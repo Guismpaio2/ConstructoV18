@@ -1,0 +1,60 @@
+@import "../../../../styles/variables";
+
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5); // Fundo semi-transparente
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; // Garante que o modal esteja acima de outros elementos
+  padding: $spacing-m; // Padding para evitar que o modal toque as bordas em telas pequenas
+}
+
+.modal-content {
+  background-color: $color-background-card; // Fundo branco do modal
+  border-radius: $border-radius-large;
+  box-shadow: $box-shadow-heavy; // Sombra mais proeminente
+  max-width: 500px; // Largura máxima do modal
+  width: 100%; // Ocupa toda a largura disponível até o max-width
+  padding: $spacing-l;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-m;
+
+  .modal-title {
+    font-size: $font-size-h3;
+    color: $color-text-dark;
+    margin: 0;
+  }
+
+  .close-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: $spacing-xxs; // Área clicável maior
+    svg {
+      width: 24px;
+      height: 24px;
+      color: $color-text-dark;
+      transition: color $transition-speed;
+    }
+    &:hover svg {
+      color: $color-alert; // Muda para vermelho no hover
+    }
+  }
+}
+
+.modal-body {
+  flex-grow: 1; // Ocupa o espaço restante
+  overflow-y: auto; // Permite rolagem se o conteúdo for grande
+}

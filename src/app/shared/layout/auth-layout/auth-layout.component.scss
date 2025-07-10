@@ -1,0 +1,33 @@
+@import '../../../../styles/variables';
+
+.auth-layout-container {
+  display: flex;
+  height: 100vh; // Ocupa a altura total da viewport
+  width: 100vw; // Ocupa a largura total da viewport
+  background-color: $color-background; // Cor de fundo padrão
+
+  .auth-content-left {
+    flex: 1; // Ocupa 1 parte do espaço (ex: 50% se o outro for 1)
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: $spacing-xl; // Espaçamento interno
+    background-color: $color-background-card; // Fundo branco para a área de formulário
+  }
+
+  .auth-background-right {
+    flex: 1; // Ocupa a outra parte do espaço (ex: 50%)
+    background-size: cover; // Cobre toda a área sem distorcer a imagem
+    background-position: center center; // Centraliza a imagem
+    background-repeat: no-repeat;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: $color-text-light; // Cor do texto sobre a imagem
+    font-size: $font-size-h2;
+    font-weight: bold;
+    text-align: center;
+    padding: $spacing-m;
+    box-shadow: inset 0 0 100px rgba(0,0,0,0.5); // Sombra interna para escurecer a imagem levemente e fazer o texto se destacar
+  }
+}

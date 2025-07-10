@@ -1,0 +1,7 @@
+<div class="auth-layout-container">
+  <div class="auth-content-left">
+    <ng-content></ng-content> </div>
+  <div class="auth-background-right" [style.backgroundImage]="'url(' + backgroundImage + ')'">
+    <ng-content select="[auth-bg-text]"></ng-content>
+  </div>
+</div>

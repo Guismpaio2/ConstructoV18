@@ -1,0 +1,203 @@
+@import "variables";
+@import "reset";
+
+/* Estilos de corpo e fontes */
+body {
+  font-family: "Inter", sans-serif; // Exemplo: se usar Google Fonts, importe no index.html
+  font-size: $font-size-base;
+  color: $color-text-dark;
+  background-color: $color-background; // Cor de fundo padrão
+}
+
+/* Estilos para Botões */
+.btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: $border-radius-medium;
+  font-size: $font-size-base;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color $transition-speed, opacity $transition-speed;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-xs; // Espaço entre texto e ícone, se houver
+
+  &:hover {
+    opacity: 0.9;
+  }
+
+  &:active {
+    opacity: 0.8;
+  }
+
+  &.primary {
+    background-color: $color-brand-base; // Laranja
+    color: $color-text-light; // Branco acinzentado
+    &:hover {
+      background-color: $color-brand-darker;
+    }
+  }
+
+  &.secondary {
+    background-color: $color-secondary-base; // Azul escuro
+    color: $color-text-light; // Branco acinzentado
+    &:hover {
+      background-color: $color-secondary-darker;
+    }
+  }
+
+  &.tertiary {
+    // Para botões como "Limpar Filtros" ou "Sair Desta Conta"
+    background-color: $color-background-card; // Branco
+    color: $color-text-dark; // Azul muito escuro
+    border: 1px solid lighten($color-text-dark, 60%); // Uma borda mais clara
+    &:hover {
+      background-color: darken($color-background-card, 5%);
+    }
+  }
+
+  &.icon-only {
+    padding: 8px; // Botões menores para ícones
+    border-radius: 50%;
+  }
+
+  &.small {
+    padding: 8px 16px;
+    font-size: $font-size-small;
+  }
+
+  &.medium {
+    padding: 10px 20px;
+    font-size: $font-size-base;
+  }
+
+  &.large {
+    padding: 14px 28px;
+    font-size: $font-size-large;
+  }
+
+  &:disabled {
+    background-color: #ccc;
+    color: #999;
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+}
+
+/* Estilos para Inputs de Formulário */
+.form-group {
+  margin-bottom: $spacing-s;
+
+  label {
+    display: block;
+    margin-bottom: $spacing-xs;
+    color: $color-text-dark;
+    font-weight: 500;
+  }
+
+  input[type="email"],
+  input[type="password"],
+  input[type="text"],
+  input[type="date"],
+  select,
+  textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ccc;
+    border-radius: $border-radius-medium;
+    font-size: $font-size-base;
+    color: $color-text-dark;
+    background-color: $color-background-card;
+    box-sizing: border-box; // Inclui padding e border no width
+
+    &:focus {
+      border-color: $color-secondary-lighter;
+      outline: none;
+      box-shadow: 0 0 0 2px rgba($color-secondary-lighter, 0.3);
+    }
+    &.ng-invalid.ng-touched {
+      border-color: $color-alert; // Vermelho para campos inválidos tocados
+    }
+  }
+
+  select {
+    appearance: none; // Remove seta padrão do select
+    background-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23061D3D"><path d="M7 10l5 5 5-5z"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+  }
+}
+
+.error-message {
+  color: $color-alert;
+  font-size: $font-size-xsmall;
+  margin-top: $spacing-xxs;
+  text-align: left;
+}
+
+.link-text {
+  font-size: $font-size-small;
+  color: $color-text-dark;
+  a {
+    color: $color-brand-base;
+    text-decoration: none;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+/* Títulos */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: $color-text-dark;
+  font-weight: bold;
+  margin-bottom: $spacing-s;
+}
+
+h1 {
+  font-size: $font-size-h1;
+}
+h2 {
+  font-size: $font-size-h2;
+}
+h3 {
+  font-size: $font-size-h3;
+}
+
+/* Utilitários Flexbox */
+.d-flex {
+  display: flex;
+}
+.justify-content-center {
+  justify-content: center;
+}
+.align-items-center {
+  align-items: center;
+}
+.flex-column {
+  flex-direction: column;
+}
+.gap-s {
+  gap: $spacing-s;
+}
+.gap-m {
+  gap: $spacing-m;
+}
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+/* Utilitários de Sombra */
+.shadow-light {
+  box-shadow: $box-shadow-light;
+}
+.shadow-medium {
+  box-shadow: $box-shadow-medium;
+}

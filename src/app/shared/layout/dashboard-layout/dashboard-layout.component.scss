@@ -1,0 +1,120 @@
+@import "../../../../styles/variables";
+
+.dashboard-layout-container {
+  display: flex;
+  min-height: 100vh;
+  background-color: $color-background; // Fundo geral
+
+  .sidebar {
+    width: 250px; // Largura padrão da sidebar
+    background-color: $color-secondary-base; // Azul escuro da sidebar
+    color: $color-text-light;
+    padding: $spacing-m $spacing-s;
+    box-shadow: $box-shadow-medium;
+    display: flex;
+    flex-direction: column;
+    transition: width $transition-speed; // Para futura funcionalidade de expandir/recolher
+
+    .sidebar-header {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding-bottom: $spacing-l;
+      margin-bottom: $spacing-l;
+      border-bottom: 1px solid rgba($color-text-light, 0.1);
+
+      .sidebar-logo {
+        width: 100px; // Ajuste o tamanho do logo conforme necessário
+        height: auto;
+      }
+    }
+
+    .sidebar-nav {
+      ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      li {
+        margin-bottom: $spacing-xs; // Espaçamento entre os itens do menu
+
+        a {
+          display: flex;
+          align-items: center;
+          padding: $spacing-s $spacing-m; // Padding interno dos itens do menu
+          border-radius: $border-radius-medium;
+          color: $color-text-light;
+          text-decoration: none;
+          font-size: $font-size-base;
+          transition: background-color $transition-speed,
+            color $transition-speed;
+
+          .icon {
+            font-size: $font-size-large; // Tamanho dos ícones (ajuste para Font Awesome ou ícones reais)
+            margin-right: $spacing-s;
+            line-height: 1; // Garante que o ícone esteja bem alinhado
+          }
+
+          .text {
+            white-space: nowrap; // Evita quebra de linha no texto
+          }
+
+          &:hover {
+            background-color: $color-secondary-lighter; // Azul mais claro no hover
+            color: $color-background-card; // Letra branca no hover
+          }
+
+          &.active {
+            background-color: $color-brand-base; // Laranja para item ativo
+            color: $color-text-light;
+            &:hover {
+              background-color: $color-brand-darker;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .main-content {
+    flex-grow: 1; // Ocupa o restante do espaço
+    display: flex;
+    flex-direction: column;
+    padding: $spacing-m; // Padding geral do conteúdo principal
+
+    .main-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: $spacing-m;
+      padding: $spacing-s $spacing-m;
+      background-color: $color-background-card;
+      border-radius: $border-radius-medium;
+      box-shadow: $box-shadow-light;
+
+      .page-title {
+        font-size: $font-size-h2;
+        color: $color-text-dark;
+        margin: 0;
+      }
+
+      .user-info {
+        // Estilos para "Bem-vindo, Usuário 1" ou avatar
+        font-size: $font-size-base;
+        color: $color-text-dark;
+      }
+    }
+
+    .content-area {
+      flex-grow: 1;
+      padding: $spacing-m; // Padding interno da área de conteúdo
+      background-color: $color-background-card;
+      border-radius: $border-radius-medium;
+      box-shadow: $box-shadow-light;
+      display: flex;
+      flex-direction: column; // Permite que o conteúdo interno se organize
+      overflow: auto; // Garante rolagem se o conteúdo for muito grande
+    }
+  }
+}

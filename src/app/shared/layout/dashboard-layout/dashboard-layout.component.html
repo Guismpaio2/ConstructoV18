@@ -1,0 +1,63 @@
+<div class="dashboard-layout-container">
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <img
+        src="assets/images/logo.png"
+        alt="Constructo Logo"
+        class="sidebar-logo"
+      />
+    </div>
+
+    <nav class="sidebar-nav">
+      <ul>
+        <li>
+          <a routerLink="/dashboard" routerLinkActive="active">
+            <span class="icon">🏠</span>
+            <span class="text">Início</span>
+          </a>
+        </li>
+        <li>
+          <a routerLink="/dashboard/produtos" routerLinkActive="active">
+            <span class="icon">📦</span>
+            <span class="text">Produtos</span>
+          </a>
+        </li>
+        <li>
+          <a routerLink="/dashboard/estoque" routerLinkActive="active">
+            <span class="icon">📊</span>
+            <span class="text">Estoque</span>
+          </a>
+        </li>
+        <li>
+          <a routerLink="/dashboard/registros-baixas" routerLinkActive="active">
+            <span class="icon">📉</span>
+            <span class="text">Registro de Baixas</span>
+          </a>
+        </li>
+        <li>
+          <a routerLink="/dashboard/perfil" routerLinkActive="active">
+            <span class="icon">👤</span>
+            <span class="text">Perfil</span>
+          </a>
+        </li>
+        <li>
+          <a routerLink="/dashboard/usuarios" routerLinkActive="active">
+            <span class="icon">👥</span>
+            <span class="text">Usuários</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+
+  <div class="main-content">
+    <header class="main-header">
+      <h1 class="page-title">{{ pageTitle }}</h1>
+      <div class="user-info"></div>
+    </header>
+
+    <div class="content-area">
+      <ng-content></ng-content>
+    </div>
+  </div>
+</div>

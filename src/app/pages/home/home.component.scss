@@ -1,0 +1,36 @@
+@import '../../../styles/variables';
+
+// Estilos específicos para o conteúdo da página Home dentro do AuthLayout
+.home-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 400px; // Limita a largura do conteúdo para não ficar muito esticado
+  padding: $spacing-m; // Padding para o conteúdo
+
+  .app-logo {
+    width: 150px; // Ajuste o tamanho do logo
+    height: auto;
+    margin-bottom: $spacing-s;
+  }
+
+  .app-name {
+    color: $color-text-dark;
+    font-size: $font-size-h1;
+    font-weight: bold;
+    margin-bottom: $spacing-xl; // Espaço antes dos botões
+  }
+
+  .action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-s; // Espaço entre os botões
+    width: 100%;
+
+    .btn {
+      width: 100%; // Faz com que os botões ocupem a largura total
+    }
+  }
+}
