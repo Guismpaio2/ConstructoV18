@@ -1,58 +1,80 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, User, signInWithPopup, GoogleAuthProvider } from '@angular/fire/auth';
+import { Observable, from } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { Router } from '@angular/router';
-import { catchError, map, Observable, throwError } from 'rxjs';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root'
+})
 export class AuthService {
-  private apiUrl = 'http://localhost:3000/login';
+  user$: Observable<User | null>; // Observável para o estado do usuário
 
-  constructor(private http: HttpClient, private router: Router) {
-    console.log('AuthService - Serviço iniciado');
+  constructor(private auth: Auth, private router: Router) {
+    // Observa mudanças no estado de autenticação do Firebase
+    this.user$ = new Observable(observer => {
+      onAuthStateChanged(this.auth, (user) => {
+        observer.next(user);
+      });
+    });
   }
 
-  public login(payload: { email: string; password: string }): Observable<any> {
-    console.log('AuthService - Método login chamado com:', payload);
+  /**
+   * Registra um novo usuário com e-mail e senha.
+   * @param email O e-mail do usuário.
+   * @param password A senha do usuário.
+   * @returns Um Observable que emite o UserCredential em caso de sucesso.
+   */
+  register(email: string, password: string): Observable<any> {
+    return from(createUserWithEmailAndPassword(this.auth, email, password));
+  }
 
-    return this.http.post<{ token: string }>(this.apiUrl, payload).pipe(
-      map((res) => {
-        console.log('AuthService - Resposta recebida:', res);
-
-        localStorage.removeItem('authToken');
-        console.log('AuthService - authToken antigo removido');
-
-        localStorage.setItem('authToken', res.token);
-        console.log('AuthService - Novo authToken armazenado');
-
-        return res; // Retorna apenas a resposta com o token
-      }),
-      catchError((e) => {
-        console.log('AuthService - Erro ao fazer login:', e);
-
-        if (e.error && e.error.message) {
-          return throwError(() => e.error.message);
-        }
-        return throwError(() => 'Erro ao fazer login. Tente novamente.');
+  /**
+   * Realiza o login de um usuário com e-mail e senha.
+   * @param email O e-mail do usuário.
+   * @param password A senha do usuário.
+   * @returns Um Observable que emite o UserCredential em caso de sucesso.
+   */
+  login(email: string, password: string): Observable<any> {
+    return from(signInWithEmailAndPassword(this.auth, email, password)).pipe(
+      map(response => {
+        this.router.navigate(['/home']); // Redireciona para a página home após login
+        return response;
       })
     );
   }
 
-  public logout() {
-    console.log('AuthService - logout chamado');
-    localStorage.removeItem('authToken');
-    this.router.navigate(['/login']);
-    console.log('AuthService - Redirecionado para /login');
+  /**
+   * Realiza o logout do usuário.
+   * @returns Um Observable que emite void em caso de sucesso.
+   */
+  logout(): Observable<void> {
+    return from(signOut(this.auth)).pipe(
+      map(() => {
+        this.router.navigate(['/login']); // Redireciona para a página de login após logout
+      })
+    );
   }
 
-  public isLoggedIn(): boolean {
-    const token = localStorage.getItem('authToken');
-    console.log('AuthService - isLoggedIn verificado:', !!token);
-    return !!token;
+  /**
+   * (Opcional) Login com Google.
+   * Requer habilitar o provedor Google no Firebase Console.
+   * @returns Um Observable que emite o UserCredential em caso de sucesso.
+   */
+  loginWithGoogle(): Observable<any> {
+    return from(signInWithPopup(this.auth, new GoogleAuthProvider())).pipe(
+      map(response => {
+        this.router.navigate(['/home']);
+        return response;
+      })
+    );
   }
 
-  public getToken(): string | null {
-    const token = localStorage.getItem('authToken');
-    console.log('AuthService - getToken:', token);
-    return token;
+  /**
+   * Retorna o usuário logado atualmente.
+   * @returns O objeto User do Firebase, ou null se ninguém estiver logado.
+   */
+  getCurrentUser(): User | null {
+    return this.auth.currentUser;
   }
 }
