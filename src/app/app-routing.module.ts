@@ -6,6 +6,7 @@ import { LoginComponent } from './LoginComponents/login/login.component';
 import { CadastroComponent } from './LoginComponents/cadastro/cadastro.component';
 import { CadastroSenhaComponent } from './LoginComponents/cadastro-senha/cadastro-senha.component';
 import { RecuperarSenhaComponent } from './LoginComponents/recuperar-senha/recuperar-senha.component';
+import { CadastroSucessoComponent } from './LoginComponents/cadastro-sucesso/cadastro-sucesso.component'; // Nova importação
 
 import { HomeComponent } from './pages/home/home.component';
 
@@ -24,20 +25,22 @@ const routes: Routes = [
       { path: 'cadastro', component: CadastroComponent },
       { path: 'cadastro-senha', component: CadastroSenhaComponent },
       { path: 'recuperar-senha', component: RecuperarSenhaComponent },
+      { path: 'cadastro-sucesso', component: CadastroSucessoComponent }, // Nova rota
     ],
   },
 
   {
     path: '',
     component: DashboardLayoutComponent,
-    // canActivate: [AuthGuard],
+    // canActivate: [AuthGuard], // Habilitar depois de criar e configurar o AuthGuard
     children: [
       { path: 'home', component: HomeComponent },
       // Rotas do Dashboard aqui (Produtos, Estoque, Perfil, etc.)
-      // Exemplo para o Perfil:
       // { path: 'perfil', component: PerfilComponent },
-      // Exemplo para o Estoque:
       // { path: 'estoque', component: EstoqueComponent },
+      // { path: 'produtos', component: ProdutosComponent },
+      // { path: 'registro-baixas', component: RegistroBaixasComponent },
+      // { path: 'usuarios', component: UsuariosComponent },
     ],
   },
 

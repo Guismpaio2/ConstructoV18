@@ -1,0 +1,86 @@
+<div class="cadastro-container-wrapper">
+  <div class="form-panel">
+    <div class="form-wrapper">
+      <h2 class="title">Crie uma Senha</h2>
+
+      <form (ngSubmit)="onCreateAccount()">
+        <div class="form-group">
+          <label for="password">Senha</label>
+          <div class="password-wrapper">
+            <input
+              [type]="passwordVisible ? 'text' : 'password'"
+              id="password"
+              [(ngModel)]="password"
+              name="password"
+              placeholder="Senha"
+              required
+            />
+            <span class="password-toggle" (click)="togglePasswordVisibility()">
+              <img
+                *ngIf="!passwordVisible"
+                src="assets/icons/eye-open.svg"
+                alt="Mostrar Senha"
+                class="icon-eye"
+              />
+              <img
+                *ngIf="passwordVisible"
+                src="assets/icons/eye-closed.svg"
+                alt="Esconder Senha"
+                class="icon-eye"
+              />
+            </span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="confirmPassword">Confirmar Senha</label>
+          <div class="password-wrapper">
+            <input
+              [type]="confirmPasswordVisible ? 'text' : 'password'"
+              id="confirmPassword"
+              [(ngModel)]="confirmPassword"
+              name="confirmPassword"
+              placeholder="Senha"
+              required
+            />
+            <span
+              class="password-toggle"
+              (click)="toggleConfirmPasswordVisibility()"
+            >
+              <img
+                *ngIf="!confirmPasswordVisible"
+                src="assets/icons/eye-open.svg"
+                alt="Mostrar Senha"
+                class="icon-eye"
+              />
+              <img
+                *ngIf="confirmPasswordVisible"
+                src="assets/icons/eye-closed.svg"
+                alt="Esconder Senha"
+                class="icon-eye"
+              />
+            </span>
+          </div>
+        </div>
+
+        <div *ngIf="errorMessage" class="error-message">
+          {{ errorMessage }}
+        </div>
+
+        <button type="submit" class="btn primary" [disabled]="isLoading">
+          <span *ngIf="!isLoading">Próximo</span>
+          <span *ngIf="isLoading">Criando conta...</span>
+        </button>
+        <a routerLink="/login" class="already-account link-text"
+          >Já Possuo Conta</a
+        >
+      </form>
+    </div>
+  </div>
+
+  <div class="image-panel">
+    <img src="assets/images/cadastro-background.jpg" alt="Fundo de cadastro" />
+    <div class="overlay"></div>
+  </div>
+</div>
+<div class="fullscreen-info">PARA SAIR DO MODO TELA CHEIA, PRESSIONE ESC</div>

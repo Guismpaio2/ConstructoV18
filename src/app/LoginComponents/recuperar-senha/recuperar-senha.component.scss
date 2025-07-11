@@ -1,0 +1,25 @@
+/* src/app/LoginComponents/recuperar-senha/recuperar-senha.component.scss */
+.login-page-container {
+  .form-panel {
+    .form-wrapper {
+      .title {
+        text-align: center;
+        margin-bottom: $spacing-s;
+      }
+      p.small-text {
+        text-align: center;
+        margin-bottom: $spacing-m;
+      }
+      .button-group {
+        display: flex;
+        flex-direction: column;
+        gap: $spacing-s;
+        margin-top: $spacing-l;
+
+        .btn {
+          width: 100%;
+        }
+      }
+    }
+  }
+}

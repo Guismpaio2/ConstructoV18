@@ -1,0 +1,22 @@
+<div class="modal-overlay">
+  <div class="modal-content success-modal">
+    <div class="modal-header success-header">
+      <button class="close-button" (click)="closeModal()">
+        <img src="assets/icons/close.svg" alt="Fechar" class="close-icon" />
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="success-icon-wrapper">
+        <img
+          src="assets/icons/check-circle.svg"
+          alt="Sucesso"
+          class="success-check-icon"
+        />
+      </div>
+      <h2>Parabéns {{ userName }}, sua conta foi criada com sucesso!</h2>
+      <p>Seu código de identificação é:</p>
+      <div class="employee-code-display">{{ employeeCode }}</div>
+      <button class="btn primary" (click)="goToLogin()">Ir para o Login</button>
+    </div>
+  </div>
+</div>

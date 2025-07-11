@@ -1,228 +1,601 @@
-/* src/styles/styles.scss */
-@import "./_variables.scss";
-@import "./_reset.scss";
+/* src/styles/_styles.scss */
 
-/* Estilos de corpo e fontes */
+@import "variables";
+
+/* Estilos de Tipografia */
 body {
-  font-family: "Inter", sans-serif; // Exemplo: se usar Google Fonts, importe no index.html
-  font-size: $font-size-base;
+  font-family: "Roboto", sans-serif; // Garanta que Roboto esteja linkado no index.html
   color: $color-text-dark;
-  background-color: $color-background; // Cor de fundo padrão
+  background-color: $color-background;
 }
 
-/* Classes para os backgrounds dinâmicos no painel direito do AuthLayout */
-// Certifique-se de que o caminho das imagens está correto!
-body.starter-background .auth-right-panel {
-  background-image: url("../assets/images/bg-capacete.jpg"); // Imagem do capacete
+h1 {
+  font-size: $font-size-h1;
+  font-weight: bold; // H1 - Header 1 Bold
+  color: $color-text-dark;
 }
 
-body.login-background .auth-right-panel {
-  background-image: url("../assets/images/bg-mao.jpg"); // Imagem da mão com tijolo
+h2 {
+  font-size: $font-size-h2;
+  font-weight: 600; // H2 - Header 2 Semi Bold
+  color: $color-text-dark;
 }
 
-body.cadastro-background .auth-right-panel {
-  background-image: url("../assets/images/bg-tijolo-vazada.jpg"); // Imagem de tijolo vazada
+h3 {
+  font-size: $font-size-h3;
+  font-weight: 600; // H3 - Header 3 Semi Bold
+  color: $color-text-dark;
 }
 
-body.recuperar-senha-background .auth-right-panel {
-  background-image: url("../assets/images/bg-mao.jpg"); // Mesma imagem do login
+h4 {
+  font-size: $font-size-large; // H4 - Header 4 Semi Bold
+  font-weight: 600;
+  color: $color-text-dark;
 }
 
-/* Estilos para Botões */
+h5 {
+  font-size: $font-size-base; // H5 - Header 5 Medium
+  font-weight: 500;
+  color: $color-text-dark;
+}
+
+h6 {
+  font-size: $font-size-small; // H6 - Header 6 Medium
+  font-weight: 500;
+  color: $color-text-dark;
+}
+
+p {
+  font-size: $font-size-base; // P - Parágrafo
+  color: $color-text-dark;
+}
+
+.small-text {
+  font-size: $font-size-small; // Small - Regular
+  font-weight: normal;
+}
+
+/* Estilos de Botões */
 .btn {
-  padding: 12px 24px;
-  border: none;
-  border-radius: $border-radius-medium;
-  font-size: $font-size-base;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background-color $transition-speed, opacity $transition-speed;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: $spacing-xs;
-
-  &:hover {
-    opacity: 0.9;
-  }
-
-  &:active {
-    opacity: 0.8;
-  }
+  padding: $spacing-xs $spacing-s;
+  border-radius: $border-radius-small;
+  font-size: $font-size-base;
+  cursor: pointer;
+  border: none;
+  transition: background-color $transition-speed, color $transition-speed,
+    border-color $transition-speed;
+  white-space: nowrap; // Evita que o texto quebre em várias linhas
 
   &.primary {
-    background-color: $color-brand-base;
+    background-color: $color-secondary-base; // Botões Primários Desktop
     color: $color-text-light;
+
     &:hover {
-      background-color: $color-brand-darker;
+      background-color: $color-secondary-lighter; // Hover
+    }
+    &:active {
+      background-color: $color-secondary-darker; // Active
+    }
+    &:disabled {
+      background-color: lighten($color-secondary-base, 30%); // Disable
+      cursor: not-allowed;
     }
   }
 
   &.secondary {
-    background-color: $color-secondary-base;
-    color: $color-text-light;
+    background-color: transparent;
+    color: $color-secondary-base;
+    border: 1px solid $color-secondary-base; // Botões Secundários Desktop
+
     &:hover {
-      background-color: $color-secondary-darker;
+      background-color: lighten($color-secondary-base, 40%); // Hover
+    }
+    &:active {
+      background-color: lighten($color-secondary-base, 30%); // Active
+    }
+    &:disabled {
+      color: lighten($color-secondary-base, 30%); // Disable
+      border-color: lighten($color-secondary-base, 30%);
+      cursor: not-allowed;
+    }
+  }
+
+  &.btn-cta {
+    background-color: $color-brand-base; // Botões CTA Desktop
+    color: $color-text-light;
+    padding: $spacing-s $spacing-l;
+    font-weight: bold;
+
+    &:hover {
+      background-color: $color-brand-lighter; // Hover
+    }
+    &:active {
+      background-color: $color-brand-darker; // Active
+    }
+    &:disabled {
+      background-color: lighten($color-brand-base, 30%);
+      cursor: not-allowed;
     }
   }
 
   &.tertiary {
-    background-color: $color-background-card;
-    color: $color-text-dark;
-    border: 1px solid lighten($color-text-dark, 60%);
+    /* Botão para adicionar imagem, por exemplo */
+    background-color: transparent;
+    color: $color-brand-base;
+    border: 1px solid $color-brand-base;
+    font-size: $font-size-small;
+    padding: $spacing-xxs $spacing-xs;
+
     &:hover {
-      background-color: darken($color-background-card, 5%);
+      background-color: lighten($color-brand-base, 40%);
     }
   }
 
-  &.icon-only {
-    padding: 8px;
-    border-radius: 50%;
-  }
-
   &.small {
-    padding: 8px 16px;
+    padding: $spacing-xxs $spacing-xs;
     font-size: $font-size-small;
-  }
-
-  &.medium {
-    padding: 10px 20px;
-    font-size: $font-size-base;
-  }
-
-  &.large {
-    padding: 14px 28px;
-    font-size: $font-size-large;
-  }
-
-  &:disabled {
-    background-color: #ccc;
-    color: #999;
-    cursor: not-allowed;
-    opacity: 0.7;
   }
 }
 
-/* Estilos para Inputs de Formulário */
+/* Estilos de Formulário Comuns */
 .form-group {
   margin-bottom: $spacing-s;
 
   label {
     display: block;
-    margin-bottom: $spacing-xs;
+    font-size: $font-size-small;
+    margin-bottom: $spacing-xxs;
     color: $color-text-dark;
-    font-weight: 500;
   }
 
+  input[type="text"],
   input[type="email"],
   input[type="password"],
-  input[type="text"],
-  input[type="date"],
+  input[type="number"],
   select,
   textarea {
     width: 100%;
-    padding: 12px 15px;
-    border: 1px solid #ccc; // Pode usar uma variável de cor aqui também, ex: var(--color-border)
-    border-radius: $border-radius-medium;
+    padding: $spacing-xs;
+    border: 1px solid #ccc;
+    border-radius: $border-radius-small;
     font-size: $font-size-base;
     color: $color-text-dark;
-    background-color: $color-background-card;
-    box-sizing: border-box;
+    background-color: $color-background-card; // Branco para inputs
 
     &:focus {
-      border-color: $color-secondary-lighter;
       outline: none;
-      box-shadow: 0 0 0 2px rgba($color-secondary-lighter, 0.3);
+      border-color: $color-brand-base;
+      box-shadow: 0 0 0 2px rgba($color-brand-base, 0.2);
     }
-    &.ng-invalid.ng-touched {
-      border-color: $color-alert;
+
+    &::placeholder {
+      color: #999;
     }
   }
+}
 
-  select {
-    appearance: none;
-    background-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23061D3D"><path d="M7 10l5 5 5-5z"/></svg>');
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    background-size: 16px;
+.password-wrapper {
+  position: relative;
+
+  input {
+    padding-right: $spacing-l; /* Espaço para o ícone do olho */
+  }
+
+  .password-toggle {
+    position: absolute;
+    right: $spacing-xs;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #999;
+
+    &:hover {
+      color: $color-text-dark;
+    }
   }
 }
 
 .error-message {
-  color: $color-alert;
-  font-size: $font-size-xsmall;
+  color: $color-alert; // Vermelho para erros
+  font-size: $font-size-small;
   margin-top: $spacing-xxs;
-  text-align: left;
+  text-align: center;
 }
 
-.link-text {
+.success-message {
+  color: $color-success; // Verde para sucesso
   font-size: $font-size-small;
-  color: $color-text-dark;
-  a {
-    color: $color-brand-base;
-    text-decoration: none;
-    &:hover {
-      text-decoration: underline;
+  margin-top: $spacing-xxs;
+  text-align: center;
+}
+
+/* Estilos para links de texto */
+.link-text {
+  color: $color-secondary-base;
+  font-size: $font-size-small;
+  text-align: center;
+  display: block;
+  margin-top: $spacing-xs;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+/* Mixin para painéis de formulário e imagem em layouts de duas colunas */
+@mixin two-column-layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden; // Previne scrollbar indesejada
+
+  .form-panel {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: $color-background-card;
+    padding: $spacing-l;
+    position: relative; // Para o botão de sair do modo tela cheia
+
+    .form-wrapper {
+      width: 100%;
+      max-width: 400px; // Largura máxima para o formulário
+    }
+  }
+
+  .image-panel {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: brightness(0.4); // Escurece a imagem
+    }
+
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.3); // Mais um overlay para escurecer
+    }
+
+    .motto {
+      position: absolute;
+      color: $color-text-light;
+      font-size: $font-size-h2;
+      text-align: center;
+      padding: $spacing-m;
+      max-width: 80%;
+      h2 {
+        color: $color-text-light;
+        font-size: $font-size-h2;
+        font-weight: 600;
+      }
     }
   }
 }
 
-/* Títulos */
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  color: $color-text-dark;
-  font-weight: bold;
-  margin-bottom: $spacing-s;
+/* Aplicação dos mixins para login, cadastro e starter */
+.login-page-container {
+  @include two-column-layout;
 }
 
-h1 {
-  font-size: $font-size-h1;
-}
-h2 {
-  font-size: $font-size-h2;
-}
-h3 {
-  font-size: $font-size-h3;
+.cadastro-container-wrapper {
+  // Wrapper para a página de cadastro e cadastro-senha
+  @include two-column-layout;
+
+  .image-panel {
+    img {
+      // Imagem específica para cadastro/cadastro-senha
+      content: url("/assets/images/cadastro-background.jpg"); // Certifique-se de ter essa imagem
+    }
+  }
 }
 
-/* Utilitários Flexbox */
-.d-flex {
-  display: flex;
-}
-.justify-content-center {
-  justify-content: center;
-}
-.align-items-center {
-  align-items: center;
-}
-.flex-column {
-  flex-direction: column;
-}
-.gap-s {
-  gap: $spacing-s;
-}
-.gap-m {
-  gap: $spacing-m;
-}
-.flex-wrap {
-  flex-wrap: wrap;
+.starter-container {
+  @include two-column-layout;
+  .content-panel {
+    // No starter, o form-panel é chamado content-panel
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: $color-background-card;
+    padding: $spacing-l;
+
+    .logo-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: $spacing-xl;
+
+      img {
+        width: 100px; // Ajuste conforme o tamanho do logo
+        height: auto;
+        margin-bottom: $spacing-s;
+      }
+
+      h1 {
+        color: $color-secondary-base;
+        font-size: $font-size-h1;
+        font-weight: bold;
+      }
+    }
+
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      gap: $spacing-s;
+      width: 100%;
+      max-width: 250px; // Largura máxima para os botões
+
+      .btn {
+        width: 100%;
+      }
+    }
+  }
+
+  .image-panel {
+    img {
+      content: url("/assets/images/starter-background.jpg"); // Imagem específica para o starter
+    }
+  }
 }
 
-/* Utilitários de Sombra */
-.shadow-light {
+/* Estilos para o modo tela cheia e botão ESC */
+.fullscreen-info {
+  position: absolute;
+  top: $spacing-xs;
+  right: $spacing-xs;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: $color-text-light;
+  padding: $spacing-xxs $spacing-xs;
+  border-radius: $border-radius-small;
+  font-size: $font-size-xsmall;
+  z-index: 1000; // Garante que fique acima de outros elementos
+}
+
+/* Estilos de Tabela para o Dashboard */
+.table-container {
+  background-color: $color-background-card;
+  border-radius: $border-radius-medium;
   box-shadow: $box-shadow-light;
-}
-.shadow-medium {
-  box-shadow: $box-shadow-medium;
+  overflow-x: auto; // Permite rolagem horizontal em telas menores
+  margin-top: $spacing-m;
+  padding: $spacing-s;
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px; // Garante que a tabela não fique muito estreita
+
+    thead {
+      background-color: $color-secondary-base;
+      th {
+        color: $color-text-light;
+        padding: $spacing-s;
+        text-align: left;
+        font-weight: 600;
+      }
+    }
+
+    tbody {
+      tr {
+        border-bottom: 1px solid lighten($color-secondary-base, 40%); // Linha de separação clara
+        &:nth-child(even) {
+          background-color: lighten(
+            $color-secondary-base,
+            48%
+          ); // Levemente mais claro para linhas pares
+        }
+        &:last-child {
+          border-bottom: none;
+        }
+
+        td {
+          padding: $spacing-s;
+          color: $color-text-dark;
+          font-size: $font-size-small;
+
+          .btn-details {
+            background-color: $color-brand-base;
+            color: $color-text-light;
+            padding: $spacing-xxs $spacing-xs;
+            border-radius: $border-radius-small;
+            font-size: $font-size-xsmall;
+
+            &:hover {
+              background-color: $color-brand-lighter;
+            }
+          }
+
+          .quantity-input {
+            width: 70px; // Largura fixa para input de quantidade
+            padding: $spacing-xxs;
+            text-align: center;
+          }
+
+          .action-icon {
+            cursor: pointer;
+            width: 20px;
+            height: 20px;
+            vertical-align: middle; // Alinha o ícone com o texto
+            &:hover {
+              opacity: 0.7;
+            }
+          }
+        }
+      }
+    }
+  }
 }
 
-// Adicione as novas variáveis de cor no seu _variables.scss para `styles.scss`
-// src/styles/_variables.scss
-/*
-$color-border: #ccc; // Para inputs
-$color-text-muted: #666; // Para labels e textos mais suaves
-*/
+/* Estilos para barra de pesquisa e filtros */
+.search-filter-bar {
+  display: flex;
+  gap: $spacing-s;
+  align-items: center;
+  margin-bottom: $spacing-m;
+
+  .search-input {
+    flex-grow: 1;
+    position: relative;
+
+    input {
+      width: 100%;
+      padding-left: $spacing-l; // Espaço para o ícone de lupa
+    }
+
+    .search-icon {
+      position: absolute;
+      left: $spacing-xs;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 18px;
+      height: 18px;
+      color: #999;
+    }
+  }
+
+  .btn-filter,
+  .btn-sort {
+    background-color: $color-secondary-lighter;
+    color: $color-text-light;
+    padding: $spacing-xs $spacing-s;
+    border-radius: $border-radius-small;
+    display: flex;
+    align-items: center;
+    gap: $spacing-xxs;
+
+    &:hover {
+      background-color: $color-secondary-base;
+    }
+
+    img {
+      width: 16px;
+      height: 16px;
+      filter: invert(100%); // Deixa o ícone branco
+    }
+  }
+
+  select {
+    padding: $spacing-xs;
+    border-radius: $border-radius-small;
+    border: 1px solid #ccc;
+    background-color: $color-background-card;
+  }
+}
+
+/* Estilos para Paginação */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: $spacing-m;
+  gap: $spacing-xs;
+
+  button {
+    background-color: transparent;
+    border: 1px solid $color-secondary-base;
+    color: $color-secondary-base;
+    padding: $spacing-xxs $spacing-xs;
+    border-radius: $border-radius-small;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      background-color: $color-secondary-lighter;
+      color: $color-text-light;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  span {
+    padding: $spacing-xxs $spacing-xs;
+    &.active {
+      background-color: $color-brand-base;
+      color: $color-text-light;
+      border-radius: $border-radius-small;
+    }
+  }
+}
+
+/* Card de Usuário (para a tela de Usuários) */
+.user-card {
+  background-color: $color-background-card;
+  border-radius: $border-radius-medium;
+  box-shadow: $box-shadow-light;
+  padding: $spacing-s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 250px; // Largura fixa para os cards
+  flex-shrink: 0; // Não permite encolher
+  margin: $spacing-s; // Espaçamento entre os cards
+
+  .profile-circle {
+    width: 80px;
+    height: 80px;
+    background-color: $color-brand-base;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: $spacing-s;
+
+    img {
+      width: 50px;
+      height: 50px;
+      filter: invert(100%); // Deixa o ícone branco
+    }
+  }
+
+  h4 {
+    margin-bottom: $spacing-s;
+  }
+
+  .user-info-detail {
+    width: 100%;
+    text-align: left;
+    margin-bottom: $spacing-xs;
+
+    div {
+      background-color: lighten($color-secondary-base, 48%);
+      padding: $spacing-xxs $spacing-xs;
+      border-radius: $border-radius-small;
+      font-size: $font-size-small;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      label {
+        font-weight: 600;
+        color: $color-text-dark;
+      }
+      span {
+        color: $color-text-dark;
+      }
+    }
+
+    select {
+      width: 100%;
+      margin-top: $spacing-xxs;
+    }
+  }
+}
