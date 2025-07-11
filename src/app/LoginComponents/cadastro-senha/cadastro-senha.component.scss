@@ -1,0 +1,76 @@
+/* src/app/LoginComponents/cadastro-senha/cadastro-senha.component.scss */
+@import "variables";
+
+.cadastro-senha-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: $spacing-m;
+  width: 100%;
+  max-width: 400px;
+  box-sizing: border-box;
+}
+
+h2 {
+  font-size: $font-size-h2;
+  color: var(--color-text-dark);
+  margin-bottom: $spacing-l;
+  width: 100%;
+  text-align: left;
+}
+
+form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-s;
+}
+
+.form-group {
+  width: 100%;
+  position: relative;
+  margin-bottom: $spacing-s;
+}
+
+label {
+  color: var(--color-text-dark);
+}
+
+input[type="password"] {
+  // Estilos definidos em styles.scss
+}
+
+.password-toggle {
+  position: absolute;
+  right: $spacing-s;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: var(--color-text-dark);
+  font-size: 1.2rem;
+}
+
+.btn {
+  margin-top: $spacing-xs;
+  width: 100%;
+}
+
+.already-account {
+  text-align: center;
+  margin-top: $spacing-xs;
+  display: block;
+}
+
+// Estilos específicos para o modal de sucesso, se necessário
+.identification-code {
+  font-size: $font-size-large;
+  font-weight: bold;
+  color: var(--color-text-light); // Deve ser branco no modal de sucesso
+  margin-top: $spacing-xs;
+}
+.check-icon {
+  width: 80px;
+  height: 80px;
+  margin: $spacing-m auto;
+  display: block;
+}

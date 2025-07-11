@@ -1,33 +1,125 @@
-@import '../../../../styles/variables';
+/* src/app/shared/layout/auth-layout/auth-layout.component.scss */
+@import "variables"; // Assegure que o caminho está correto
 
-.auth-layout-container {
+.auth-layout-wrapper {
   display: flex;
-  height: 100vh; // Ocupa a altura total da viewport
-  width: 100vw; // Ocupa a largura total da viewport
-  background-color: $color-background; // Cor de fundo padrão
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh; // Garante que o wrapper ocupe a altura total da viewport
+  width: 100vw;
+  background-color: var(
+    --color-background
+  ); // Fundo da tela inteira, se não for uma imagem
+  overflow: hidden; // Previne scroll indesejado
+}
 
-  .auth-content-left {
-    flex: 1; // Ocupa 1 parte do espaço (ex: 50% se o outro for 1)
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: $spacing-xl; // Espaçamento interno
-    background-color: $color-background-card; // Fundo branco para a área de formulário
+.auth-content-container {
+  display: flex;
+  background-color: var(
+    --color-background-card
+  ); // Branco para o container geral
+  border-radius: $border-radius-large; // Bordas arredondadas para o "cartão"
+  box-shadow: $box-shadow-heavy; // Sombra para o efeito de "relevo"
+  overflow: hidden; // Garante que bordas arredondadas e shadows funcionem bem
+  width: 90%; // Largura máxima do cartão
+  max-width: 1100px; // Largura máxima para o design de desktop
+  height: 90vh; // Altura para o cartão
+  max-height: 800px; // Altura máxima para o design de desktop
+}
+
+.auth-left-panel {
+  flex: 1; // Ocupa o espaço disponível
+  min-width: 400px; // Largura mínima para o painel de formulário
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: $spacing-l; // Padding interno
+  box-sizing: border-box;
+  background-color: var(
+    --color-background-card
+  ); // Fundo branco para o formulário
+}
+
+.auth-right-panel {
+  flex: 1; // Ocupa o espaço restante
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end; // Alinha o texto na parte inferior
+  padding: $spacing-xl;
+  box-sizing: border-box;
+  position: relative; // Para posicionar o texto
+
+  // Efeito de overlay escuro para melhorar a leitura do texto
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.7) 0%,
+      rgba(0, 0, 0, 0) 50%
+    ); // Escurece a parte de baixo
+  }
+}
+
+.auth-right-text {
+  color: var(--color-text-light); // Branco acinzentado
+  font-size: $font-size-h2; // Tamanho do título
+  font-weight: bold;
+  text-align: center;
+  max-width: 80%;
+  line-height: 1.3;
+  text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.8); // Sombra para o texto para destacá-lo
+  z-index: 1; // Garante que o texto fique acima do overlay
+}
+
+// Media Queries (Ajuste para telas menores, se necessário)
+@media (max-width: 992px) {
+  .auth-content-container {
+    flex-direction: column; // Empilha os painéis
+    width: 95%;
+    height: auto; // Altura automática para o conteúdo
+    max-height: none;
   }
 
-  .auth-background-right {
-    flex: 1; // Ocupa a outra parte do espaço (ex: 50%)
-    background-size: cover; // Cobre toda a área sem distorcer a imagem
-    background-position: center center; // Centraliza a imagem
-    background-repeat: no-repeat;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: $color-text-light; // Cor do texto sobre a imagem
-    font-size: $font-size-h2;
-    font-weight: bold;
-    text-align: center;
+  .auth-left-panel {
+    min-width: auto;
+    width: 100%;
+    height: auto;
     padding: $spacing-m;
-    box-shadow: inset 0 0 100px rgba(0,0,0,0.5); // Sombra interna para escurecer a imagem levemente e fazer o texto se destacar
+  }
+
+  .auth-right-panel {
+    min-height: 200px; // Altura mínima para o painel de imagem em telas pequenas
+    width: 100%;
+    align-items: center; // Centraliza o texto verticalmente em telas menores
+    padding: $spacing-m;
+    &::before {
+      background: linear-gradient(
+        to top,
+        rgba(0, 0, 0, 0.5) 0%,
+        rgba(0, 0, 0, 0) 50%
+      );
+    }
+  }
+
+  .auth-right-text {
+    font-size: $font-size-h3;
+  }
+}
+
+@media (max-width: 576px) {
+  .auth-left-panel {
+    padding: $spacing-s;
+  }
+  .auth-right-panel {
+    min-height: 150px;
+    padding: $spacing-s;
   }
 }

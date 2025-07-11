@@ -1,5 +1,6 @@
+/* src/styles/styles.scss */
 @import "./_variables.scss";
-@import "./_resets.scss";
+@import "./_reset.scss";
 
 /* Estilos de corpo e fontes */
 body {
@@ -7,6 +8,24 @@ body {
   font-size: $font-size-base;
   color: $color-text-dark;
   background-color: $color-background; // Cor de fundo padrão
+}
+
+/* Classes para os backgrounds dinâmicos no painel direito do AuthLayout */
+// Certifique-se de que o caminho das imagens está correto!
+body.starter-background .auth-right-panel {
+  background-image: url("../assets/images/bg-capacete.jpg"); // Imagem do capacete
+}
+
+body.login-background .auth-right-panel {
+  background-image: url("../assets/images/bg-mao.jpg"); // Imagem da mão com tijolo
+}
+
+body.cadastro-background .auth-right-panel {
+  background-image: url("../assets/images/bg-tijolo-vazada.jpg"); // Imagem de tijolo vazada
+}
+
+body.recuperar-senha-background .auth-right-panel {
+  background-image: url("../assets/images/bg-mao.jpg"); // Mesma imagem do login
 }
 
 /* Estilos para Botões */
@@ -21,7 +40,7 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: $spacing-xs; // Espaço entre texto e ícone, se houver
+  gap: $spacing-xs;
 
   &:hover {
     opacity: 0.9;
@@ -32,33 +51,32 @@ body {
   }
 
   &.primary {
-    background-color: $color-brand-base; // Laranja
-    color: $color-text-light; // Branco acinzentado
+    background-color: $color-brand-base;
+    color: $color-text-light;
     &:hover {
       background-color: $color-brand-darker;
     }
   }
 
   &.secondary {
-    background-color: $color-secondary-base; // Azul escuro
-    color: $color-text-light; // Branco acinzentado
+    background-color: $color-secondary-base;
+    color: $color-text-light;
     &:hover {
       background-color: $color-secondary-darker;
     }
   }
 
   &.tertiary {
-    // Para botões como "Limpar Filtros" ou "Sair Desta Conta"
-    background-color: $color-background-card; // Branco
-    color: $color-text-dark; // Azul muito escuro
-    border: 1px solid lighten($color-text-dark, 60%); // Uma borda mais clara
+    background-color: $color-background-card;
+    color: $color-text-dark;
+    border: 1px solid lighten($color-text-dark, 60%);
     &:hover {
       background-color: darken($color-background-card, 5%);
     }
   }
 
   &.icon-only {
-    padding: 8px; // Botões menores para ícones
+    padding: 8px;
     border-radius: 50%;
   }
 
@@ -104,12 +122,12 @@ body {
   textarea {
     width: 100%;
     padding: 12px 15px;
-    border: 1px solid #ccc;
+    border: 1px solid #ccc; // Pode usar uma variável de cor aqui também, ex: var(--color-border)
     border-radius: $border-radius-medium;
     font-size: $font-size-base;
     color: $color-text-dark;
     background-color: $color-background-card;
-    box-sizing: border-box; // Inclui padding e border no width
+    box-sizing: border-box;
 
     &:focus {
       border-color: $color-secondary-lighter;
@@ -117,12 +135,12 @@ body {
       box-shadow: 0 0 0 2px rgba($color-secondary-lighter, 0.3);
     }
     &.ng-invalid.ng-touched {
-      border-color: $color-alert; // Vermelho para campos inválidos tocados
+      border-color: $color-alert;
     }
   }
 
   select {
-    appearance: none; // Remove seta padrão do select
+    appearance: none;
     background-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23061D3D"><path d="M7 10l5 5 5-5z"/></svg>');
     background-repeat: no-repeat;
     background-position: right 12px center;
@@ -201,3 +219,10 @@ h3 {
 .shadow-medium {
   box-shadow: $box-shadow-medium;
 }
+
+// Adicione as novas variáveis de cor no seu _variables.scss para `styles.scss`
+// src/styles/_variables.scss
+/*
+$color-border: #ccc; // Para inputs
+$color-text-muted: #666; // Para labels e textos mais suaves
+*/

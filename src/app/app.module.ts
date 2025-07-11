@@ -1,57 +1,44 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { ReactiveFormsModule, FormsModule } from '@angular/forms'; 
-
-import { AppRoutingModule } from './app-routing.module'; // <<-- VERIFIQUE ESTE CAMINHO
+import { FormsModule } from '@angular/forms'; // Adicione esta linha
+import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 
-import { environment } from '../app/enviroments/enviroment'; 
-
+// Importações do AngularFire
 import { AngularFireModule } from '@angular/fire/compat';
 import { AngularFireAuthModule } from '@angular/fire/compat/auth';
 import { AngularFirestoreModule } from '@angular/fire/compat/firestore';
 
-// IMPORTAÇÕES DOS SEUS COMPONENTES (Todos estes DEVEM ser 'import' e 'declarados' abaixo)
-// Caminhos conforme sua estrutura
+// Sua configuração do environment
+import { environment } from '../app/enviroments/enviroment';
+
+// Importe seus componentes aqui para que o Angular os reconheça
 import { LoginComponent } from './LoginComponents/login/login.component';
 import { CadastroComponent } from './LoginComponents/cadastro/cadastro.component';
-import { CadastroSenhaComponent } from './LoginComponents/cadastro-senha/cadastro-senha.component';
-import { RecuperarSenhaComponent } from './LoginComponents/recuperar-senha/recuperar-senha.component';
-import { StarterComponent } from './LoginComponents/starter/starter.component';
-
-import { HomeComponent } from './pages/home/home.component';
-
-import { AuthLayoutComponent } from './shared/layout/auth-layout/auth-layout.component';
-import { DashboardLayoutComponent } from './shared/layout/dashboard-layout/dashboard-layout.component';
-import { FeedbackMessageComponent } from './shared/feedback-message/feedback-message.component';
-import { ModalWrapperComponent } from './shared/components/modal-wrapper/modal-wrapper.component';
-
+import { SharedModule } from './shared/shared.module';
+// ... adicione outros componentes que você usa
 
 @NgModule({
   declarations: [
     AppComponent,
-    LoginComponent,
+    LoginComponent, // Declare os componentes
     CadastroComponent,
-    CadastroSenhaComponent,
-    RecuperarSenhaComponent,
-    StarterComponent,
-    HomeComponent,
-    AuthLayoutComponent,
-    DashboardLayoutComponent,
-    FeedbackMessageComponent,
-    ModalWrapperComponent,
+    // ...
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
-    ReactiveFormsModule,
     FormsModule,
+    SharedModule, // Adicione o FormsModule para usar ngModel nos formulários
 
+    // Inicializa o Firebase com as suas chaves
     AngularFireModule.initializeApp(environment.firebase),
+
+    // Importa os módulos que você vai usar (Autenticação e Banco de Dados)
     AngularFireAuthModule,
     AngularFirestoreModule,
   ],
   providers: [],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}

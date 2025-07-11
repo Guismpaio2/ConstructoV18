@@ -1,0 +1,83 @@
+/* src/app/LoginComponents/cadastro/cadastro.component.scss */
+@import "variables";
+
+.cadastro-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: $spacing-m;
+  width: 100%;
+  max-width: 450px;
+  box-sizing: border-box;
+}
+
+h2 {
+  font-size: $font-size-h2;
+  color: var(--color-text-dark);
+  margin-bottom: $spacing-l;
+  width: 100%;
+  text-align: left;
+}
+
+form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-s;
+}
+
+.profile-image-upload {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: $spacing-m;
+
+  .image-placeholder {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background-color: var(
+      --color-background
+    ); // Cor de fundo para o placeholder
+    border: 2px solid #ccc; // Pode usar uma variável de borda aqui
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+
+    .user-icon {
+      width: 60px;
+      height: 60px;
+      color: var(--color-text-dark); // Cor para o SVG do ícone
+    }
+  }
+
+  .add-image-button {
+    margin-top: $spacing-xs;
+  }
+}
+
+.form-group {
+  width: 100%;
+  margin-bottom: $spacing-s;
+}
+
+label {
+  color: var(--color-text-dark);
+}
+
+input[type="text"],
+input[type="email"] {
+  // Estilos definidos em styles.scss
+}
+
+.btn {
+  margin-top: $spacing-xs;
+  width: 100%;
+}
+
+.already-account {
+  text-align: center;
+  margin-top: $spacing-xs;
+  display: block;
+}
