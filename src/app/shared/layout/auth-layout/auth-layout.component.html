@@ -3,8 +3,7 @@
     <div class="auth-left-panel">
       <router-outlet></router-outlet>
     </div>
-    <div class="auth-right-panel">
-      <h2 class="auth-right-text">A base sólida da sua gestão começa aqui</h2>
+    <div class="auth-right-panel" [ngClass]="'bg-' + currentRoute">
     </div>
   </div>
 </div>

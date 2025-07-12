@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, Renderer2 } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core'; // Renderer2 removido
 import { Router } from '@angular/router';
 
 @Component({
@@ -7,16 +7,14 @@ import { Router } from '@angular/router';
   styleUrls: ['./starter.component.scss'],
 })
 export class StarterComponent implements OnInit, OnDestroy {
-  constructor(private router: Router, private renderer: Renderer2) {}
+  constructor(private router: Router) {} // Renderer2 removido do constructor
 
   ngOnInit(): void {
-    // Adiciona uma classe ao body ao iniciar o componente
-    this.renderer.addClass(document.body, 'starter-background');
+    // Linha removida
   }
 
   ngOnDestroy(): void {
-    // Remove a classe do body ao sair do componente para limpar os estilos
-    this.renderer.removeClass(document.body, 'starter-background');
+    // Linha removida
   }
 
   navigateToLogin(): void {

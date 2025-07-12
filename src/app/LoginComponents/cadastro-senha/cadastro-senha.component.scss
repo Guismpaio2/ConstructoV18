@@ -1,11 +1,14 @@
 /* src/app/LoginComponents/cadastro-senha/cadastro-senha.component.scss */
-/* Não precisa de muito aqui se os estilos globais forem bem definidos */
+
+@import "../../../styles/variables"; // Garanta que esta linha esteja no topo
+@import "../../../styles/styles"; // Garanta que esta linha esteja no topo para usar os mixins
+
 .cadastro-container-wrapper {
   .form-panel {
     .form-wrapper {
       .title {
         text-align: center;
-        margin-bottom: $spacing-xl;
+        margin-bottom: $spacing-xl; // Usando variável de _variables.scss
       }
 
       .password-wrapper {
@@ -17,11 +20,11 @@
 
       .btn {
         width: 100%;
-        margin-top: $spacing-m;
+        margin-top: $spacing-m; // Usando variável de _variables.scss
       }
 
       .already-account {
-        margin-top: $spacing-s;
+        margin-top: $spacing-s; // Usando variável de _variables.scss
       }
     }
   }

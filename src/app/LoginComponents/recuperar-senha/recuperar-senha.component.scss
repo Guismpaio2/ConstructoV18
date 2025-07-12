@@ -1,20 +1,24 @@
 /* src/app/LoginComponents/recuperar-senha/recuperar-senha.component.scss */
+
+@import "../../../styles/variables"; // Garanta que esta linha esteja no topo
+@import "../../../styles/styles"; // Garanta que esta linha esteja no topo para usar os mixins
+
 .login-page-container {
   .form-panel {
     .form-wrapper {
       .title {
         text-align: center;
-        margin-bottom: $spacing-s;
+        margin-bottom: $spacing-s; // Usando variável de _variables.scss
       }
       p.small-text {
         text-align: center;
-        margin-bottom: $spacing-m;
+        margin-bottom: $spacing-m; // Usando variável de _variables.scss
       }
       .button-group {
         display: flex;
         flex-direction: column;
-        gap: $spacing-s;
-        margin-top: $spacing-l;
+        gap: $spacing-s; // Usando variável de _variables.scss
+        margin-top: $spacing-l; // Usando variável de _variables.scss
 
         .btn {
           width: 100%;
