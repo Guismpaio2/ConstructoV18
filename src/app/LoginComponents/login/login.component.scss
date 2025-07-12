@@ -1,18 +1,18 @@
 /* src/app/LoginComponents/login/login.component.scss */
 
-@import "../../../styles/variables"; // Garanta que esta linha esteja no topo
-@import "../../../styles/styles"; // Garanta que esta linha esteja no topo para usar os mixins
+@import "../../../styles/variables";
+@import "../../../styles/styles";
 
 .login-page-container {
-  @include two-column-layout(
-    "login-background.jpg"
-  );
+  // Remova o mixin se o AuthLayoutComponent já cuida do background
+  // @include two-column-layout("login-background.jpg");
+
   .form-panel {
     .form-wrapper {
       .title {
-        color: $color-secondary-base; 
+        color: $color-secondary-base;
         text-align: center;
-        margin-bottom: $spacing-xl; 
+        margin-bottom: $spacing-xl;
       }
 
       .logo-container {
@@ -22,9 +22,9 @@
         margin-bottom: $spacing-l;
 
         img {
-          width: 80px; // Ajuste o tamanho do logo conforme necessário
+          width: 80px;
           height: auto;
-          margin-bottom: $spacing-s; // Usando variável de _variables.scss
+          margin-bottom: $spacing-s;
         }
       }
 
@@ -37,12 +37,29 @@
 
       .btn {
         width: 100%;
-        margin-top: $spacing-m; // Usando variável de _variables.scss
+        margin-top: $spacing-m;
       }
 
       .forgot-password {
-        margin-top: $spacing-s; // Usando variável de _variables.scss
+        margin-top: $spacing-s;
       }
     }
   }
+
+  // Se você removeu o .image-panel do HTML, este bloco não é mais necessário
+  // .image-panel {
+  //   display: none; // Pode esconder em telas menores
+  //   @media (min-width: 992px) {
+  //     display: block;
+  //     flex: 1;
+  //     position: relative;
+  //     overflow: hidden;
+  //
+  //     img {
+  //       width: 100%;
+  //       height: 100%;
+  //       object-fit: cover;
+  //     }
+  //   }
+  // }
 }

@@ -18,13 +18,13 @@
             <span class="password-toggle" (click)="togglePasswordVisibility()">
               <img
                 *ngIf="!passwordVisible"
-                src="assets/icons/eye-open.svg"
+                src="../../../assets/icons/eye-open.svg"
                 alt="Mostrar Senha"
                 class="icon-eye"
               />
               <img
                 *ngIf="passwordVisible"
-                src="assets/icons/eye-closed.svg"
+                src="../../../assets/icons/eye-closed.svg"
                 alt="Esconder Senha"
                 class="icon-eye"
               />
@@ -49,13 +49,13 @@
             >
               <img
                 *ngIf="!confirmPasswordVisible"
-                src="assets/icons/eye-open.svg"
+                src="../../../assets/icons/eye-open.svg"
                 alt="Mostrar Senha"
                 class="icon-eye"
               />
               <img
                 *ngIf="confirmPasswordVisible"
-                src="assets/icons/eye-closed.svg"
+                src="../../../assets/icons/eye-closed.svg"
                 alt="Esconder Senha"
                 class="icon-eye"
               />
@@ -79,7 +79,10 @@
   </div>
 
   <div class="image-panel">
-    <img src="assets/images/cadastro-background.jpg" alt="Fundo de cadastro" />
+    <img
+      src="../../../assets/images/cadastro-background.jpg"
+      alt="Fundo de cadastro"
+    />
     <div class="overlay"></div>
   </div>
 </div>

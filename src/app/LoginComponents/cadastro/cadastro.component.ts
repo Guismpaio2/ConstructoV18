@@ -1,4 +1,5 @@
-import { Component, OnInit, OnDestroy, Renderer2 } from '@angular/core';
+// src/app/LoginComponents/cadastro/cadastro.component.ts
+import { Component, OnInit, OnDestroy } from '@angular/core'; // Renderer2 removido
 import { Router } from '@angular/router';
 
 @Component({
@@ -12,14 +13,15 @@ export class CadastroComponent implements OnInit, OnDestroy {
   email: string = '';
   errorMessage: string = '';
 
-  constructor(private router: Router, private renderer: Renderer2) {}
+  // Renderer2 removido pois o AuthLayoutComponent gerencia o background
+  constructor(private router: Router) {}
 
   ngOnInit(): void {
-    this.renderer.addClass(document.body, 'cadastro-background');
+    // Lógica de background removida
   }
 
   ngOnDestroy(): void {
-    this.renderer.removeClass(document.body, 'cadastro-background');
+    // Lógica de background removida
   }
 
   goToNextStep(): void {

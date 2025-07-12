@@ -1,6 +1,7 @@
+// src/app/LoginComponents/login/login.component.ts
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthService } from '../../auth/auth.service';
+import { AuthService } from '../../auth/auth.service'; // Caminho corrigido para o AuthService
 
 @Component({
   selector: 'app-login',
@@ -12,8 +13,6 @@ export class LoginComponent {
   email = '';
   password = '';
   passwordVisible = false;
-
-  // Adicionamos uma flag para desabilitar o botão durante o login
   isLoading = false;
 
   constructor(private authService: AuthService, private router: Router) {}
@@ -22,29 +21,45 @@ export class LoginComponent {
     this.passwordVisible = !this.passwordVisible;
   }
 
-  // Transformamos a função onLogin em async
   async onLogin(): Promise<void> {
     if (!this.email || !this.password) {
-      this.errorMessage = 'Por favor, preencha todos os campos.';
+      this.errorMessage = 'Por favor, preença todos os campos.';
       return;
     }
 
-    // Limpa a mensagem de erro e ativa o estado de carregamento
     this.errorMessage = '';
     this.isLoading = true;
 
     try {
-      // Usa await para esperar a Promise do login ser resolvida
       await this.authService.login(this.email, this.password);
-
-      // Se o código chegou até aqui, o login foi um sucesso
-      this.router.navigate(['/home']);
-    } catch (error) {
-      // Se a Promise for rejeitada, o código entra no bloco catch
-      this.errorMessage = 'E-mail ou senha inválidos. Tente novamente.';
-      console.error(error); // Mostra o erro original no console para debug
+      // Login bem-sucedido. O AuthGuard (se configurado) ou sua lógica de redirecionamento
+      // no serviço/componente do Dashboard cuidará de levar o usuário ao lugar certo.
+      this.router.navigate(['/home']); // Redireciona para a página principal após o login
+    } catch (error: any) {
+      console.error('Erro de login:', error);
+      // Mensagens de erro mais específicas do Firebase
+      switch (error.code) {
+        case 'auth/user-not-found':
+        case 'auth/wrong-password':
+          this.errorMessage = 'E-mail ou senha inválidos. Tente novamente.';
+          break;
+        case 'auth/invalid-email':
+          this.errorMessage = 'O formato do e-mail é inválido.';
+          break;
+        case 'auth/user-disabled':
+          this.errorMessage =
+            'Sua conta foi desativada. Entre em contato com o suporte.';
+          break;
+        case 'auth/too-many-requests':
+          this.errorMessage =
+            'Muitas tentativas de login. Tente novamente mais tarde.';
+          break;
+        default:
+          this.errorMessage =
+            'Ocorreu um erro ao fazer login. Por favor, tente novamente.';
+          break;
+      }
     } finally {
-      // O bloco finally sempre executa, seja em caso de sucesso ou erro
       this.isLoading = false;
     }
   }

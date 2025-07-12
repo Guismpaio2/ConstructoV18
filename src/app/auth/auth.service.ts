@@ -1,3 +1,4 @@
+// src/app/auth/auth.service.ts
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 
@@ -19,6 +20,8 @@ export interface User {
   email: string | null;
   role: string; // Ex: 'Administrador', 'Estoquista', 'Leitor'
   employeeCode: string;
+  nome: string; // Adicionado
+  sobrenome: string; // Adicionado
 }
 
 @Injectable({
@@ -77,24 +80,32 @@ export class AuthService {
 
   /**
    * Salva ou atualiza os dados adicionais de um usuário na coleção 'users' do Firestore.
-   * @param user O objeto de usuário do Firebase (contém uid, email).
-   * @param role O nível de permissão ('Administrador', 'Estoquista', etc.).
+   * @param uid O UID do usuário.
+   * @param email O e-mail do usuário.
+   * @param role O nível de permissão ('Administrador', 'Estoquista', 'Leitor').
    * @param employeeCode O código único do funcionário.
+   * @param nome O nome do usuário.
+   * @param sobrenome O sobrenome do usuário.
    */
   async saveUserData(
-    user: firebase.User,
+    uid: string,
+    email: string | null,
     role: string,
-    employeeCode: string
+    employeeCode: string,
+    nome: string, // Adicionado
+    sobrenome: string // Adicionado
   ): Promise<void> {
     const userRef: AngularFirestoreDocument<User> = this.afs.doc(
-      `users/${user.uid}`
+      `users/${uid}`
     );
 
     const data: User = {
-      uid: user.uid,
-      email: user.email,
+      uid: uid,
+      email: email,
       role: role,
       employeeCode: employeeCode,
+      nome: nome, // Adicionado
+      sobrenome: sobrenome, // Adicionado
     };
 
     return userRef.set(data, { merge: true });

@@ -28,7 +28,18 @@
               required
             />
             <span class="password-toggle" (click)="togglePasswordVisibility()">
-              <i class="icon-eye"></i>
+              <img
+                *ngIf="!passwordVisible"
+                src="../../../assets/icons/eye-open.svg"
+                alt="Mostrar Senha"
+                class="icon-eye"
+              />
+              <img
+                *ngIf="passwordVisible"
+                src="../../../assets/icons/eye-closed.svg"
+                alt="Esconder Senha"
+                class="icon-eye"
+              />
             </span>
           </div>
         </div>
@@ -42,7 +53,10 @@
         </div>
 
         <div class="button-group">
-          <button type="submit" class="btn btn-cta">Entrar</button>
+          <button type="submit" class="btn btn-cta" [disabled]="isLoading">
+            <span *ngIf="!isLoading">Entrar</span>
+            <span *ngIf="isLoading">Verificando...</span>
+          </button>
           <button
             type="button"
             class="btn btn-secondary"
@@ -57,7 +71,7 @@
 
   <div class="image-panel">
     <img
-      src="assets/images/login-background.jpg"
+      src="../../../assets/images/login-background.jpg"
       alt="Fundo com luvas e tijolos"
     />
   </div>

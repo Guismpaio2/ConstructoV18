@@ -1,7 +1,7 @@
-import { Component, OnInit, OnDestroy, Renderer2 } from '@angular/core';
+// src/app/LoginComponents/cadastro-senha/cadastro-senha.component.ts
+import { Component, OnInit, OnDestroy } from '@angular/core'; // Renderer2 removido
 import { Router } from '@angular/router';
-import { AuthService } from '../../auth/auth.service'; // Importe o AuthService
-import { NgForm } from '@angular/forms'; // Para usar validação de formulário
+import { AuthService } from '../../auth/auth.service'; // Caminho corrigido para o AuthService
 
 @Component({
   selector: 'app-cadastro-senha',
@@ -16,23 +16,17 @@ export class CadastroSenhaComponent implements OnInit, OnDestroy {
   errorMessage: string = '';
   isLoading: boolean = false;
 
-  // Variáveis para armazenar dados do cadastro da etapa anterior (simulando um serviço ou estado compartilhado)
-  // Em um projeto real, você usaria um serviço para compartilhar esses dados ou um state management
-  // Por simplicidade, vamos usar localStorage para simular temporariamente
   private tempUserData: {
     email: string;
     nome: string;
     sobrenome: string;
   } | null = null;
 
-  constructor(
-    private router: Router,
-    private renderer: Renderer2,
-    private authService: AuthService
-  ) {}
+  // Renderer2 removido
+  constructor(private router: Router, private authService: AuthService) {}
 
   ngOnInit(): void {
-    this.renderer.addClass(document.body, 'cadastro-background'); // Adiciona a classe específica para a imagem de fundo
+    // Lógica de background removida
     // Recupera os dados temporários do cadastro se existirem
     const storedData = localStorage.getItem('tempCadastroData');
     if (storedData) {
@@ -45,7 +39,7 @@ export class CadastroSenhaComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.renderer.removeClass(document.body, 'cadastro-background'); // Remove ao sair
+    // Lógica de background removida
     // Opcional: Limpar os dados temporários após o cadastro ser concluído ou cancelado
     // localStorage.removeItem('tempCadastroData');
   }
@@ -70,7 +64,6 @@ export class CadastroSenhaComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Adicione validações de segurança da senha (ex: mínimo 6 caracteres)
     if (this.password.length < 6) {
       this.errorMessage = 'A senha deve ter no mínimo 6 caracteres.';
       return;
@@ -92,20 +85,22 @@ export class CadastroSenhaComponent implements OnInit, OnDestroy {
 
       if (userCredential.user) {
         // 2. Gerar um código de identificação de funcionário único
-        // Para simplicidade, vamos gerar um código numérico. Em produção, considere um gerador mais robusto.
         const employeeCode = Math.floor(
           1000000 + Math.random() * 9000000
         ).toString(); // Ex: 7 dígitos
 
         // 3. Salvar dados adicionais do usuário no Firestore
-        // Por padrão, novos usuários se cadastram com a role 'Leitor'
+        // Novos usuários se cadastram com a role 'Leitor' por padrão, conforme o PDF
         await this.authService.saveUserData(
-          userCredential.user,
-          'Leitor',
-          employeeCode
+          userCredential.user.uid, // UID do usuário
+          userCredential.user.email, // E-mail do usuário
+          'Leitor', // Papel padrão para o cadastro via formulário
+          employeeCode,
+          this.tempUserData.nome, // Nome
+          this.tempUserData.sobrenome // Sobrenome
         );
 
-        // 4. Armazenar o código de identificação para exibir na tela de sucesso
+        // 4. Armazenar o código de identificação e nome para exibir na tela de sucesso
         localStorage.setItem('newEmployeeCode', employeeCode);
         localStorage.setItem(
           'newUserName',
@@ -120,12 +115,22 @@ export class CadastroSenhaComponent implements OnInit, OnDestroy {
       }
     } catch (error: any) {
       console.error('Erro ao criar conta:', error);
-      if (error.code === 'auth/email-already-in-use') {
-        this.errorMessage =
-          'Este e-mail já está em uso. Tente outro ou faça login.';
-      } else {
-        this.errorMessage =
-          'Erro ao criar conta. Por favor, tente novamente mais tarde.';
+      // Mensagens de erro mais específicas
+      switch (error.code) {
+        case 'auth/email-already-in-use':
+          this.errorMessage =
+            'Este e-mail já está em uso. Tente outro ou faça login.';
+          break;
+        case 'auth/invalid-email':
+          this.errorMessage = 'O formato do e-mail é inválido.';
+          break;
+        case 'auth/weak-password':
+          this.errorMessage = 'A senha é muito fraca (mínimo 6 caracteres).';
+          break;
+        default:
+          this.errorMessage =
+            'Erro ao criar conta. Por favor, tente novamente mais tarde.';
+          break;
       }
     } finally {
       this.isLoading = false;
