@@ -64,17 +64,18 @@
   box-sizing: border-box;
   position: relative;
 
-  // Imagens de fundo dinâmicas baseadas na rota
+  // **Novas regras para os backgrounds específicos por rota**
+  // Certifique-se que os caminhos das imagens estão corretos em 'assets/images/'
   &.bg-starter {
-    background-image: url("/assets/images/starter-background.jpg");
+    background-image: url("../../../../assets/images/starter-background.jpg");
   }
 
   &.bg-login {
-    background-image: url("/assets/images/login-background.jpg");
+    background-image: url("../../../../assets/images/login-background.jpg");
   }
 
   &.bg-cadastro {
-    background-image: url("/assets/images/cadastro-background.jpg");
+    background-image: url("../../../../assets/images/cadastro-background.jpg");
   }
 
   &::before {
