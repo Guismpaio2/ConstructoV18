@@ -30,13 +30,13 @@
             <span class="password-toggle" (click)="togglePasswordVisibility()">
               <img
                 *ngIf="!passwordVisible"
-                src="../../../assets/icons/eye-open.svg"
+                src="../../../assets/icons/eye-closed.svg"
                 alt="Mostrar Senha"
                 class="icon-eye"
               />
               <img
                 *ngIf="passwordVisible"
-                src="../../../assets/icons/eye-closed.svg"
+                src="../../../assets/icons/eye-open.svg"
                 alt="Esconder Senha"
                 class="icon-eye"
               />
@@ -67,12 +67,5 @@
         </div>
       </form>
     </div>
-  </div>
-
-  <div class="image-panel">
-    <img
-      src="../../../assets/images/login-background.jpg"
-      alt="Fundo com luvas e tijolos"
-    />
   </div>
 </div>

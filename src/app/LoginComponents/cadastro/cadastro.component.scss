@@ -1,83 +1,126 @@
 /* src/app/LoginComponents/cadastro/cadastro.component.scss */
-@import "variables";
+@import "variables"; // Importa suas variáveis de SCSS
+@import "../../../styles/styles"; // Importa estilos globais, como para botões e inputs, se existirem
 
-.cadastro-container {
+.cadastro-container-wrapper {
+  // Este wrapper é o que está dentro do auth-left-panel.
+  // Ele já deve estar centralizado e com largura definida pelo auth-layout.
+  // Aqui, ele serve mais como um contêiner flex para o form-panel.
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding: $spacing-m;
+  align-items: flex-start; // Alinha o conteúdo à esquerda dentro do wrapper
   width: 100%;
-  max-width: 450px;
+  max-width: 450px; // Mantém a largura máxima do formulário
+  box-sizing: border-box;
+  padding: $spacing-m; // Adiciona um padding interno ao redor de todo o conteúdo do formulário para separar das bordas
+}
+
+.form-panel {
+  // Este painel deve ocupar a largura total disponível dentro do wrapper.
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  // align-items: center; // Removido para permitir alinhamento do h2 à esquerda, ajustado no form-wrapper
+  // Não adicione padding aqui se o padding já estiver no .cadastro-container-wrapper
+}
+
+.form-wrapper {
+  // Este é o contêiner direto para o h2 e o form.
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; // Alinha todo o conteúdo (h2 e form) à esquerda dentro deste wrapper
+  width: 100%;
+  // No Figma, há um padding horizontal considerável para o formulário
+  padding: 0 $spacing-s; // Ajusta o padding horizontalmente, ajuste $spacing-s para corresponder ao Figma
   box-sizing: border-box;
 }
 
 h2 {
   font-size: $font-size-h2;
   color: var(--color-text-dark);
-  margin-bottom: $spacing-l;
-  width: 100%;
-  text-align: left;
+  margin-bottom: $spacing-l; // Espaço abaixo do título antes do upload de imagem
+  width: 100%; // Garante que ocupe a largura para alinhamento
+  text-align: left; // Alinha o texto à esquerda
+  // padding-left: $spacing-xs; // Remova este se o padding do .form-wrapper for suficiente para o alinhamento do título.
 }
 
 form {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: $spacing-s;
+  gap: $spacing-m; // Espaçamento entre os grupos de formulário, como no Figma
 }
 
 .profile-image-upload {
   display: flex;
   flex-direction: column;
+  align-items: center; // Centraliza o ícone e o botão horizontalmente
+  margin-bottom: $spacing-l; // Espaçamento após o bloco de upload de imagem
+  width: 100%; // Ocupa a largura total para centralização
+}
+
+.profile-image-upload .image-placeholder {
+  width: 120px; // Tamanho maior para o círculo do placeholder
+  height: 120px;
+  border-radius: 50%;
+  background-color: var(--color-background-input); // Cor de fundo do círculo
+  border: 2px solid var(--color-border); // Borda do círculo
+  display: flex;
+  justify-content: center;
   align-items: center;
-  margin-bottom: $spacing-m;
+  overflow: hidden;
+  margin-bottom: $spacing-xs; // Espaçamento entre o círculo e o botão "Adicionar Imagem"
+}
 
-  .image-placeholder {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    background-color: var(
-      --color-background
-    ); // Cor de fundo para o placeholder
-    border: 2px solid #ccc; // Pode usar uma variável de borda aqui
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
+.profile-image-upload .image-placeholder .user-icon {
+  width: 80px; // Tamanho do ícone SVG dentro do círculo
+  height: 80px;
+  color: var(--color-text-light-alt); // Cor do ícone
+}
 
-    .user-icon {
-      width: 60px;
-      height: 60px;
-      color: var(--color-text-dark); // Cor para o SVG do ícone
-    }
-  }
-
-  .add-image-button {
-    margin-top: $spacing-xs;
-  }
+.profile-image-upload .add-image-button {
+  margin-top: $spacing-xs; // Pequeno espaçamento acima do botão
+  // Ajuste o padding/font-size do botão se precisar.
 }
 
 .form-group {
   width: 100%;
-  margin-bottom: $spacing-s;
+  margin-bottom: $spacing-s; // Espaçamento entre os grupos de input
 }
 
 label {
   color: var(--color-text-dark);
+  font-size: $font-size-small; // Ajuste o tamanho da fonte da label se necessário
+  margin-bottom: $spacing-xs; // Pequeno espaçamento entre label e input
+  display: block; // Garante que a label ocupe sua própria linha
+  text-align: left; // Alinha o texto da label à esquerda
 }
 
 input[type="text"],
 input[type="email"] {
-  // Estilos definidos em styles.scss
+  width: 100%; // Garante que o input ocupe 100% da largura do pai
+  padding: $spacing-s $spacing-m; // Aumenta o padding para inputs maiores (top/bottom e left/right)
+  border: 1px solid var(--color-border-light); // Borda para os inputs
+  border-radius: $border-radius-small; // Borda arredondada
+  background-color: var(--color-background-input); // Cor de fundo do input
+  color: var(--color-text-dark); // Cor do texto
+  box-sizing: border-box; // Garante que padding e border não aumentem a largura total
+  font-size: $font-size-base; // Ajuste o tamanho da fonte do texto dentro do input
+  height: 48px; // Altura fixa para inputs, se o Figma tiver
 }
 
 .btn {
-  margin-top: $spacing-xs;
+  margin-top: $spacing-s; // Espaçamento entre o último campo e o botão "Próximo"
   width: 100%;
+  // Os estilos para .btn .primary e .btn .tertiary (do botão "Adicionar Imagem")
+  // devem vir do seu styles.scss e já estar corretos para o Figma.
+  // Se não estiverem, ajuste-os em styles.scss.
 }
 
 .already-account {
   text-align: center;
-  margin-top: $spacing-xs;
+  margin-top: $spacing-s; // Espaçamento entre o botão e o link "Já Possuo Conta"
   display: block;
+  font-size: $font-size-small; // Ajuste o tamanho da fonte se necessário
+  // A cor do link deve ser ajustada em seu styles.scss para a classe .link-text
 }
