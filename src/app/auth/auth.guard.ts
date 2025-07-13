@@ -8,7 +8,7 @@ import {
   Router,
 } from '@angular/router';
 import { Observable } from 'rxjs';
-import { AuthService } from './auth.service';
+import { AuthService, User } from './auth.service'; // Importar a interface User para tipagem
 import { map, take } from 'rxjs/operators';
 
 @Injectable({
@@ -20,33 +20,42 @@ export class AuthGuard implements CanActivate {
   canActivate(
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
-  ):
-    | Observable<boolean | UrlTree>
-    | Promise<boolean | UrlTree>
-    | boolean
-    | UrlTree {
+  ): Observable<boolean | UrlTree> {
     return this.authService.user$.pipe(
       take(1), // Pega o valor mais recente do Observable e então completa
-      map((user) => {
-        // Se o usuário existe (está logado)
-        if (user) {
-          // Opcional: Lógica de verificação de permissão (roles)
-          // Se a rota tem uma propriedade 'data.role' definida
-          if (route.data && route.data['role']) {
-            const requiredRole = route.data['role'] as string;
-            // Verifica se o papel do usuário é o papel exigido ou se é Administrador (que geralmente tem acesso a tudo)
-            if (user.role === requiredRole || user.role === 'Administrador') {
-              return true; // Permite o acesso
-            } else {
-              // Redireciona para uma página de "acesso negado" ou para a home
-              this.router.navigate(['/home']); // Ou uma página de erro/acesso negado
-              return false; // Nega o acesso
-            }
-          }
-          return true; // Usuário logado, e sem restrição de role específica para esta rota, permite o acesso
-        } else {
-          // Se o usuário não existe (não está logado), redireciona para a página de login
+      map((user: User | null) => {
+        // Se o usuário NÃO está logado, redireciona para o login
+        if (!user) {
+          console.log(
+            'AuthGuard: Usuário não logado, redirecionando para /login'
+          );
           return this.router.createUrlTree(['/login']);
+        }
+
+        // Se a rota NÃO possui uma 'role' definida, qualquer usuário logado pode acessá-la.
+        if (!route.data || !route.data['role']) {
+          return true;
+        }
+
+        // Se a rota exige uma role, verifica a permissão
+        const requiredRole = route.data['role'] as User['role'];
+        // console.log(`AuthGuard: Rota exige role: ${requiredRole}. Usuário logado tem role: ${user.role}`);
+
+        // O administrador tem acesso a todas as rotas protegidas por role. [cite: 28, 29, 31, 32]
+        if (user.role === 'Administrador') {
+          return true;
+        }
+
+        // Verifica se a role do usuário corresponde à role exigida pela rota
+        if (user.role === requiredRole) {
+          return true;
+        } else {
+          // Usuário logado, mas não tem a role necessária.
+          console.log(
+            `AuthGuard: Usuário ${user.email} (role: ${user.role}) não tem permissão para a rota que exige role: ${requiredRole}. Redirecionando para /home.`
+          );
+          this.router.navigate(['/home']); // Redireciona para a home ou dashboard
+          return false;
         }
       })
     );
