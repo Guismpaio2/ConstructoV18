@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core'; // <<< Adicionado NgZone
 import { Router } from '@angular/router';
 
 // Importações necessárias do AngularFire
@@ -10,14 +10,14 @@ import {
 
 // Importações do RxJS e Firebase
 import { Observable, of } from 'rxjs';
-import { switchMap, take, map } from 'rxjs/operators'; // Adicionado 'map' para o hasRole
-import firebase from 'firebase/compat/app'; // Para tipos como firebase.auth.UserCredential
+import { switchMap, take, map } from 'rxjs/operators';
+import firebase from 'firebase/compat/app';
 
 // Interface para definir a estrutura do nosso objeto de usuário no Firestore
 export interface User {
   uid: string;
   email: string | null;
-  role: 'Administrador' | 'Estoquista' | 'Leitor'; // Definindo os tipos de roles possíveis
+  role: 'Administrador' | 'Estoquista' | 'Leitor';
   employeeCode: string;
   nome: string;
   sobrenome: string;
@@ -27,31 +27,36 @@ export interface User {
   providedIn: 'root',
 })
 export class AuthService {
-  // Observable que mantém o estado do usuário em tempo real
-  // user$ emitirá um objeto User (com uid, email, role, etc.) ou null se não houver usuário logado ou se o documento do Firestore não existir.
   public user$: Observable<User | null>;
 
   constructor(
-    private afAuth: AngularFireAuth, // Serviço do AngularFire para autenticação
-    private afs: AngularFirestore, // Serviço do AngularFire para Firestore
-    private router: Router // Serviço de roteamento do Angular
+    private afAuth: AngularFireAuth,
+    private afs: AngularFirestore,
+    private router: Router,
+    private ngZone: NgZone // <<< Injetado NgZone aqui
   ) {
-    // Obtém o estado de autenticação do Firebase.
-    // Se o usuário está logado, busca seus dados no Firestore.
     this.user$ = this.afAuth.authState.pipe(
       switchMap((userAuth) => {
         if (userAuth) {
           // Se o usuário está logado no Firebase Auth, busca o documento dele no Firestore.
-          // .valueChanges() pode retornar undefined se o documento não existir.
-          // Vamos adicionar um pipe com map para garantir que undefined seja tratado como null.
           return this.afs
             .doc<User>(`users/${userAuth.uid}`)
             .valueChanges()
             .pipe(
               map((firestoreUser) => {
-                // Se firestoreUser for undefined (documento não existe), retorne null.
-                // Caso contrário, retorne o firestoreUser.
-                return firestoreUser || null;
+                // Se encontrar o documento no Firestore, combine com os dados do Auth
+                if (firestoreUser) {
+                  return {
+                    uid: userAuth.uid,
+                    email: userAuth.email,
+                    ...firestoreUser, // Espalha as propriedades do usuário do Firestore
+                  };
+                } else {
+                  // Se o documento não existe no Firestore (ou está incompleto),
+                  // você pode optar por retornar null, ou um objeto User com dados mínimos
+                  // Aqui estou retornando null, pois a role e employeeCode seriam indefinidos.
+                  return null;
+                }
               })
             );
         } else {
@@ -77,9 +82,10 @@ export class AuthService {
         email,
         password
       );
-      // Após o login bem-sucedido, você pode querer redirecionar o usuário
-      // Para a dashboard, por exemplo.
-      // await this.router.navigate(['/home']); // Exemplo de redirecionamento
+      // Garante que a navegação ocorre dentro da zona Angular
+      this.ngZone.run(() => {
+        this.router.navigate(['/home']); // Navega para a home após o login bem-sucedido
+      });
       return result;
     } catch (error) {
       console.error('Erro no login:', error);
@@ -91,7 +97,7 @@ export class AuthService {
    * Registra um novo usuário no Firebase Authentication.
    * Esta função é tipicamente chamada para usuários "comuns" que se cadastram pelo app.
    * A role para esses usuários (Leitor ou Estoquista) deve ser definida ao chamar `saveUserData`.
-   * Administradores não se auto-cadastram. [cite: 28, 29, 31, 32]
+   * Administradores não se auto-cadastram.
    * @param email O e-mail do novo usuário.
    * @param password A senha inicial para o novo usuário.
    * @returns Uma promessa que resolve com as credenciais do novo usuário.
@@ -107,8 +113,7 @@ export class AuthService {
       );
       // IMPORTANTE: Após criar o usuário no Auth, você DEVE chamar saveUserData
       // para adicionar seus dados no Firestore, incluindo a role.
-      // Exemplo:
-      // await this.saveUserData(result.user!.uid, email, 'Leitor', 'NOVOCODE', 'Nome Novo', 'Sobrenome Novo');
+      // A navegação após o cadastro completo deve ser feita no componente que chama registerUser e saveUserData
       return result;
     } catch (error) {
       console.error('Erro ao registrar usuário no Auth:', error);
@@ -170,8 +175,9 @@ export class AuthService {
    */
   async logout(): Promise<void> {
     await this.afAuth.signOut();
-    // Redireciona para a tela de login ou starter page após o logout
-    await this.router.navigate(['/']); // Redireciona para a rota raiz/starter
+    this.ngZone.run(() => {
+      this.router.navigate(['/']); // Redireciona para a rota raiz/starter
+    });
   }
 
   /**
@@ -184,7 +190,8 @@ export class AuthService {
     roleToCheck: 'Administrador' | 'Estoquista' | 'Leitor'
   ): Observable<boolean> {
     return this.user$.pipe(
-      map((user) => user?.role === roleToCheck) // Retorna true se a role do usuário corresponder
+      map((user) => user?.role === roleToCheck),
+      take(1) // <<< Adicionado take(1) para que o observable complete após a primeira emissão
     );
   }
 

@@ -1,13 +1,60 @@
-<div class="home-content">
-  <img src="assets/images/logo.png" alt="Constructo Logo" class="app-logo" />
-  <h1 class="app-name">Constructo</h1>
-  <div class="action-buttons">
-    <button class="btn primary large" (click)="navigateToLogin()">
-      Entrar
-    </button>
-    <button class="btn secondary large" (click)="navigateToCadastro()">
-      Cadastrar
-    </button>
+<div class="home-container">
+  <div class="header-banner">
+    <img
+      src="assets/images/dashboard-banner.png"
+      alt="Banner do Dashboard"
+      class="banner-image"
+    />
+    <div class="welcome-message">
+      <h2>Bem-vindo, Usuário 1</h2>
+    </div>
+    <div class="fullscreen-info" *ngIf="isFullScreen">
+      PARA SAIR DO MODO TELA CHEIA, PRESSIONE ESC
+    </div>
+  </div>
+
+  <div class="section-title">
+    <h3>Materiais em Falta</h3>
+  </div>
+
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Imagem</th>
+          <th>Nome</th>
+          <th>Marca</th>
+          <th>Data de Cadastro</th>
+          <th>Quantidade</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let material of materiaisEmFalta">
+          <td>
+            <div class="image-placeholder"></div>
+          </td>
+          <td>{{ material.nome }}</td>
+          <td>{{ material.marca }}</td>
+          <td>{{ material.dataCadastro | date : "dd/MM/yyyy" }}</td>
+          <td [ngClass]="{ 'low-quantity': material.quantidade < 5 }">
+            {{ material.quantidade }} un.
+          </td>
+          <td>
+            <button
+              class="btn btn-cta btn-details"
+              (click)="viewDetails(material.id)"
+            >
+              Detalhes
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="materiaisEmFalta.length === 0">
+          <td colspan="6" style="text-align: center; padding: 20px">
+            Nenhum material em falta encontrado.
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </div>
-<div auth-bg-text>A base sólida da sua gestão começa aqui</div>

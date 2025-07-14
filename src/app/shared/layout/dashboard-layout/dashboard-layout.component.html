@@ -11,57 +11,87 @@
     <nav class="sidebar-nav">
       <ul>
         <li>
-          <a routerLink="/dashboard" routerLinkActive="active">
-            <span class="icon">🏠</span>
+          <a routerLink="/home" routerLinkActive="active">
+            <img src="assets/icons/home-icon.svg" alt="Home" class="nav-icon" />
             <span class="text">Início</span>
           </a>
         </li>
         <li>
-          <a routerLink="/dashboard/produtos" routerLinkActive="active">
-            <span class="icon">📦</span>
+          <a routerLink="/produtos" routerLinkActive="active">
+            <img
+              src="assets/icons/box-icon.svg"
+              alt="Produtos"
+              class="nav-icon"
+            />
             <span class="text">Produtos</span>
           </a>
         </li>
         <li>
-          <a routerLink="/dashboard/estoque" routerLinkActive="active">
-            <span class="icon">📊</span>
+          <a routerLink="/estoque" routerLinkActive="active">
+            <img
+              src="assets/icons/warehouse-icon.svg"
+              alt="Estoque"
+              class="nav-icon"
+            />
             <span class="text">Estoque</span>
           </a>
         </li>
         <li>
-          <a routerLink="/dashboard/registros-baixas" routerLinkActive="active">
-            <span class="icon">📉</span>
-            <span class="text">Registro de Baixas</span>
+          <a routerLink="/registros-baixas" routerLinkActive="active">
+            <img
+              src="assets/icons/chart-bar-icon.svg"
+              alt="Registros de Baixas"
+              class="nav-icon"
+            />
+            <span class="text">Registros de Baixas</span>
           </a>
         </li>
-        <li>
-          <a routerLink="/dashboard/perfil" routerLinkActive="active">
-            <span class="icon">👤</span>
-            <span class="text">Perfil</span>
-          </a>
-        </li>
-        <li>
-          <a routerLink="/dashboard/usuarios" routerLinkActive="active">
-            <span class="icon">👥</span>
+        <li *ngIf="isAdmin | async">
+          <a routerLink="/usuarios" routerLinkActive="active">
+            <img
+              src="assets/icons/users-icon.svg"
+              alt="Usuários"
+              class="nav-icon"
+            />
             <span class="text">Usuários</span>
+          </a>
+        </li>
+        <li>
+          <a routerLink="/perfil" routerLinkActive="active">
+            <img
+              src="assets/icons/user-circle-icon.svg"
+              alt="Perfil"
+              class="nav-icon"
+            />
+            <span class="text">Perfil</span>
           </a>
         </li>
       </ul>
     </nav>
+
+    <div class="sidebar-footer">
+      <button class="btn btn-secondary logout-btn" (click)="logout()">
+        <img src="assets/icons/logout-icon.svg" alt="Sair" class="nav-icon" />
+        Sair
+      </button>
+    </div>
   </div>
 
   <div class="main-content">
     <header class="main-header">
+      <img
+        src="assets/images/logo-icon.svg"
+        alt="Constructo Icon"
+        class="header-logo-icon"
+      />
       <h1 class="page-title">{{ pageTitle }}</h1>
-      <div class="user-info"></div>
+      <div class="user-info">
+        <span>Olá, {{ (user | async)?.nome }}!</span>
+      </div>
     </header>
 
     <div class="content-area">
-      <ng-content></ng-content>
+      <router-outlet></router-outlet>
     </div>
   </div>
-</div>
-
-<div class="dashboard-layout-container">
-  <router-outlet></router-outlet>
 </div>

@@ -1,4 +1,3 @@
-// src/app/app-routing.module.ts
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
@@ -10,78 +9,104 @@ import { CadastroSenhaComponent } from './LoginComponents/cadastro-senha/cadastr
 import { RecuperarSenhaComponent } from './LoginComponents/recuperar-senha/recuperar-senha.component';
 import { CadastroSucessoComponent } from './LoginComponents/cadastro-sucesso/cadastro-sucesso.component';
 
-// Componentes de Layout (importados de shared, mas usados aqui para rotas)
+// Componentes de Layout
 import { AuthLayoutComponent } from './shared/layout/auth-layout/auth-layout.component';
 import { DashboardLayoutComponent } from './shared/layout/dashboard-layout/dashboard-layout.component';
 
-// Componente Home (importado do pages)
+// Componentes de Páginas (exemplo, você precisará criá-los)
 import { HomeComponent } from './pages/home/home.component';
+import { ProdutosComponent } from './pages/produtos/produtos.component'; // Crie este
+import { EstoqueComponent } from './pages/estoque/estoque.component'; // Crie este
+import { RegistrosBaixasComponent } from './pages/registros-baixas/registros-baixas.component'; // Crie este
+import { UsuariosComponent } from './pages/usuarios/usuarios.component'; // Crie este (para Admin)
+import { PerfilComponent } from './pages/perfil/perfil.component'; // Crie este
 
 // Importe seu AuthGuard
 import { AuthGuard } from './auth/auth.guard';
 
-// Importe componentes para as rotas protegidas por role (apenas exemplos, substitua pelos seus)
-// import { AdminPanelComponent } from './pages/admin-panel/admin-panel.component';
-// import { EstoqueManagementComponent } from './pages/estoque-management/estoque-management.component';
-// import { RelatoriosComponent } from './pages/relatorios/relatorios.component';
-
 const routes: Routes = [
-  // Rota raiz que redireciona para a página 'starter' (rota de entrada pública)
   { path: '', redirectTo: 'starter', pathMatch: 'full' },
 
-  // =====================================================================
-  // Rotas PÚBLICAS (não exigem autenticação)
-  // Agrupadas sob um prefixo '/auth' para clareza ou diretamente no raiz
-  // Use AuthLayoutComponent como o layout para essas páginas
-  // =====================================================================
+  // Rotas PÚBLICAS
   {
-    path: '', // Este caminho vazio permite que as rotas filhas sejam acessadas diretamente (/starter, /login)
-    component: AuthLayoutComponent, // O layout para todas as páginas de autenticação
+    path: '',
+    component: AuthLayoutComponent,
     children: [
-      { path: 'starter', component: StarterComponent },
-      { path: 'login', component: LoginComponent },
-      { path: 'cadastro', component: CadastroComponent },
-      { path: 'cadastro-senha', component: CadastroSenhaComponent },
-      { path: 'recuperar-senha', component: RecuperarSenhaComponent },
-      { path: 'cadastro-sucesso', component: CadastroSucessoComponent },
+      {
+        path: 'starter',
+        component: StarterComponent,
+        data: { title: 'Bem-vindo' },
+      },
+      { path: 'login', component: LoginComponent, data: { title: 'Login' } },
+      {
+        path: 'cadastro',
+        component: CadastroComponent,
+        data: { title: 'Cadastro' },
+      },
+      {
+        path: 'cadastro-senha',
+        component: CadastroSenhaComponent,
+        data: { title: 'Criar Senha' },
+      },
+      {
+        path: 'recuperar-senha',
+        component: RecuperarSenhaComponent,
+        data: { title: 'Recuperar Senha' },
+      },
+      {
+        path: 'cadastro-sucesso',
+        component: CadastroSucessoComponent,
+        data: { title: 'Cadastro Concluído' },
+      },
     ],
   },
 
-  // =====================================================================
   // Rotas PROTEGIDAS (exigem autenticação)
-  // Agrupadas sob um prefixo '/dashboard' ou diretamente no raiz
-  // Use DashboardLayoutComponent como o layout para essas páginas
-  // =====================================================================
   {
-    path: '', // Este caminho vazio permite que as rotas filhas sejam acessadas diretamente (/home, /admin-panel)
+    path: '', // Este caminho vazio permite que as rotas filhas sejam acessadas diretamente (/home, /produtos, etc.)
     component: DashboardLayoutComponent,
     canActivate: [AuthGuard], // Aplica o AuthGuard a TODAS as rotas filhas deste bloco
     children: [
-      // Rota 'home' - Acessível por qualquer usuário logado (o canActivate do pai já protege)
-      { path: 'home', component: HomeComponent },
+      // Rota 'home' - Acessível por qualquer usuário logado
+      { path: 'home', component: HomeComponent, data: { title: 'Início' } },
+      {
+        path: 'produtos',
+        component: ProdutosComponent,
+        data: { title: 'Produtos' },
+      },
+      {
+        path: 'estoque',
+        component: EstoqueComponent,
+        data: { title: 'Estoque' },
+      },
+      {
+        path: 'registros-baixas',
+        component: RegistrosBaixasComponent,
+        data: { title: 'Registros de Baixas' },
+      },
+      {
+        path: 'perfil',
+        component: PerfilComponent,
+        data: { title: 'Meu Perfil' },
+      },
 
-      // // Exemplo de rota para Administrador:
+      // Rota para Usuários (apenas para Administrador)
+      {
+        path: 'usuarios',
+        component: UsuariosComponent, // Substitua por seu UsuariosComponent
+        canActivate: [AuthGuard], // Re-aplica o guard para garantir que a role seja verificada
+        data: { title: 'Gerenciamento de Usuários', role: 'Administrador' }, // A role é verificada pelo AuthGuard
+      },
+
+      // Você pode adicionar rotas específicas de admin, estoquista, leitor aqui também,
+      // se elas tiverem componentes e URLs diferentes.
+      // Por exemplo, um painel de relatórios mais detalhado para 'Leitor' ou 'Administrador'.
       // {
-      //   path: 'admin-panel',
-      //   component: null as any, // Substitua por seu AdminPanelComponent
-      //   data: { role: 'Administrador' }, // A role é verificada pelo AuthGuard
+      //   path: 'relatorios-avancados',
+      //   component: RelatoriosAvancadosComponent,
+      //   canActivate: [AuthGuard],
+      //   data: { title: 'Relatórios Avançados', role: 'Administrador' },
       // },
-
-      // // Exemplo de rota para Estoquistas:
-      // {
-      //   path: 'estoque-management',
-      //   component: null as any, // Substitua por seu EstoqueManagementComponent
-      //   data: { role: 'Estoquista' },
-      // },
-
-      // // Exemplo de rota para Leitores:
-      // {
-      //   path: 'relatorios',
-      //   component: null as any, // Substitua por seu RelatoriosComponent
-      //   data: { role: 'Leitor' },
-      // },
-
-      // Adicione mais rotas protegidas conforme necessário
     ],
   },
 
@@ -92,6 +117,5 @@ const routes: Routes = [
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule],
-  // AuthGuard já é providedIn: 'root', não precisa ser adicionado aqui.
 })
 export class AppRoutingModule {}
