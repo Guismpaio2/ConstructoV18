@@ -1,1 +1,131 @@
-<p>estoque works!</p>
+<div class="main-content-container">
+  <div class="page-header">
+    <h1>Itens em Estoque</h1>
+    <div class="header-actions">
+      <button
+        class="btn btn-primary"
+        routerLink="/estoque/cadastro"
+        *ngIf="isAdmin || isEstoquista"
+      >
+        <i class="fas fa-plus"></i> Adicionar Item
+      </button>
+      <button
+        class="btn btn-warning ml-2"
+        routerLink="/baixas/registrar"
+        *ngIf="isAdmin || isEstoquista"
+      >
+        <i class="fas fa-minus-circle"></i> Registrar Baixa
+      </button>
+    </div>
+  </div>
+
+  <div class="search-filter-bar">
+    <div class="search-input">
+      <i class="fas fa-search search-icon"></i>
+      <input
+        type="text"
+        placeholder="Buscar por produto, lote, tipo, marca..."
+        [(ngModel)]="searchTerm"
+        (keyup.enter)="onSearch()"
+      />
+    </div>
+
+    <select [(ngModel)]="selectedFilter" (change)="onFilterChange()">
+      <option value="todos">Todos os Itens</option>
+      <option value="vencidos">Itens Vencidos</option>
+      <option value="proximo_vencimento">Próximos ao Vencimento</option>
+      <option value="sem_validade">Itens Sem Validade</option>
+    </select>
+
+    <select [(ngModel)]="selectedSort" (change)="onSortChange()">
+      <option value="data_cadastro_desc">Mais Recentes</option>
+      <option value="data_cadastro_asc">Mais Antigos</option>
+      <option value="nome_asc">Nome Produto (A-Z)</option>
+      <option value="nome_desc">Nome Produto (Z-A)</option>
+      <option value="lote_asc">Lote (A-Z)</option>
+      <option value="lote_desc">Lote (Z-A)</option>
+      <option value="quantidade_asc">Menor Quantidade</option>
+      <option value="quantidade_desc">Maior Quantidade</option>
+      <option value="validade_asc">Validade (Mais Próxima)</option>
+      <option value="validade_desc">Validade (Mais Distante)</option>
+    </select>
+  </div>
+
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Produto</th>
+          <th>Lote</th>
+          <th>Quantidade</th>
+          <th>Validade</th>
+          <th>Data Cadastro</th>
+          <th *ngIf="isAdmin || isEstoquista">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let item of filteredItensEstoque"
+          [ngClass]="{
+            'expired-row': isExpired(item.dataValidade),
+            'near-expiry-row':
+              isNearExpiry(item.dataValidade) && !isExpired(item.dataValidade)
+          }"
+        >
+          <td>
+            <div class="product-info-cell">
+              <img
+                [src]="item.produto?.imageUrl || 'assets/placeholder-image.png'"
+                alt="Imagem do Produto"
+                class="product-image"
+              />
+              <span>{{ item.produto?.nome }} ({{ item.produto?.marca }})</span>
+            </div>
+          </td>
+          <td>{{ item.produto?.lote }}</td>
+          <td>{{ item.quantidade }}</td>
+          <td>
+            <ng-container *ngIf="item.dataValidade">
+              {{ item.dataValidade.toDate() | date : "dd/MM/yyyy" }}
+              <i
+                class="fas fa-exclamation-triangle expired-icon"
+                *ngIf="isExpired(item.dataValidade)"
+                title="Vencido"
+              ></i>
+              <i
+                class="fas fa-clock near-expiry-icon"
+                *ngIf="
+                  isNearExpiry(item.dataValidade) &&
+                  !isExpired(item.dataValidade)
+                "
+                title="Próximo ao Vencimento"
+              ></i>
+            </ng-container>
+            <ng-container *ngIf="!item.dataValidade"> N/A </ng-container>
+          </td>
+          <td>{{ item.dataCadastro.toDate() | date : "dd/MM/yyyy HH:mm" }}</td>
+          <td *ngIf="isAdmin || isEstoquista">
+            <button
+              class="btn btn-sm btn-info"
+              [routerLink]="['/estoque/edicao', item.id]"
+            >
+              <i class="fas fa-edit"></i>
+            </button>
+            <button
+              class="btn btn-sm btn-danger ml-2"
+              (click)="onDeleteItemEstoque(item.id!)"
+              *ngIf="isAdmin"
+            >
+              <i class="fas fa-trash"></i>
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="filteredItensEstoque.length === 0">
+          <td colspan="6" class="text-center">
+            Nenhum item em estoque encontrado.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

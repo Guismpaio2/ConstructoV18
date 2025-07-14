@@ -15,6 +15,11 @@
     margin: 0;
     color: $color-text-dark;
   }
+
+  .header-actions {
+    display: flex;
+    gap: $spacing-s;
+  }
 }
 
 .search-filter-bar {
@@ -58,7 +63,7 @@
 }
 
 .table-responsive {
-  overflow-x: auto; // Permite scroll horizontal em telas pequenas
+  overflow-x: auto;
 }
 
 .data-table {
@@ -68,7 +73,7 @@
   background-color: $color-background-card;
   box-shadow: $box-shadow-light;
   border-radius: $border-radius-medium;
-  overflow: hidden; // Garante que o border-radius seja aplicado
+  overflow: hidden;
 
   th,
   td {
@@ -92,28 +97,12 @@
     background-color: lighten($color-background-card, 2%);
   }
 
-  .product-image {
-    width: 50px;
-    height: 50px;
-    object-fit: cover;
-    border-radius: $border-radius-small;
-    border: 1px solid #ddd;
-  }
-
   .btn {
     padding: $spacing-xxs $spacing-xs;
     font-size: $font-size-small;
     display: inline-flex;
     align-items: center;
     gap: $spacing-xxs;
-  }
-
-  .btn-info {
-    background-color: $color-info;
-    color: $color-text-light;
-    &:hover {
-      background-color: darken($color-info, 10%);
-    }
   }
 
   .btn-danger {
@@ -147,6 +136,16 @@
     h1 {
       font-size: $font-size-h3;
     }
+
+    .header-actions {
+      flex-direction: column;
+      width: 100%;
+      .btn {
+        width: 100%;
+        margin-left: 0 !important; // Override ml-2
+        margin-top: $spacing-s;
+      }
+    }
   }
 
   .search-filter-bar {
@@ -165,14 +164,10 @@
   }
 
   .data-table {
-    font-size: $font-size-small;
+    font-size: $font-size-xsmall;
     th,
     td {
       padding: $spacing-xs;
-    }
-    .product-image {
-      width: 40px;
-      height: 40px;
     }
   }
 }

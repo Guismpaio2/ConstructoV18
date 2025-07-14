@@ -1,1 +1,71 @@
-<p>perfil works!</p>
+<div class="main-content-container">
+  <div class="page-header">
+    <h1>Meu Perfil</h1>
+  </div>
+
+  <div class="profile-card-container mt-4">
+    <div class="profile-card">
+      <div class="profile-header">
+        <div class="profile-picture">
+          <i class="fas fa-user-circle"></i>
+        </div>
+        <h2>{{ currentUser?.nome }} {{ currentUser?.sobrenome }}</h2>
+        <p class="role-display">{{ currentUser?.role }}</p>
+      </div>
+
+      <div class="profile-details">
+        <div class="form-group">
+          <label>Email:</label>
+          <input type="email" [ngModel]="currentUser?.email" disabled />
+        </div>
+
+        <div class="form-group">
+          <label>Código de Funcionário:</label>
+          <input type="text" [ngModel]="currentUser?.employeeCode" disabled />
+        </div>
+
+        <div class="form-group">
+          <label for="nome">Nome:</label>
+          <input
+            id="nome"
+            type="text"
+            [(ngModel)]="editableUser.nome"
+            [disabled]="!isEditing"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="sobrenome">Sobrenome:</label>
+          <input
+            id="sobrenome"
+            type="text"
+            [(ngModel)]="editableUser.sobrenome"
+            [disabled]="!isEditing"
+          />
+        </div>
+
+        <div class="profile-actions">
+          <button *ngIf="!isEditing" class="btn btn-primary" (click)="onEdit()">
+            <i class="fas fa-edit me-2"></i> Editar Perfil
+          </button>
+          <div *ngIf="isEditing">
+            <button class="btn btn-cta me-2" (click)="onSave()">
+              <i class="fas fa-save me-2"></i> Salvar
+            </button>
+            <button class="btn btn-secondary" (click)="onCancel()">
+              <i class="fas fa-times-circle me-2"></i> Cancelar
+            </button>
+          </div>
+        </div>
+        <p
+          *ngIf="message"
+          class="info-message mt-3"
+          [class.success-message]="isSuccess"
+          [class.error-message]="!isSuccess"
+        >
+          {{ message }}
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

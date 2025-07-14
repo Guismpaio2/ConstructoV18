@@ -1,0 +1,72 @@
+<div class="main-content-container">
+  <div class="page-header">
+    <h1>Editar Item do Estoque</h1>
+    <button class="btn btn-secondary" routerLink="/estoque">
+      Voltar para Estoque
+    </button>
+  </div>
+
+  <div class="form-card">
+    <form [formGroup]="estoqueForm" (ngSubmit)="onSubmit()">
+      <div class="product-info-display" *ngIf="associatedProduto">
+        <h3>Produto Associado:</h3>
+        <p><strong>Nome:</strong> {{ associatedProduto.nome }}</p>
+        <p><strong>Lote:</strong> {{ associatedProduto.lote }}</p>
+        <p><strong>Tipo:</strong> {{ associatedProduto.tipo }}</p>
+        <p><strong>Marca:</strong> {{ associatedProduto.marca }}</p>
+        <p *ngIf="associatedProduto.descricao">
+          <strong>Descrição:</strong> {{ associatedProduto.descricao }}
+        </p>
+        <div *ngIf="associatedProduto.imageUrl" class="image-display">
+          <img [src]="associatedProduto.imageUrl" alt="Imagem do Produto" />
+        </div>
+        <hr />
+      </div>
+      <div *ngIf="!associatedProduto && currentItemEstoque">
+        <p class="error-message">
+          Não foi possível carregar os detalhes do produto associado a este item
+          de estoque.
+        </p>
+        <hr />
+      </div>
+
+      <div class="form-group">
+        <label for="quantidade">Quantidade:</label>
+        <input
+          type="number"
+          id="quantidade"
+          formControlName="quantidade"
+          class="form-control"
+          placeholder="Ex: 100"
+        />
+        <div
+          *ngIf="
+            estoqueForm.get('quantidade')?.invalid &&
+            estoqueForm.get('quantidade')?.touched
+          "
+          class="error-message"
+        >
+          Quantidade é obrigatória e deve ser um número positivo.
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="dataValidade">Data de Validade (Opcional):</label>
+        <input
+          type="date"
+          id="dataValidade"
+          formControlName="dataValidade"
+          class="form-control"
+        />
+      </div>
+
+      <button
+        type="submit"
+        class="btn btn-primary"
+        [disabled]="estoqueForm.invalid || !currentItemEstoque"
+      >
+        Salvar Alterações
+      </button>
+    </form>
+  </div>
+</div>

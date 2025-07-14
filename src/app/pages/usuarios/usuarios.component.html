@@ -1,1 +1,76 @@
-<p>usuarios works!</p>
+<div class="main-content-container">
+  <div class="page-header">
+    <h1>Gerenciamento de Usuários</h1>
+  </div>
+
+  <div class="search-filter-bar mt-4">
+    <div class="search-input">
+      <i class="fas fa-search search-icon"></i>
+      <input
+        type="text"
+        placeholder="Buscar por nome, email, código..."
+        [(ngModel)]="searchTerm"
+        (input)="applyFilter()"
+      />
+    </div>
+
+    <select [(ngModel)]="selectedRoleFilter" (change)="applyFilter()">
+      <option value="">Todas as Roles</option>
+      <option value="Administrador">Administrador</option>
+      <option value="Estoquista">Estoquista</option>
+      <option value="Leitor">Leitor</option>
+    </select>
+
+    <select [(ngModel)]="selectedSort" (change)="applySort()">
+      <option value="nome_asc">Nome (A-Z)</option>
+      <option value="nome_desc">Nome (Z-A)</option>
+      <option value="role_asc">Role (A-Z)</option>
+      <option value="role_desc">Role (Z-A)</option>
+    </select>
+  </div>
+
+  <div *ngIf="filteredUsers.length === 0" class="alert alert-info mt-4">
+    Nenhum usuário encontrado.
+  </div>
+
+  <div *ngIf="filteredUsers.length > 0" class="users-grid mt-4">
+    <div class="user-card" *ngFor="let user of filteredUsers">
+      <div class="profile-circle">
+        <i class="fas fa-user"></i>
+      </div>
+      <h4>{{ user.nome }} {{ user.sobrenome }}</h4>
+      <div class="user-info-detail">
+        <div>
+          <label>Email:</label>
+          <span>{{ user.email }}</span>
+        </div>
+      </div>
+      <div class="user-info-detail">
+        <div>
+          <label>Código:</label>
+          <span>{{ user.employeeCode }}</span>
+        </div>
+      </div>
+      <div class="user-info-detail">
+        <label for="role-{{ user.uid }}">Role:</label>
+        <select
+          id="role-{{ user.uid }}"
+          [(ngModel)]="user.role"
+          (change)="onRoleChange(user)"
+          [disabled]="user.uid === currentUserId"
+        >
+          <option value="Administrador">Administrador</option>
+          <option value="Estoquista">Estoquista</option>
+          <option value="Leitor">Leitor</option>
+        </select>
+      </div>
+      <button
+        *ngIf="user.uid !== currentUserId"
+        class="btn btn-sm btn-outline-danger mt-3"
+        (click)="onDeleteUser(user.uid)"
+      >
+        <i class="fas fa-trash-alt"></i> Excluir Usuário
+      </button>
+    </div>
+  </div>
+</div>

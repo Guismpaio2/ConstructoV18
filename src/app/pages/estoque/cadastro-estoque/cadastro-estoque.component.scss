@@ -1,0 +1,119 @@
+@import "../../../../styles/variables";
+@import "../../../../styles/styles";
+
+.main-content-container {
+  padding: $spacing-m;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-l;
+
+  h1 {
+    margin: 0;
+    color: $color-text-dark;
+  }
+}
+
+.form-card {
+  background-color: $color-background-card;
+  border-radius: $border-radius-medium;
+  box-shadow: $box-shadow-light;
+  padding: $spacing-l;
+}
+
+.form-group {
+  margin-bottom: $spacing-m;
+
+  label {
+    display: block;
+    margin-bottom: $spacing-xs;
+    font-weight: 600;
+    color: $color-text-dark;
+  }
+
+  .form-control {
+    width: 100%;
+    padding: $spacing-s;
+    border: 1px solid #ccc;
+    border-radius: $border-radius-small;
+    font-size: $font-size-base;
+    box-sizing: border-box;
+
+    &:focus {
+      border-color: $color-brand-base;
+      box-shadow: 0 0 0 2px rgba($color-brand-base, 0.2);
+      outline: none;
+    }
+  }
+
+  select.form-control {
+    -webkit-appearance: none; // Remove default browser styling for select
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg fill="%23333" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right $spacing-s center;
+    background-size: 1.5em;
+    padding-right: $spacing-l; // Make space for the custom arrow
+  }
+
+  .error-message {
+    color: $color-alert;
+    font-size: $font-size-small;
+    margin-top: $spacing-xxs;
+  }
+}
+
+.btn {
+  padding: $spacing-s $spacing-m;
+  border-radius: $border-radius-small;
+  font-size: $font-size-base;
+  cursor: pointer;
+  transition: background-color $transition-speed, color $transition-speed;
+  border: none;
+}
+
+.btn-primary {
+  background-color: $color-brand-base;
+  color: $color-text-light;
+
+  &:hover {
+    background-color: $color-brand-darker;
+  }
+
+  &:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+  }
+}
+
+.btn-secondary {
+  background-color: $color-secondary-lighter;
+  color: $color-text-light;
+
+  &:hover {
+    background-color: $color-secondary-base;
+  }
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .main-content-container {
+    padding: $spacing-s;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: $spacing-s;
+
+    h1 {
+      font-size: $font-size-h3;
+    }
+  }
+}

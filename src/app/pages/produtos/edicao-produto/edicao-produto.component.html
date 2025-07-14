@@ -1,0 +1,137 @@
+<div class="main-content-container">
+  <div class="page-header">
+    <h1>Editar Produto</h1>
+    <button class="btn btn-secondary" routerLink="/produtos">
+      Voltar para Produtos
+    </button>
+  </div>
+
+  <div class="form-card">
+    <form [formGroup]="produtoForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="nome">Nome do Produto:</label>
+        <input
+          type="text"
+          id="nome"
+          formControlName="nome"
+          class="form-control"
+          placeholder="Ex: Cimento Portland"
+        />
+        <div
+          *ngIf="
+            produtoForm.get('nome')?.invalid && produtoForm.get('nome')?.touched
+          "
+          class="error-message"
+        >
+          Nome é obrigatório.
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="lote">Lote:</label>
+        <input
+          type="text"
+          id="lote"
+          formControlName="lote"
+          class="form-control"
+          placeholder="Ex: LOTE-ABC-123"
+        />
+        <div
+          *ngIf="
+            produtoForm.get('lote')?.invalid && produtoForm.get('lote')?.touched
+          "
+          class="error-message"
+        >
+          Lote é obrigatório.
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="tipo">Tipo:</label>
+        <input
+          type="text"
+          id="tipo"
+          formControlName="tipo"
+          class="form-control"
+          placeholder="Ex: Cimento, Tijolo, Areia"
+        />
+        <div
+          *ngIf="
+            produtoForm.get('tipo')?.invalid && produtoForm.get('tipo')?.touched
+          "
+          class="error-message"
+        >
+          Tipo é obrigatório.
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="marca">Marca:</label>
+        <input
+          type="text"
+          id="marca"
+          formControlName="marca"
+          class="form-control"
+          placeholder="Ex: Votorantim, Gerdau"
+        />
+        <div
+          *ngIf="
+            produtoForm.get('marca')?.invalid &&
+            produtoForm.get('marca')?.touched
+          "
+          class="error-message"
+        >
+          Marca é obrigatória.
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="descricao">Descrição (Opcional):</label>
+        <textarea
+          id="descricao"
+          formControlName="descricao"
+          class="form-control"
+          rows="3"
+          placeholder="Detalhes adicionais sobre o produto"
+        ></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Imagem do Produto (Opcional):</label>
+        <div class="image-upload-container">
+          <input
+            type="file"
+            id="image"
+            (change)="onFileSelected($event)"
+            accept="image/*"
+            class="form-control-file"
+          />
+          <div *ngIf="imageUrlPreview" class="image-preview">
+            <img
+              [src]="imageUrlPreview"
+              alt="Pré-visualização da imagem do produto"
+            />
+            <button
+              type="button"
+              class="btn btn-outline-danger btn-delete-image"
+              (click)="onDeleteImage()"
+            >
+              <i class="fas fa-trash"></i> Remover Imagem
+            </button>
+          </div>
+          <p *ngIf="!selectedFile && !imageUrlPreview" class="no-image-text">
+            Nenhuma imagem selecionada.
+          </p>
+        </div>
+      </div>
+
+      <button
+        type="submit"
+        class="btn btn-primary"
+        [disabled]="produtoForm.invalid"
+      >
+        Salvar Alterações
+      </button>
+    </form>
+  </div>
+</div>

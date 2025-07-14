@@ -1,221 +1,175 @@
-import { Injectable, NgZone } from '@angular/core'; // <<< Adicionado NgZone
-import { Router } from '@angular/router';
-
-// Importações necessárias do AngularFire
+import { Injectable } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import {
   AngularFirestore,
+  AngularFirestoreCollection,
   AngularFirestoreDocument,
 } from '@angular/fire/compat/firestore';
-
-// Importações do RxJS e Firebase
+import { Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
-import { switchMap, take, map } from 'rxjs/operators';
+import { switchMap, map } from 'rxjs/operators';
+import { User } from '../models/user.model';
 import firebase from 'firebase/compat/app';
-
-// Interface para definir a estrutura do nosso objeto de usuário no Firestore
-export interface User {
-  uid: string;
-  email: string | null;
-  role: 'Administrador' | 'Estoquista' | 'Leitor';
-  employeeCode: string;
-  nome: string;
-  sobrenome: string;
-}
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  public user$: Observable<User | null>;
+  user$: Observable<User | null>;
+  private usersCollection: AngularFirestoreCollection<User>;
 
   constructor(
     private afAuth: AngularFireAuth,
     private afs: AngularFirestore,
-    private router: Router,
-    private ngZone: NgZone // <<< Injetado NgZone aqui
+    private router: Router
   ) {
+    this.usersCollection = this.afs.collection<User>('users');
     this.user$ = this.afAuth.authState.pipe(
-      switchMap((userAuth) => {
-        if (userAuth) {
-          // Se o usuário está logado no Firebase Auth, busca o documento dele no Firestore.
+      switchMap((user) => {
+        if (user) {
           return this.afs
-            .doc<User>(`users/${userAuth.uid}`)
+            .doc<User>(`users/${user.uid}`)
             .valueChanges()
             .pipe(
               map((firestoreUser) => {
-                // Se encontrar o documento no Firestore, combine com os dados do Auth
                 if (firestoreUser) {
-                  return {
-                    uid: userAuth.uid,
-                    email: userAuth.email,
-                    ...firestoreUser, // Espalha as propriedades do usuário do Firestore
-                  };
-                } else {
-                  // Se o documento não existe no Firestore (ou está incompleto),
-                  // você pode optar por retornar null, ou um objeto User com dados mínimos
-                  // Aqui estou retornando null, pois a role e employeeCode seriam indefinidos.
-                  return null;
+                  // Certifique-se de que o timestamp é convertido para Date, se necessário
+                  if (
+                    firestoreUser.dataCadastro instanceof
+                    firebase.firestore.Timestamp
+                  ) {
+                    firestoreUser.dataCadastro =
+                      firestoreUser.dataCadastro.toDate();
+                  }
+                  return { ...firestoreUser, uid: user.uid };
                 }
+                return null;
               })
             );
         } else {
-          // Se não há usuário logado, retorna um observable que emite null.
           return of(null);
         }
       })
     );
   }
 
-  /**
-   * Realiza o login do usuário com e-mail e senha no Firebase.
-   * @param email O e-mail do usuário.
-   * @param password A senha do usuário.
-   * @returns Uma promessa que resolve com as credenciais do usuário.
-   */
-  async login(
+  async signUp(
     email: string,
-    password: string
-  ): Promise<firebase.auth.UserCredential> {
+    password: string,
+    nome: string,
+    sobrenome: string,
+    employeeCode: string,
+    role: 'Estoquista' | 'Leitor'
+  ): Promise<any> {
+    try {
+      const credential = await this.afAuth.createUserWithEmailAndPassword(
+        email,
+        password
+      );
+      if (credential.user) {
+        return this.updateUserData(
+          credential.user,
+          nome,
+          sobrenome,
+          employeeCode,
+          role
+        );
+      }
+      return null;
+    } catch (error) {
+      console.error('Erro no cadastro:', error);
+      throw error;
+    }
+  }
+
+  async signIn(email: string, password: string): Promise<any> {
     try {
       const result = await this.afAuth.signInWithEmailAndPassword(
         email,
         password
       );
-      // Garante que a navegação ocorre dentro da zona Angular
-      this.ngZone.run(() => {
-        this.router.navigate(['/home']); // Navega para a home após o login bem-sucedido
-      });
+      // O usuário será automaticamente populado via user$ observable
       return result;
     } catch (error) {
       console.error('Erro no login:', error);
-      throw error; // Rejeita a promessa para que o componente possa lidar com o erro
-    }
-  }
-
-  /**
-   * Registra um novo usuário no Firebase Authentication.
-   * Esta função é tipicamente chamada para usuários "comuns" que se cadastram pelo app.
-   * A role para esses usuários (Leitor ou Estoquista) deve ser definida ao chamar `saveUserData`.
-   * Administradores não se auto-cadastram.
-   * @param email O e-mail do novo usuário.
-   * @param password A senha inicial para o novo usuário.
-   * @returns Uma promessa que resolve com as credenciais do novo usuário.
-   */
-  async registerUser(
-    email: string,
-    password: string
-  ): Promise<firebase.auth.UserCredential> {
-    try {
-      const result = await this.afAuth.createUserWithEmailAndPassword(
-        email,
-        password
-      );
-      // IMPORTANTE: Após criar o usuário no Auth, você DEVE chamar saveUserData
-      // para adicionar seus dados no Firestore, incluindo a role.
-      // A navegação após o cadastro completo deve ser feita no componente que chama registerUser e saveUserData
-      return result;
-    } catch (error) {
-      console.error('Erro ao registrar usuário no Auth:', error);
       throw error;
     }
   }
 
-  /**
-   * Salva ou atualiza os dados adicionais de um usuário na coleção 'users' do Firestore.
-   * Esta função é essencial para definir o papel (role) do usuário.
-   * @param uid O UID do usuário.
-   * @param email O e-mail do usuário.
-   * @param role O nível de permissão ('Administrador', 'Estoquista', 'Leitor').
-   * @param employeeCode O código único do funcionário.
-   * @param nome O nome do usuário.
-   * @param sobrenome O sobrenome do usuário.
-   */
-  async saveUserData(
-    uid: string,
-    email: string | null,
-    role: 'Administrador' | 'Estoquista' | 'Leitor', // Garantir que apenas roles válidos sejam passados
-    employeeCode: string,
+  async signOut(): Promise<void> {
+    await this.afAuth.signOut();
+    this.router.navigate(['/starter']);
+  }
+
+  private updateUserData(
+    user: firebase.User,
     nome: string,
-    sobrenome: string
+    sobrenome: string,
+    employeeCode: string,
+    role: 'Administrador' | 'Estoquista' | 'Leitor'
   ): Promise<void> {
     const userRef: AngularFirestoreDocument<User> = this.afs.doc(
-      `users/${uid}`
+      `users/${user.uid}`
     );
-
     const data: User = {
-      uid: uid,
-      email: email,
-      role: role,
-      employeeCode: employeeCode,
-      nome: nome,
-      sobrenome: sobrenome,
+      uid: user.uid,
+      email: user.email,
+      nome,
+      sobrenome,
+      employeeCode,
+      role,
+      dataCadastro: firebase.firestore.Timestamp.fromDate(new Date()), // Adiciona data de cadastro
     };
-
-    // 'merge: true' garante que se o documento já existir, ele será atualizado, não sobrescrito.
     return userRef.set(data, { merge: true });
   }
 
-  /**
-   * Envia um e-mail de redefinição de senha para o endereço fornecido.
-   * @param email O e-mail para o qual o link de redefinição será enviado.
-   */
-  async resetPassword(email: string): Promise<void> {
-    try {
-      await this.afAuth.sendPasswordResetEmail(email);
-      console.log('E-mail de redefinição de senha enviado!');
-    } catch (error) {
-      console.error('Erro ao enviar e-mail de redefinição:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Desloga o usuário do sistema, limpa o estado e o redireciona para a tela inicial.
-   */
-  async logout(): Promise<void> {
-    await this.afAuth.signOut();
-    this.ngZone.run(() => {
-      this.router.navigate(['/']); // Redireciona para a rota raiz/starter
-    });
-  }
-
-  /**
-   * Método auxiliar para verificar se o usuário atual tem uma role específica.
-   * Útil para *ngIf em templates.
-   * @param roleToCheck A role a ser verificada.
-   * @returns Observable<boolean> que emite true se o usuário tiver a role, false caso contrário.
-   */
-  hasRole(
-    roleToCheck: 'Administrador' | 'Estoquista' | 'Leitor'
-  ): Observable<boolean> {
-    return this.user$.pipe(
-      map((user) => user?.role === roleToCheck),
-      take(1) // <<< Adicionado take(1) para que o observable complete após a primeira emissão
+  // Método para buscar todos os usuários (para uso do Admin)
+  getUsersForAdminView(): Observable<User[]> {
+    return this.usersCollection.snapshotChanges().pipe(
+      map((actions) =>
+        actions.map((a) => {
+          const data = a.payload.doc.data() as User;
+          const id = a.payload.doc.id;
+          // Converte Firestore Timestamp para Date, se necessário
+          if (data.dataCadastro instanceof firebase.firestore.Timestamp) {
+            data.dataCadastro = data.dataCadastro.toDate();
+          }
+          return { id, ...data } as User;
+        })
+      )
     );
   }
 
-  /**
-   * Método auxiliar para verificar se o usuário atual é um Administrador.
-   * @returns Observable<boolean> que emite true se o usuário for Administrador, false caso contrário.
-   */
-  isAdmin(): Observable<boolean> {
-    return this.hasRole('Administrador');
+  // Método para atualizar a role de um usuário
+  updateUserRole(
+    uid: string,
+    newRole: 'Administrador' | 'Estoquista' | 'Leitor'
+  ): Promise<void> {
+    return this.usersCollection.doc(uid).update({ role: newRole });
   }
 
-  /**
-   * Método auxiliar para verificar se o usuário atual é um Estoquista.
-   * @returns Observable<boolean> que emite true se o usuário for Estoquista, false caso contrário.
-   */
-  isEstoquista(): Observable<boolean> {
-    return this.hasRole('Estoquista');
+  // Método para excluir um usuário (Firestore e Auth)
+  // **Importante**: A exclusão do usuário do Firebase Auth no frontend é geralmente desaconselhada
+  // para segurança e escalabilidade. Em um ambiente de produção, isso seria feito através de
+  // Cloud Functions ou um backend seguro. Este é um placeholder para fins de demonstração.
+  async deleteUser(uid: string): Promise<void> {
+    // 1. Excluir o documento do usuário no Firestore
+    await this.usersCollection.doc(uid).delete();
+    // 2. Tentar excluir o usuário do Firebase Auth (requer permissões de Admin SDK ou Cloud Function)
+    // Este passo pode falhar se não estiver em um ambiente de servidor seguro.
+    // Para simplificar no cliente, não tentaremos a exclusão direta do Auth aqui sem um backend.
+    // console.warn('A exclusão do usuário do Firebase Authentication deve ser feita por um backend seguro (Cloud Functions/Admin SDK) para evitar erros de permissão.');
   }
 
-  /**
-   * Método auxiliar para verificar se o usuário atual é um Leitor.
-   * @returns Observable<boolean> que emite true se o usuário for Leitor, false caso contrário.
-   */
-  isLeitor(): Observable<boolean> {
-    return this.hasRole('Leitor');
+  // Método para verificar se o usuário atual tem uma determinada role
+  canAccess(allowedRoles: string[]): Observable<boolean> {
+    return this.user$.pipe(
+      map((user) => {
+        if (!user) {
+          return false;
+        }
+        return allowedRoles.includes(user.role);
+      })
+    );
   }
 }

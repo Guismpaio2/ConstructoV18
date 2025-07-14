@@ -1,1 +1,91 @@
-<p>produtos works!</p>
+<div class="main-content-container">
+  <div class="page-header">
+    <h1>Lista de Produtos</h1>
+    <button
+      class="btn btn-primary"
+      routerLink="/produtos/cadastro"
+      *ngIf="isAdmin || isEstoquista"
+    >
+      <i class="fas fa-plus"></i> Novo Produto
+    </button>
+  </div>
+
+  <div class="search-filter-bar">
+    <div class="search-input">
+      <i class="fas fa-search search-icon"></i>
+      <input
+        type="text"
+        placeholder="Buscar por nome, lote, tipo, marca..."
+        [(ngModel)]="searchTerm"
+        (keyup.enter)="onSearch()"
+      />
+    </div>
+
+    <select [(ngModel)]="selectedSort" (change)="onSortChange()">
+      <option value="nome_asc">Nome (A-Z)</option>
+      <option value="nome_desc">Nome (Z-A)</option>
+      <option value="lote_asc">Lote (A-Z)</option>
+      <option value="lote_desc">Lote (Z-A)</option>
+      <option value="data_cadastro_asc">
+        Data de Cadastro (Antigo p/ Novo)
+      </option>
+      <option value="data_cadastro_desc">
+        Data de Cadastro (Novo p/ Antigo)
+      </option>
+    </select>
+  </div>
+
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Imagem</th>
+          <th>Nome</th>
+          <th>Lote</th>
+          <th>Tipo</th>
+          <th>Marca</th>
+          <th>Descrição</th>
+          <th>Data Cadastro</th>
+          <th *ngIf="isAdmin || isEstoquista">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let produto of filteredProdutos">
+          <td>
+            <img
+              [src]="produto.imageUrl || 'assets/placeholder-image.png'"
+              alt="Imagem do Produto"
+              class="product-image"
+            />
+          </td>
+          <td>{{ produto.nome }}</td>
+          <td>{{ produto.lote }}</td>
+          <td>{{ produto.tipo }}</td>
+          <td>{{ produto.marca }}</td>
+          <td>{{ produto.descricao || "-" }}</td>
+          <td>
+            {{ produto.dataCadastro.toDate() | date : "dd/MM/yyyy HH:mm" }}
+          </td>
+          <td *ngIf="isAdmin || isEstoquista">
+            <button
+              class="btn btn-sm btn-info"
+              [routerLink]="['/produtos/edicao', produto.id]"
+            >
+              <i class="fas fa-edit"></i>
+            </button>
+            <button
+              class="btn btn-sm btn-danger ml-2"
+              (click)="onDeleteProduto(produto.id!)"
+              *ngIf="isAdmin"
+            >
+              <i class="fas fa-trash"></i>
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="filteredProdutos.length === 0">
+          <td colspan="8" class="text-center">Nenhum produto encontrado.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

@@ -1,0 +1,225 @@
+@import "../../../styles/variables";
+@import "../../../styles/styles";
+
+.main-content-container {
+  padding: $spacing-m;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-l;
+
+  h1 {
+    margin: 0;
+    color: $color-text-dark;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: $spacing-s;
+  }
+}
+
+.search-filter-bar {
+  display: flex;
+  gap: $spacing-s;
+  align-items: center;
+  margin-bottom: $spacing-m;
+  flex-wrap: wrap;
+
+  .search-input {
+    flex-grow: 1;
+    position: relative;
+    min-width: 200px;
+  }
+
+  input[type="text"] {
+    width: 100%;
+    padding-left: $spacing-l;
+    border-color: #ccc;
+    &:focus {
+      border-color: $color-brand-base;
+      box-shadow: 0 0 0 2px rgba($color-brand-base, 0.2);
+    }
+  }
+
+  .search-icon {
+    position: absolute;
+    left: $spacing-xs;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #999;
+  }
+
+  select {
+    padding: $spacing-xs;
+    border-radius: $border-radius-small;
+    border: 1px solid #ccc;
+    background-color: $color-background-card;
+    color: $color-text-dark;
+  }
+}
+
+.table-responsive {
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: $spacing-m;
+  background-color: $color-background-card;
+  box-shadow: $box-shadow-light;
+  border-radius: $border-radius-medium;
+  overflow: hidden;
+
+  th,
+  td {
+    padding: $spacing-s $spacing-m;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+    color: $color-text-dark;
+  }
+
+  th {
+    background-color: $color-primary-light;
+    font-weight: 600;
+    color: $color-text-light;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  tbody tr:hover {
+    background-color: lighten($color-background-card, 2%);
+  }
+
+  .product-info-cell {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+
+    .product-image {
+      width: 40px;
+      height: 40px;
+      object-fit: cover;
+      border-radius: $border-radius-small;
+      border: 1px solid #ddd;
+    }
+  }
+
+  .btn {
+    padding: $spacing-xxs $spacing-xs;
+    font-size: $font-size-small;
+    display: inline-flex;
+    align-items: center;
+    gap: $spacing-xxs;
+  }
+
+  .btn-info {
+    background-color: $color-info;
+    color: $color-text-light;
+    &:hover {
+      background-color: darken($color-info, 10%);
+    }
+  }
+
+  .btn-danger {
+    background-color: $color-alert;
+    color: $color-text-light;
+    &:hover {
+      background-color: darken($color-alert, 10%);
+    }
+  }
+
+  .ml-2 {
+    margin-left: $spacing-xs;
+  }
+
+  .text-center {
+    text-align: center;
+  }
+
+  .expired-icon {
+    color: $color-alert; // Vermelho
+    margin-left: $spacing-xxs;
+    font-size: $font-size-small;
+  }
+
+  .near-expiry-icon {
+    color: $color-warning; // Amarelo
+    margin-left: $spacing-xxs;
+    font-size: $font-size-small;
+  }
+
+  .expired-row {
+    background-color: lighten(
+      $color-alert,
+      40%
+    ); // Fundo vermelho claro para linha vencida
+  }
+
+  .near-expiry-row {
+    background-color: lighten(
+      $color-warning,
+      40%
+    ); // Fundo amarelo claro para linha próxima ao vencimento
+  }
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .main-content-container {
+    padding: $spacing-s;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: $spacing-s;
+
+    h1 {
+      font-size: $font-size-h3;
+    }
+
+    .header-actions {
+      flex-direction: column;
+      width: 100%;
+      .btn {
+        width: 100%;
+        margin-left: 0 !important; // Override ml-2
+        margin-top: $spacing-s;
+      }
+    }
+  }
+
+  .search-filter-bar {
+    flex-direction: column;
+    gap: $spacing-s;
+    align-items: stretch;
+
+    .search-input {
+      min-width: unset;
+      width: 100%;
+    }
+
+    select {
+      width: 100%;
+    }
+  }
+
+  .data-table {
+    font-size: $font-size-xsmall;
+    th,
+    td {
+      padding: $spacing-xs;
+    }
+    .product-image {
+      width: 30px;
+      height: 30px;
+    }
+  }
+}

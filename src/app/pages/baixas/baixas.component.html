@@ -1,0 +1,77 @@
+<div class="main-content-container">
+  <div class="page-header">
+    <h1>Registros de Baixas</h1>
+    <div class="header-actions">
+      <button
+        class="btn btn-primary"
+        routerLink="/baixas/registrar"
+        *ngIf="isAdmin || isEstoquista"
+      >
+        <i class="fas fa-minus-circle"></i> Registrar Nova Baixa
+      </button>
+    </div>
+  </div>
+
+  <div class="search-filter-bar">
+    <div class="search-input">
+      <i class="fas fa-search search-icon"></i>
+      <input
+        type="text"
+        placeholder="Buscar por produto, lote, motivo, usuário..."
+        [(ngModel)]="searchTerm"
+        (keyup.enter)="onSearch()"
+      />
+    </div>
+
+    <select [(ngModel)]="selectedSort" (change)="onSortChange()">
+      <option value="data_baixa_desc">Mais Recentes</option>
+      <option value="data_baixa_asc">Mais Antigos</option>
+      <option value="usuario_asc">Usuário (A-Z)</option>
+      <option value="usuario_desc">Usuário (Z-A)</option>
+    </select>
+  </div>
+
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Produto / Lote</th>
+          <th>Quantidade Baixada</th>
+          <th>Motivo</th>
+          <th>Registrado Por</th>
+          <th>Data da Baixa</th>
+          <th *ngIf="isAdmin">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let baixa of filteredBaixas">
+          <td>
+            <ng-container *ngIf="baixa.nomeProduto && baixa.loteProduto">
+              {{ baixa.nomeProduto }} (Lote: {{ baixa.loteProduto }})
+            </ng-container>
+            <ng-container *ngIf="!baixa.nomeProduto || !baixa.loteProduto">
+              Produto Indisponível (ID: {{ baixa.itemEstoqueId }})
+            </ng-container>
+          </td>
+          <td>{{ baixa.quantidadeBaixada }}</td>
+          <td>{{ baixa.motivo }}</td>
+          <td>{{ baixa.usuarioQueRegistrou }}</td>
+          <td>{{ baixa.dataBaixa.toDate() | date : "dd/MM/yyyy HH:mm" }}</td>
+          <td *ngIf="isAdmin">
+            <button
+              class="btn btn-sm btn-danger"
+              (click)="onDeleteBaixa(baixa.id!)"
+            >
+              <i class="fas fa-trash"></i>
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="filteredBaixas.length === 0">
+          <td colspan="6" class="text-center">
+            Nenhum registro de baixa encontrado.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

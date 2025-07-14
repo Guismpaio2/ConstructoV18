@@ -1,16 +1,18 @@
 import { NgModule } from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser'; // Contém CommonModule
-import { FormsModule, ReactiveFormsModule } from '@angular/forms'; // ReactiveFormsModule para formulários reativos, se for usar
+import { BrowserModule } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations'; // Adicionado
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 
-// Importações do AngularFire (confira o caminho para 'compat')
+// Importações do AngularFire
 import { AngularFireModule } from '@angular/fire/compat';
 import { AngularFireAuthModule } from '@angular/fire/compat/auth';
 import { AngularFirestoreModule } from '@angular/fire/compat/firestore';
+import { AngularFireStorageModule } from '@angular/fire/compat/storage'; // Adicionado para Cloud Storage
 
-// Caminho corrigido para o environment
-import { environment } from './enviroments/enviroment'; // <<< ATENÇÃO: 'environments' (plural) é o padrão
+// Caminho para o environment (você já corrigiu para './enviroments/enviroment')
+import { environment } from './enviroments/enviroment';
 
 // Components de Login
 import { LoginComponent } from './LoginComponents/login/login.component';
@@ -27,9 +29,15 @@ import { EstoqueComponent } from './pages/estoque/estoque.component';
 import { RegistrosBaixasComponent } from './pages/registros-baixas/registros-baixas.component';
 import { UsuariosComponent } from './pages/usuarios/usuarios.component';
 import { PerfilComponent } from './pages/perfil/perfil.component';
+import { CadastroProdutoComponent } from './pages/produtos/cadastro-produto/cadastro-produto.component'; // Confirmado
 
-// Se você tiver um SharedModule para AuthLayoutComponent e DashboardLayoutComponent
-import { SharedModule } from './shared/shared.module'; // Importa o SharedModule
+// SharedModule para layouts e outros componentes/módulos compartilhados
+import { SharedModule } from './shared/shared.module';
+import { EdicaoProdutoComponent } from './pages/produtos/edicao-produto/edicao-produto.component';
+import { CadastroEstoqueComponent } from './pages/estoque/cadastro-estoque/cadastro-estoque.component';
+import { EdicaoEstoqueComponent } from './pages/estoque/edicao-estoque/edicao-estoque.component';
+import { RegistrarBaixaComponent } from './pages/baixas/registrar-baixa/registrar-baixa.component';
+import { BaixasComponent } from './pages/baixas/baixas.component';
 
 @NgModule({
   declarations: [
@@ -46,19 +54,26 @@ import { SharedModule } from './shared/shared.module'; // Importa o SharedModule
     RegistrosBaixasComponent,
     UsuariosComponent,
     PerfilComponent,
-    // AuthLayoutComponent e DashboardLayoutComponent NÃO SÃO declarados aqui
-    // se já estão no SharedModule e SharedModule é importado abaixo.
+    CadastroProdutoComponent,
+    EdicaoProdutoComponent,
+    CadastroEstoqueComponent,
+    EdicaoEstoqueComponent,
+    RegistrarBaixaComponent,
+    BaixasComponent,
   ],
   imports: [
     BrowserModule,
+    BrowserAnimationsModule, // Adicionei para compatibilidade futura com animações
     AppRoutingModule,
     FormsModule,
-    ReactiveFormsModule, // Adicione se for usar formulários reativos
+    ReactiveFormsModule,
     SharedModule, // Importa o SharedModule que deve declarar e exportar os layouts
 
+    // Inicialização do Firebase
     AngularFireModule.initializeApp(environment.firebase),
     AngularFireAuthModule,
     AngularFirestoreModule,
+    AngularFireStorageModule, // Adicionado
   ],
   providers: [],
   bootstrap: [AppComponent],
