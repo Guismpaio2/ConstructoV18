@@ -1,10 +1,10 @@
 // src/app/pages/usuarios/usuarios.component.ts
-import { Component, OnInit, OnDestroy } from '@angular/core'; // Adicionado OnDestroy
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { AuthService } from '../../auth/auth.service';
-import { User, UserRole } from '../../models/user.model';
-import { Observable, Subscription, combineLatest, BehaviorSubject } from 'rxjs'; // Adicionado Subscription, combineLatest, BehaviorSubject
-import { map, startWith } from 'rxjs/operators'; // Adicionado startWith
-import { Timestamp } from '@angular/fire/firestore'; // Importar Timestamp
+import { User, UserRole } from '../../models/user.model'; // Importar UserRole
+import { Observable, Subscription, combineLatest, BehaviorSubject } from 'rxjs';
+import { map, startWith } from 'rxjs/operators';
+import { Timestamp } from '@angular/fire/firestore';
 
 @Component({
   selector: 'app-usuarios',
@@ -12,55 +12,50 @@ import { Timestamp } from '@angular/fire/firestore'; // Importar Timestamp
   styleUrls: ['./usuarios.component.scss'],
 })
 export class UsuariosComponent implements OnInit, OnDestroy {
-  allUsers$!: Observable<User[]>; // Observable para todos os usuários do Firestore
-  filteredUsers: User[] = []; // Array para os usuários filtrados e ordenados
+  allUsers$!: Observable<User[]>;
+  filteredUsers: User[] = [];
   currentUserId: string | null = null;
 
-  // Variáveis para filtros e ordenação, vinculadas ao ngModel no HTML
   searchTerm: string = '';
-  selectedRoleFilter: UserRole | '' = ''; // Pode ser uma role ou string vazia para "Todas as Roles"
-  selectedSort: string = 'nome_asc'; // Valor inicial para ordenação
+  selectedRoleFilter: UserRole | '' = '';
+  selectedSort: string = 'nome_asc';
 
-  private usersSubscription!: Subscription; // Assinatura para gerenciar o stream de usuários
-  private filterTrigger = new BehaviorSubject<void>(undefined); // Gatilho para re-filtrar/ordenar
+  private usersSubscription!: Subscription;
+  private filterTrigger = new BehaviorSubject<void>(undefined);
 
   constructor(private authService: AuthService) {}
 
   async ngOnInit(): Promise<void> {
     this.currentUserId = await this.authService.getCurrentUserUid();
 
-    // Obtém todos os usuários do serviço
     this.allUsers$ = this.authService.getUsersForAdminView();
 
-    // Combina o stream de todos os usuários com o gatilho de filtro/ordenação
-    // Sempre que allUsers$ emitir ou filterTrigger for ativado, a lógica de filtro/ordenação será executada
     this.usersSubscription = combineLatest([
       this.allUsers$,
-      this.filterTrigger.asObservable().pipe(startWith(undefined)), // startWith para acionar o filtro na inicialização
+      this.filterTrigger.asObservable().pipe(startWith(undefined)),
     ])
       .pipe(
         map(([users, _]) => {
-          let tempUsers = [...users]; // Cria uma cópia para não modificar o array original
+          let tempUsers = [...users];
 
-          // 1. Aplicar filtro de busca (searchTerm)
           if (this.searchTerm) {
             const lowerSearchTerm = this.searchTerm.toLowerCase();
             tempUsers = tempUsers.filter(
               (user) =>
                 user.nome.toLowerCase().includes(lowerSearchTerm) ||
-                user.email.toLowerCase().includes(lowerSearchTerm) ||
-                user.employeeCode?.toLowerCase().includes(lowerSearchTerm)
+                (user.email || '').toLowerCase().includes(lowerSearchTerm) || // Corrigido 'user.email' possibly 'null'
+                (user.employeeCode || '')
+                  .toLowerCase()
+                  .includes(lowerSearchTerm)
             );
           }
 
-          // 2. Aplicar filtro de role (selectedRoleFilter)
           if (this.selectedRoleFilter) {
             tempUsers = tempUsers.filter(
               (user) => user.role === this.selectedRoleFilter
             );
           }
 
-          // 3. Aplicar ordenação (selectedSort)
           tempUsers.sort((a, b) => {
             if (this.selectedSort === 'nome_asc') {
               return a.nome.localeCompare(b.nome);
@@ -71,7 +66,7 @@ export class UsuariosComponent implements OnInit, OnDestroy {
             } else if (this.selectedSort === 'role_desc') {
               return b.role.localeCompare(a.role);
             }
-            return 0; // Caso padrão, sem ordenação
+            return 0;
           });
 
           return tempUsers;
@@ -83,32 +78,24 @@ export class UsuariosComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    // Desinscreve-se da subscription para evitar vazamentos de memória
     if (this.usersSubscription) {
       this.usersSubscription.unsubscribe();
     }
   }
 
-  // Método chamado pelo HTML para acionar o filtro e a ordenação
   triggerFilterAndSort(): void {
-    this.filterTrigger.next(); // Emite um valor para re-acionar o combineLatest
+    this.filterTrigger.next();
   }
 
-  // Método chamado quando a role de um usuário é alterada no dropdown
   async onRoleChange(user: User): Promise<void> {
-    // O valor de user.role já foi atualizado pelo ngModel
-    const newRole = user.role;
+    const newRole = user.role; // ngModel já atualiza user.role
     await this.updateUserRole(user, newRole);
   }
 
-  // Método existente, renomeado para ser mais genérico e chamado por onRoleChange
   async updateUserRole(user: User, newRole: UserRole): Promise<void> {
     if (user.uid === this.currentUserId) {
       alert('Você não pode alterar sua própria função.');
-      // Reverte a seleção no dropdown se for o próprio usuário
-      // Isso pode exigir uma busca do usuário original ou um re-patch do formulário.
-      // Por simplicidade, o alerta é suficiente por enquanto.
-      this.triggerFilterAndSort(); // Para forçar a atualização visual caso a role não mude
+      this.triggerFilterAndSort(); // Para reverter a seleção visual no dropdown
       return;
     }
     if (
@@ -119,26 +106,25 @@ export class UsuariosComponent implements OnInit, OnDestroy {
       try {
         await this.authService.updateUserRole(user.uid, newRole);
         alert('Função do usuário atualizada com sucesso!');
-        // Não precisa re-chamar triggerFilterAndSort aqui, pois o allUsers$ já vai emitir
-        // uma nova lista de usuários do Firestore após a atualização.
+        // A atualização no Firestore irá disparar uma nova emissão em allUsers$
+        // que, por sua vez, acionará o combineLatest e o filtro/ordenação,
+        // então não precisamos chamar triggerFilterAndSort aqui.
       } catch (error: any) {
         console.error('Erro ao atualizar função do usuário:', error);
         alert(
           `Erro ao atualizar função: ${error.message || 'Erro desconhecido'}`
         );
-        this.triggerFilterAndSort(); // Para reverter a seleção visual em caso de erro
+        this.triggerFilterAndSort(); // Em caso de erro, reverte a seleção visual
       }
     } else {
       this.triggerFilterAndSort(); // Se o usuário cancelar, reverte a seleção visual
     }
   }
 
-  // Método chamado pelo HTML para confirmar a exclusão
   async onDeleteUser(uid: string, nome: string): Promise<void> {
     await this.confirmDeleteUser(uid, nome);
   }
 
-  // Método existente, renomeado para ser mais genérico e chamado por onDeleteUser
   async confirmDeleteUser(uid: string, nome: string): Promise<void> {
     if (uid === this.currentUserId) {
       alert('Você não pode excluir sua própria conta.');
@@ -152,8 +138,9 @@ export class UsuariosComponent implements OnInit, OnDestroy {
       try {
         await this.authService.deleteUser(uid);
         alert('Usuário excluído com sucesso (apenas do Firestore).');
-        // Não precisa re-chamar triggerFilterAndSort aqui, pois o allUsers$ já vai emitir
-        // uma nova lista de usuários do Firestore após a exclusão.
+        // A exclusão no Firestore irá disparar uma nova emissão em allUsers$
+        // que, por sua vez, acionará o combineLatest e o filtro/ordenação,
+        // então não precisamos chamar triggerFilterAndSort aqui.
       } catch (error: any) {
         console.error('Erro ao excluir usuário:', error);
         alert(
@@ -163,9 +150,8 @@ export class UsuariosComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Método auxiliar para formatar Timestamp
-  formatTimestamp(timestamp: Timestamp | undefined): string {
-    if (timestamp && timestamp.toDate) {
+  formatTimestamp(timestamp: Timestamp | null | undefined): string {
+    if (timestamp instanceof Timestamp && timestamp.toDate) {
       return timestamp.toDate().toLocaleDateString('pt-BR');
     }
     return 'N/A';

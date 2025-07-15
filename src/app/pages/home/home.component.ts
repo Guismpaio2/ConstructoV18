@@ -1,11 +1,11 @@
 // src/app/pages/home/home.component.ts
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { AuthService } from '../../auth/auth.service';
-import { BaixaService } from '../../services/baixa.service';
-import { EstoqueService } from '../../services/estoque.service'; // Importar EstoqueService
+import { BaixaService } from '../../services/baixa.service'; // Mantido por consistência, mesmo que a query seja direta
+import { EstoqueService } from '../../services/estoque.service';
 import { User } from '../../models/user.model';
 import { BaixaEstoque } from '../../models/baixa-estoque.model';
-import { EstoqueItem } from '../../models/item-estoque.model'; // Importar EstoqueItem
+import { EstoqueItem } from '../../models/item-estoque.model';
 import { Observable, Subscription } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
@@ -19,13 +19,13 @@ import { Timestamp } from '@angular/fire/firestore'; // Importar Timestamp
 export class HomeComponent implements OnInit, OnDestroy {
   user$: Observable<User | null | undefined>;
   ultimasBaixas$!: Observable<BaixaEstoque[]>;
-  materiaisEmFalta$!: Observable<EstoqueItem[]>; // Adicionado para materiais em falta
-  private userSubscription!: Subscription; // Mantido, embora não estritamente necessário para user$
+  materiaisEmFalta$!: Observable<EstoqueItem[]>;
+  private userSubscription!: Subscription;
 
   constructor(
     private authService: AuthService,
-    private baixaService: BaixaService, // Mantido, embora não usado diretamente aqui
-    private estoqueService: EstoqueService, // Injetar EstoqueService
+    private baixaService: BaixaService,
+    private estoqueService: EstoqueService,
     private afs: AngularFirestore
   ) {
     this.user$ = this.authService.user$;
@@ -39,38 +39,26 @@ export class HomeComponent implements OnInit, OnDestroy {
       )
       .valueChanges({ idField: 'uid' });
 
-    // Busca materiais em falta (exemplo: quantidade <= 5 ou próximos do vencimento)
-    // Para simplificar, vamos considerar "em falta" itens com quantidade <= 5 para começar.
-    // Você pode ajustar a query 'where' conforme a definição de "em falta" do seu Figma/PDF.
+    // Busca materiais em falta (exemplo: quantidade <= 5).
+    // O critério de "em falta" pode ser ajustado conforme a regra de negócio.
+    // Se precisar de filtros mais complexos ou combinações de campos (ex: quantidade E dataValidade),
+    // pode ser necessário buscar todos e filtrar no Angular, ou criar índices compostos no Firestore.
     this.materiaisEmFalta$ = this.afs
-      .collection<EstoqueItem>(
-        'estoque',
-        (ref) => ref.where('quantidade', '<=', 5).orderBy('quantidade', 'asc') // Exemplo de critério
+      .collection<EstoqueItem>('estoque', (ref) =>
+        ref.where('quantidade', '<=', 5).orderBy('quantidade', 'asc')
       )
       .valueChanges({ idField: 'uid' });
-
-    // Se a definição de "materiais em falta" envolver também a validade,
-    // ou se você precisar de dados combinados de Produto e EstoqueItem para essa lista,
-    // você pode usar o estoqueService.getEstoqueItems() e aplicar filtros em memória.
-    // Exemplo para materiais em falta considerando estoqueService:
-    // this.materiaisEmFalta$ = this.estoqueService.getEstoqueItems().pipe(
-    //   map(items => items.filter(item => item.quantidade <= 5 || (item.dataValidade && item.dataValidade.toDate() < new Date())))
-    // );
-    // Note: Queries complexas com múltiplos 'where' clauses (e.g., quantidade e dataValidade)
-    // podem exigir índices compostos no Firebase. Para evitar isso, filtra-se em memória.
   }
 
   ngOnDestroy(): void {
-    // Para Observables atribuídos diretamente (como user$, ultimasBaixas$, materiaisEmFalta$),
-    // o async pipe no template cuida da inscrição e desinscrição.
-    // Se houvesse subscriptions explícitas (e.g., this.userSubscription = this.user$.subscribe()),
-    // então this.userSubscription.unsubscribe() seria necessário.
+    // As Observables usadas com o `async` pipe no template são gerenciadas automaticamente.
+    // Se houvesse subscriptions manuais, elas seriam desinscritas aqui.
   }
 
   // Método auxiliar para formatar Timestamp
-  formatTimestamp(timestamp: Timestamp | undefined): string {
-    if (timestamp && timestamp.toDate) {
-      // Formata para data e hora local
+  formatTimestamp(timestamp: Timestamp | null | undefined): string {
+    // Corrigido para aceitar null ou undefined
+    if (timestamp instanceof Timestamp && timestamp.toDate) {
       return timestamp.toDate().toLocaleString('pt-BR', {
         year: 'numeric',
         month: '2-digit',

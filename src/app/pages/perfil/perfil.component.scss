@@ -1,127 +1,38 @@
-@import "../../../styles/variables";
-@import "../../../styles/styles";
+// src/app/pages/perfil/perfil.component.scss
+@import "~src/styles/_styles.scss"; // Importe estilos globais para acessar as variáveis.
 
-.main-content-container {
-  padding: $spacing-m;
-  display: flex;
-  flex-direction: column;
-  align-items: center; // Centraliza o conteúdo
-}
-
-.page-header {
-  width: 100%;
-  max-width: 600px; // Largura máxima para o cabeçalho
-  margin-bottom: $spacing-l;
-  text-align: center; // Centraliza o título
-}
-
-.profile-card-container {
-  width: 100%;
-  max-width: 600px; // Largura máxima do card
-  background-color: $color-background-card;
-  border-radius: $border-radius-medium;
-  box-shadow: $box-shadow-medium;
-  padding: $spacing-l;
-  text-align: center; // Centraliza o conteúdo do card
+.profile-card {
+  max-width: 700px;
+  margin: 0 auto; // Centraliza o card na página
 }
 
 .profile-header {
-  margin-bottom: $spacing-l;
-
-  .profile-picture {
-    width: 120px;
-    height: 120px;
-    background-color: lighten($color-secondary-base, 40%);
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 0 auto $spacing-s auto; // Centraliza a imagem e adiciona margem inferior
-
-    i {
-      font-size: 60px; // Tamanho do ícone de usuário
-      color: $color-text-light;
-    }
-  }
+  text-align: center;
+  margin-bottom: 25px;
 
   h2 {
-    margin-bottom: $spacing-xxs;
-    color: $color-text-dark;
+    color: #343a40;
+    font-size: 2rem;
+    margin-bottom: 5px;
   }
 
   .role-display {
-    font-size: $font-size-small;
-    color: #666;
-    background-color: lighten($color-secondary-base, 48%);
-    display: inline-block;
-    padding: $spacing-xxs $spacing-xs;
-    border-radius: $border-radius-small;
+    color: #6c757d;
+    font-size: 1.1rem;
     font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
   }
 }
 
-.profile-details {
-  .form-group {
-    text-align: left; // Alinha os labels e inputs à esquerda
-    input {
-      background-color: lighten($color-secondary-base, 48%);
-      &:disabled {
-        background-color: lighten($color-secondary-base, 50%);
-        cursor: not-allowed;
-        opacity: 0.8;
-      }
-    }
-  }
-
-  .profile-actions {
-    margin-top: $spacing-l;
-    display: flex;
-    justify-content: center;
-    gap: $spacing-s;
-
-    .btn {
-      min-width: 150px; // Garante largura mínima para os botões
-      display: inline-flex; // Para ícone e texto
-      align-items: center;
-      justify-content: center;
-    }
-  }
-
-  .info-message {
-    margin-top: $spacing-s;
-    font-size: $font-size-small;
-    font-weight: 500;
-  }
+hr {
+  border: 0;
+  border-top: 1px solid #e9ecef;
+  margin: 20px 0;
 }
 
-/* Responsividade */
-@media (max-width: 768px) {
-  .main-content-container {
-    padding: $spacing-s;
-  }
-
-  .profile-card-container {
-    padding: $spacing-m;
-  }
-
-  .profile-header {
-    .profile-picture {
-      width: 100px;
-      height: 100px;
-      i {
-        font-size: 50px;
-      }
-    }
-    h2 {
-      font-size: $font-size-h3;
-    }
-  }
-
-  .profile-actions {
-    flex-direction: column; // Botões em coluna
-    gap: $spacing-xs;
-    .btn {
-      width: 100%; // Ocupa a largura total
-    }
-  }
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px; // Espaçamento entre os botões
 }

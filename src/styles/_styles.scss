@@ -1,7 +1,6 @@
 /* src/styles/_styles.scss */
 
-@import "variables"; // Importa as variáveis de cores, espaçamento, etc.
-
+@import 'variables';
 /* Estilos de Tipografia */
 body {
   font-family: "Roboto", sans-serif; // Garanta que Roboto esteja linkado no index.html
@@ -110,10 +109,10 @@ p {
     font-weight: bold;
 
     &:hover {
-      background-color: $color-brand-lighter; // Hover
+      background-color: $color-brand-light; // Hover
     }
     &:active {
-      background-color: $color-brand-darker; // Active
+      background-color: $color-brand-dark; // Active
     }
     &:disabled {
       background-color: lighten($color-brand-base, 30%);
@@ -331,7 +330,7 @@ p {
             font-size: $font-size-xsmall;
 
             &:hover {
-              background-color: $color-brand-lighter;
+              background-color: $color-brand-light;
             }
           }
 

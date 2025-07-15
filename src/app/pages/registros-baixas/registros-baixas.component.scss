@@ -1,111 +1,107 @@
-@import "../../../styles/variables";
-@import "../../../styles/styles";
-
-.main-content-container {
-  padding: $spacing-m;
-}
+// src/app/pages/registros-baixas/registros-baixas.component.scss
+@import "~src/styles/_styles.scss"; // Importe estilos globais para acessar as variáveis.
 
 .page-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: $spacing-l;
-
+  margin-bottom: 25px;
   h1 {
-    margin: 0;
-    color: $color-text-dark;
+    color: #343a40;
+    font-size: 2.2rem;
+    font-weight: 600;
   }
 }
 
 .search-filter-bar {
   display: flex;
-  gap: $spacing-s;
+  gap: 15px;
+  margin-bottom: 25px;
   align-items: center;
-  margin-bottom: $spacing-m;
-  flex-wrap: wrap; // Permite quebrar linha em telas pequenas
 
   .search-input {
-    flex-grow: 1;
     position: relative;
-    min-width: 250px; // Aumentado para melhor UX
-  }
+    flex-grow: 1;
 
-  input[type="text"] {
-    width: 100%;
-    padding-left: $spacing-l;
-    border-color: #ccc;
-    &:focus {
-      border-color: $color-brand-base;
-      box-shadow: 0 0 0 2px rgba($color-brand-base, 0.2);
+    input {
+      width: 100%;
+      padding: 10px 10px 10px 40px; /* Left padding for icon */
+      border: 1px solid #ced4da;
+      border-radius: 5px;
+      font-size: 1rem;
+      color: #495057;
+      &:focus {
+        border-color: #80bdff;
+        outline: 0;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+      }
     }
-  }
 
-  .search-icon {
-    position: absolute;
-    left: $spacing-xs;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #999;
-  }
-
-  .filters {
-    display: flex;
-    gap: $spacing-s;
-    align-items: center;
-  }
-
-  .filter-button {
-    // Estilo para o botão "Filtros"
-    background-color: $color-secondary-base; // Ou uma cor que combine com a paleta
-    color: $color-text-light;
-    padding: $spacing-xs $spacing-m;
-    border-radius: $border-radius-small;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: $spacing-xxs;
-
-    &:hover {
-      background-color: darken($color-secondary-base, 10%);
+    .search-icon {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #6c757d;
     }
   }
 
   select {
-    padding: $spacing-xs;
-    border-radius: $border-radius-small;
-    border: 1px solid #ccc;
-    background-color: $color-background-card;
-    color: $color-text-dark;
+    padding: 10px 15px;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    background-color: #fff;
+    color: #495057;
     cursor: pointer;
+    &:focus {
+      border-color: #80bdff;
+      outline: 0;
+      box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
   }
 }
 
 .table-responsive {
-  overflow-x: auto; // Permite scroll horizontal em telas pequenas
+  overflow-x: auto;
+  margin-bottom: 20px;
 }
 
-.data-table {
+.baixas-table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: $spacing-m;
-  background-color: $color-background-card;
-  box-shadow: $box-shadow-light;
-  border-radius: $border-radius-medium;
-  overflow: hidden; // Garante que o border-radius seja aplicado
+  background-color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+  overflow: hidden; // Ensures rounded corners apply to table content
 
   th,
   td {
-    padding: $spacing-s $spacing-m;
+    padding: 12px 15px;
     text-align: left;
-    border-bottom: 1px solid #eee;
-    color: $color-text-dark;
+    border-bottom: 1px solid #e9ecef;
   }
 
   th {
-    background-color: $color-primary-light; // Usando a nova variável
+    background-color: #f2f2f2;
+    color: #495057;
     font-weight: 600;
-    color: $color-text-light;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+  }
+
+  td {
+    color: #6c757d;
+    font-size: 0.95rem;
+
+    .btn-action {
+      margin-right: 8px;
+      padding: 6px 10px;
+      font-size: 0.8rem;
+
+      i {
+        margin-right: 5px;
+      }
+    }
   }
 
   tr:last-child td {
@@ -113,75 +109,34 @@
   }
 
   tbody tr:hover {
-    background-color: lighten($color-background-card, 2%);
-  }
-
-  .btn {
-    padding: $spacing-xxs $spacing-xs;
-    font-size: $font-size-small;
-    display: inline-flex;
-    align-items: center;
-    gap: $spacing-xxs;
-  }
-
-  .btn-danger {
-    background-color: $color-alert;
-    color: $color-text-light;
-    &:hover {
-      background-color: darken($color-alert, 10%);
-    }
-  }
-
-  .text-center {
-    text-align: center;
+    background-color: #f8f9fa;
   }
 }
 
-/* Responsividade */
-@media (max-width: 768px) {
-  .main-content-container {
-    padding: $spacing-s;
-  }
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
 
-  .page-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: $spacing-s;
+  button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    margin: 0 5px;
 
-    h1 {
-      font-size: $font-size-h3;
-    }
-
-    .btn {
-      width: 100%; // Botão "Registrar Baixa" ocupa a largura total
-    }
-  }
-
-  .search-filter-bar {
-    flex-direction: column;
-    gap: $spacing-s;
-    align-items: stretch;
-
-    .search-input {
-      min-width: unset;
-      width: 100%;
-    }
-
-    .filters {
-      flex-direction: column; // Botão de filtro e select um abaixo do outro
-      width: 100%;
-      .filter-button,
-      select {
-        width: 100%;
-      }
+    &:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
     }
   }
 
-  .data-table {
-    font-size: $font-size-xsmall;
-    th,
-    td {
-      padding: $spacing-xs;
-    }
+  span {
+    font-size: 1rem;
+    color: #343a40;
   }
 }

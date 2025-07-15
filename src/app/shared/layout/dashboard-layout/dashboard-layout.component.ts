@@ -1,7 +1,9 @@
+// src/app/shared/layout/dashboard-layout/dashboard-layout.component.ts
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { AuthService } from '../../../auth/auth.service';
-import { User } from '../../../models/user.model';
 import { Observable, Subscription } from 'rxjs';
+import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
+import { filter, map } from 'rxjs/operators';
+import { AuthService } from '../../../auth/auth.service';
 
 @Component({
   selector: 'app-dashboard-layout',
@@ -9,24 +11,48 @@ import { Observable, Subscription } from 'rxjs';
   styleUrls: ['./dashboard-layout.component.scss'],
 })
 export class DashboardLayoutComponent implements OnInit, OnDestroy {
-  user!: Observable<User | null | undefined>; // Tipagem corrigida
-  private userSubscription!: Subscription; // Se você for usar .subscribe()
+  isAdmin$!: Observable<boolean>;
+  pageTitle: string = 'Dashboard'; // Valor padrão
+  private routerSubscription!: Subscription;
 
-  constructor(private authService: AuthService) {}
+  constructor(
+    public authService: AuthService,
+    private router: Router,
+    private activatedRoute: ActivatedRoute
+  ) {}
 
   ngOnInit(): void {
-    this.user = this.authService.user$; // Atribuição direta do Observable
+    this.isAdmin$ = this.authService.isAdmin();
+
+    this.routerSubscription = this.router.events
+      .pipe(
+        filter((event) => event instanceof NavigationEnd),
+        map(() => {
+          let child = this.activatedRoute.firstChild;
+          let title = 'Dashboard'; // Default title
+
+          // Loop through the route tree to find the 'title' data
+          while (child) {
+            if (child.snapshot.data && child.snapshot.data['title']) {
+              title = child.snapshot.data['title'];
+            }
+            child = child.firstChild;
+          }
+          return title;
+        })
+      )
+      .subscribe((title: string) => {
+        this.pageTitle = title;
+      });
   }
 
   ngOnDestroy(): void {
-    // Se você não usa .subscribe() explicitamente aqui, não precisa de unsubscribe.
-    // Se usar, descomente:
-    // if (this.userSubscription) {
-    //   this.userSubscription.unsubscribe();
-    // }
+    if (this.routerSubscription) {
+      this.routerSubscription.unsubscribe();
+    }
   }
 
-  async logout(): Promise<void> {
-    await this.authService.signOut();
+  onLogout(): void {
+    this.authService.signOut();
   }
 }

@@ -3,12 +3,12 @@
     <h1>Editar Item de Estoque</h1>
   </div>
 
-  <div *ngIf="estoqueItem" class="form-container mt-4">
+  <div *ngIf="estoqueItemId" class="form-container mt-4">
     <div class="form-card mb-4">
       <h2>Detalhes do Produto Associado</h2>
       <div *ngIf="associatedProduto">
         <p><strong>Nome do Produto:</strong> {{ associatedProduto.nome }}</p>
-        <p><strong>Lote do Item de Estoque:</strong> {{ estoqueItem.lote }}</p>
+        <p><strong>Lote do Item de Estoque:</strong> {{ associatedProduto.lote }}</p>
 
         <p>
           <strong>Descrição:</strong> {{ associatedProduto.descricao || "N/A" }}
@@ -124,14 +124,14 @@
         >
           <i class="fas fa-save"></i> Atualizar Estoque
         </button>
-        <button type="button" class="btn secondary ms-2" (click)="goBack()">
+        <button type="button" class="btn secondary ms-2" (click)="navegarPara('/estoque')">
           <i class="fas fa-arrow-left"></i> Cancelar
         </button>
       </div>
     </form>
   </div>
 
-  <div *ngIf="!estoqueItem" class="alert alert-warning mt-3">
+  <div *ngIf="!estoqueItemId" class="alert alert-warning mt-3">
     Item de estoque não encontrado ou carregando...
   </div>
 </div>

@@ -1,163 +1,151 @@
-@import "src/styles/_variables.scss";
-@import "src/styles/_styles.scss";
-
-.main-content-container {
-  padding: $spacing-m;
-}
+// src/app/pages/usuarios/usuarios.component.scss
+@import "~src/styles/_styles.scss"; // Importe estilos globais para acessar as variáveis.
 
 .page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: $spacing-l;
-
+  margin-bottom: 25px;
   h1 {
-    margin: 0;
+    color: #343a40;
+    font-size: 2.2rem;
+    font-weight: 600;
   }
 }
 
 .search-filter-bar {
   display: flex;
-  gap: $spacing-s;
+  flex-wrap: wrap; // Permite que os itens quebrem a linha em telas menores
+  gap: 15px;
+  margin-bottom: 30px;
   align-items: center;
-  margin-bottom: $spacing-m;
-  flex-wrap: wrap;
 
   .search-input {
-    flex-grow: 1;
     position: relative;
-    min-width: 200px;
-  }
+    flex-grow: 1; // Permite que o input de busca ocupe o espaço disponível
+    min-width: 250px; // Largura mínima para o campo de busca
 
-  input[type="text"] {
-    width: 100%;
-    padding-left: $spacing-l;
-    border-color: #ccc;
-    &:focus {
-      border-color: $color-brand-base;
-      box-shadow: 0 0 0 2px rgba($color-brand-base, 0.2);
+    input {
+      width: 100%;
+      padding: 10px 10px 10px 40px; /* Left padding for icon */
+      border: 1px solid #ced4da;
+      border-radius: 5px;
+      font-size: 1rem;
+      color: #495057;
+      &:focus {
+        border-color: #80bdff;
+        outline: 0;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+      }
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #6c757d;
     }
   }
 
-  .search-icon {
-    position: absolute;
-    left: $spacing-xs;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #999;
-  }
-
   select {
-    padding: $spacing-xs;
-    border-radius: $border-radius-small;
-    border: 1px solid #ccc;
-    background-color: $color-background-card;
-    color: $color-text-dark;
+    padding: 10px 15px;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    background-color: #fff;
+    color: #495057;
+    cursor: pointer;
+    &:focus {
+      border-color: #80bdff;
+      outline: 0;
+      box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
   }
 }
 
 .users-grid {
   display: grid;
-  grid-template-columns: repeat(
-    auto-fill,
-    minmax(250px, 1fr)
-  ); // Cards responsivos
-  gap: $spacing-l; // Espaçamento entre os cards
-  justify-content: center; // Centraliza os cards quando não preenchem a linha
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 25px;
+}
 
-  .user-card {
-    // Estilos já definidos em _styles.scss, mas repeti aqui para clareza no arquivo
-    background-color: $color-background-card;
-    border-radius: $border-radius-medium;
-    box-shadow: $box-shadow-light;
-    padding: $spacing-s;
+.user-card {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  padding: 25px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transition: transform 0.2s ease-in-out;
+
+  &:hover {
+    transform: translateY(-5px);
+  }
+
+  .profile-circle {
+    width: 80px;
+    height: 80px;
+    background-color: #e9ecef;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 15px;
+    .fas.fa-user {
+      font-size: 3rem;
+      color: #6c757d;
+    }
+  }
+
+  h4 {
+    color: #343a40;
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+  }
+
+  .user-info-detail {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    text-align: center;
-    // width: 250px; // Removido largura fixa para grid funcionar
-    flex-shrink: 0;
+    width: 100%;
+    margin-bottom: 10px; // Espaçamento entre os detalhes
+    text-align: left;
 
-    .profile-circle {
-      width: 80px;
-      height: 80px;
-      background-color: $color-brand-base;
-      border-radius: 50%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin-bottom: $spacing-s;
-
-      i {
-        font-size: 40px; // Tamanho do ícone de usuário
-        color: $color-text-light;
-      }
+    label {
+      font-weight: 500;
+      color: #495057;
+      font-size: 0.9rem;
+      margin-bottom: 5px;
     }
 
-    h4 {
-      margin-bottom: $spacing-s;
-      color: $color-text-dark;
-    }
-    .user-info-detail {
+    span,
+    select {
+      color: #6c757d;
+      font-size: 1rem;
+      padding: 8px 12px;
+      border: 1px solid #e9ecef;
+      border-radius: 4px;
+      background-color: #f8f9fa;
       width: 100%;
-      text-align: left;
-      margin-bottom: $spacing-xs;
-      div {
-        // Para os detalhes como Email, Código background-color: lighten($color-secondary-base, 48%); padding: $spacing-xxs $spacing-xs; border-radius: $border-radius-small; font-size: $font-size-small; display: flex; justify-content: space-between; align-items: center; margin-bottom: $spacing-xxs; // Espaçamento entre os campos dentro do card
-
-        label {
-          font-weight: 600;
-          color: $color-text-dark;
-        }
-        span {
-          color: $color-text-dark;
-        }
-      }
-
-      select {
-        width: 100%;
-        margin-top: $spacing-xxs;
-        padding: $spacing-xxs $spacing-xs;
-        border: 1px solid #ccc;
-        border-radius: $border-radius-small;
-        background-color: $color-background-card;
-        color: $color-text-dark;
-      }
+      box-sizing: border-box; // Inclui padding e border na largura
     }
 
-    .btn-outline-danger {
-      padding: $spacing-xxs $spacing-xs;
-      font-size: $font-size-xsmall;
-      display: inline-flex;
-      align-items: center;
-      gap: $spacing-xx;
+    select {
+      cursor: pointer;
+      background-color: #fff; // Override para select ficar branco
+      &:disabled {
+        background-color: #e9ecef;
+        cursor: not-allowed;
+      }
     }
+  }
+
+  .btn-sm {
+    padding: 8px 15px;
+    font-size: 0.9rem;
+    border-radius: 4px;
   }
 }
 
-/* Responsividade */
-@media (max-width: 768px) {
-  .main-content-container {
-    padding: $spacing-s;
-  }
-  .page-header {
-    h1 {
-      font-size: $font-size-h3;
-    }
-  }
-  .search-filter-bar {
-    flex-direction: column;
-    gap: $spacing-s;
-    align-items: stretch;
-    .search-input {
-      min-width: unset;
-      width: 100%;
-    }
-    select {
-      width: 100%;
-    }
-  }
-  .users-grid {
-    grid-template-columns: 1fr; // Uma coluna em telas pequenas gap: $spacing-m; }
-  }
+.alert-info {
+  margin-top: 20px;
+  text-align: center;
 }

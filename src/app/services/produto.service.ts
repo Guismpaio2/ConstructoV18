@@ -20,11 +20,18 @@ export class ProdutoService {
     this.produtosCollection = this.afs.collection<Produto>('produtos');
   }
 
-  createId(): string {
-    return this.afs.createId();
-  }
-
-  async addProduto(produto: Omit<Produto, 'uid'>): Promise<void> {
+  // Omitindo todos os campos de auditoria e uid do parâmetro de entrada,
+  // pois o serviço irá adicioná-los.
+  async addProduto(
+    produto: Omit<
+      Produto,
+      | 'uid'
+      | 'dataCadastro'
+      | 'dataUltimaEdicao'
+      | 'usuarioUltimaEdicaoUid'
+      | 'usuarioUltimaEdicaoNome'
+    >
+  ): Promise<void> {
     const uid = this.afs.createId();
     const currentUserUid = await this.authService.getCurrentUserUid();
     const currentUserDisplayName =
@@ -34,7 +41,7 @@ export class ProdutoService {
       ...produto,
       uid: uid,
       dataCadastro: Timestamp.now(),
-      dataUltimaEdicao: Timestamp.now(), // <--- MUDANÇA AQUI: de dataUltimaAtualizacao para dataUltimaEdicao
+      dataUltimaEdicao: Timestamp.now(),
       usuarioUltimaEdicaoUid: currentUserUid || 'unknown',
       usuarioUltimaEdicaoNome: currentUserDisplayName || 'Desconhecido',
     };
@@ -56,21 +63,21 @@ export class ProdutoService {
       .pipe(take(1));
   }
 
+  // Recebe Partial<Produto> para permitir atualização parcial
   async updateProduto(
-    uid: string, // Adicionado uid como primeiro parâmetro
-    updatedFields: Partial<Produto> // Mudado para Partial<Produto>
+    uid: string,
+    updatedFields: Partial<Produto>
   ): Promise<void> {
     const currentUserUid = await this.authService.getCurrentUserUid();
     const currentUserDisplayName =
       await this.authService.getCurrentUserDisplayName();
 
     const produtoAtualizado: Partial<Produto> = {
-      ...updatedFields, // Usa os campos passados para a atualização
-      dataUltimaEdicao: Timestamp.now(), // <--- MUDANÇA AQUI: de dataUltimaAtualizacao para dataUltimaEdicao
+      ...updatedFields,
+      dataUltimaEdicao: Timestamp.now(),
       usuarioUltimaEdicaoUid: currentUserUid || 'unknown',
       usuarioUltimaEdicaoNome: currentUserDisplayName || 'Desconhecido',
     };
-    // Atualiza apenas os campos fornecidos, incluindo os campos de auditoria
     return this.produtosCollection.doc(uid).update(produtoAtualizado);
   }
 

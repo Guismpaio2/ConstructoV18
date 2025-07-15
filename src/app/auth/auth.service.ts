@@ -16,6 +16,7 @@ import { Timestamp } from '@angular/fire/firestore';
 })
 export class AuthService {
   user$: Observable<User | null | undefined>;
+  firestore: any;
 
   constructor(
     private afAuth: AngularFireAuth,
@@ -122,6 +123,15 @@ export class AuthService {
   }
 
   // --- Novos métodos para corrigir os erros ---
+
+  // async updateUserData(userUid: string, data: Partial<User>): Promise<void> {
+  //   return this.firestore.collection('users').doc(userUid).update(data);
+  // }
+
+  async updateUserData(uid: string, data: Partial<User>): Promise<void> {
+    // Assume que você tem uma coleção 'users' no Firestore
+    return this.firestore.collection('users').doc(uid).update(data);
+  }
 
   hasRole(requiredRoles: UserRole[]): Observable<boolean> {
     return this.user$.pipe(

@@ -10,9 +10,9 @@ export interface Produto {
   unidadeMedida: string; // Ex: "kg", "metros", "unidade"
   imageUrl?: string; // Imagem do produto (opcional, se for usar Firebase Storage)
   dataCadastro: Timestamp;
-  dataUltimaEdicao?: Timestamp; // <--- JÁ ESTÁ AQUI COMO dataUltimaEdicao
-  usuarioUltimaEdicaoUid?: string; // UID do usuário que editou por último
-  usuarioUltimaEdicaoNome?: string; // Nome do usuário que editou por último (para facilitar a exibição)
-  categoria?: string; // Adicionado para corrigir o erro
-  sku?: string; // Adicionado para corrigir o erro
+  dataUltimaEdicao?: Timestamp; // Nome padronizado
+  usuarioUltimaEdicaoUid?: string;
+  usuarioUltimaEdicaoNome?: string;
+  categoria?: string;
+  sku?: string;
 }

@@ -1,211 +1,150 @@
-@import "../../../../styles/variables";
-@import "../../../../styles/styles"; // Importa os estilos globais
+// src/app/shared/layout/dashboard-layout/dashboard-layout.component.scss
+@import "~src/styles/_styles.scss"; // Importe estilos globais para acessar as variáveis.
 
-.dashboard-layout-container {
+.dashboard-container {
   display: flex;
   min-height: 100vh;
-  background-color: $color-background; // Fundo geral do dashboard
+  background-color: #f8f9fa;
 }
 
 .sidebar {
-  width: 250px; // Largura fixa da sidebar
-  background-color: $color-secondary-base; // Azul escuro
-  color: $color-text-light;
+  width: 250px;
+  background-color: #343a40; // Cor da barra lateral
+  color: #fff;
+  padding: 20px;
+  box-shadow: 2px 0 6px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
-  padding: $spacing-m $spacing-s;
-  box-shadow: $box-shadow-medium; // Sombra para destacar a sidebar
-  position: sticky; // Mantém a sidebar visível ao rolar
-  top: 0;
-  height: 100vh; // Ocupa a altura total da viewport
+  position: fixed; // Fixa a barra lateral
+  height: 100%;
+  overflow-y: auto; // Rolagem se o conteúdo for muito longo
 
-  .sidebar-header {
+  .logo {
     text-align: center;
-    margin-bottom: $spacing-l;
-
-    .sidebar-logo {
-      width: 100px; // Ajuste o tamanho da sua logo
+    margin-bottom: 30px;
+    img {
+      max-width: 150px;
       height: auto;
     }
   }
 
-  .sidebar-nav {
-    flex-grow: 1; // Permite que a navegação ocupe o espaço disponível
+  .nav-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex-grow: 1; // Faz a lista de navegação ocupar o espaço restante
 
-    ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
+    li {
+      margin-bottom: 10px;
 
-      li {
-        margin-bottom: $spacing-xs;
+      a {
+        display: flex;
+        align-items: center;
+        padding: 12px 15px;
+        color: rgba(255, 255, 255, 0.8);
+        text-decoration: none;
+        border-radius: 5px;
+        transition: background-color 0.2s ease, color 0.2s ease;
 
-        a {
-          display: flex;
-          align-items: center;
-          gap: $spacing-s; // Espaçamento entre ícone e texto
-          padding: $spacing-xs $spacing-s;
-          color: $color-text-light;
-          border-radius: $border-radius-small;
-          transition: background-color $transition-speed,
-            color $transition-speed;
+        i {
+          margin-right: 12px;
+          font-size: 1.2rem;
+        }
 
-          .nav-icon {
-            width: 24px; // Tamanho do ícone
-            height: 24px;
-            // Adaptação para SVGs: Se seus ícones são SVGs, você pode querer mudar a cor
-            // filter: invert(100%); // Se o SVG for preto e você quiser branco
-            fill: $color-text-light; // Se for SVG, use fill para mudar a cor
-          }
+        &:hover {
+          background-color: rgba(255, 255, 255, 0.1);
+          color: #fff;
+        }
 
-          .text {
-            font-size: $font-size-base;
-            font-weight: 500;
-          }
-
-          &:hover {
-            background-color: $color-secondary-lighter; // Hover da sidebar
-          }
-
-          &.active {
-            background-color: $color-brand-base; // Cor de destaque para o link ativo
-            color: $color-background-card; // Texto branco no link ativo
-            .nav-icon {
-              // filter: invert(0%) brightness(100); // Se o SVG for branco e você quiser manter
-              fill: $color-background-card; // Se for SVG, muda a cor do ícone
-            }
-          }
+        &.active-link {
+          background-color: $color-secondary-base; // Usa a variável
+          color: #fff;
+          font-weight: 500;
         }
       }
     }
   }
 
   .sidebar-footer {
-    padding-top: $spacing-m;
-    border-top: 1px solid lighten($color-secondary-base, 10%); // Separador
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
     text-align: center;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.6);
 
-    .logout-btn {
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: $spacing-xs;
-      padding: $spacing-s;
-      font-weight: bold;
-      // Já usa estilos de .btn.secondary, mas podemos sobrescrever um pouco
+    button {
       background-color: transparent;
-      color: $color-text-light;
-      border: 1px solid $color-text-light;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: #fff;
+      padding: 8px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.2s ease, border-color 0.2s ease;
 
       &:hover {
-        background-color: $color-secondary-lighter;
-        border-color: $color-secondary-lighter;
-      }
-
-      .nav-icon {
-        width: 20px;
-        height: 20px;
-        fill: $color-text-light;
+        background-color: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.5);
       }
     }
   }
 }
 
 .main-content {
+  margin-left: 250px; // Offset para a sidebar fixa
   flex-grow: 1;
-  display: flex;
-  flex-direction: column;
+  padding: 20px; // Padding geral do conteúdo
 }
 
-.main-header {
-  background-color: $color-background-card; // Fundo do cabeçalho
-  padding: $spacing-s $spacing-l;
+.top-bar {
+  background-color: #fff;
+  padding: 15px 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  box-shadow: $box-shadow-light; // Sombra para o cabeçalho
-  min-height: 80px; // Altura mínima do cabeçalho
-
-  .header-logo-icon {
-    width: 40px; // Tamanho do ícone da logo no cabeçalho
-    height: auto;
-    margin-right: $spacing-s;
-  }
+  align-items: center;
+  margin-bottom: 25px; // Espaçamento entre a top-bar e o conteúdo abaixo
 
   .page-title {
-    font-size: $font-size-h2;
+    color: #343a40;
+    font-size: 1.8rem;
+    margin: 0;
     font-weight: 600;
-    color: $color-text-dark;
-    flex-grow: 1; // Permite que o título ocupe o espaço
   }
 
   .user-info {
-    font-size: $font-size-base;
-    color: $color-text-dark;
-    font-weight: 500;
-  }
-}
+    display: flex;
+    align-items: center;
+    gap: 15px;
 
-.content-area {
-  padding: $spacing-l; // Espaçamento interno para o conteúdo principal
-  flex-grow: 1;
-  overflow-y: auto; // Adiciona rolagem se o conteúdo for muito longo
-}
-
-/* Estilos Responsivos */
-@media (max-width: 992px) {
-  .sidebar {
-    width: 80px; // Sidebar mais estreita em telas menores
-    padding: $spacing-m $spacing-xxs; // Menos padding
-
-    .sidebar-header {
-      .sidebar-logo {
-        width: 60px; // Logo menor
-      }
+    .username {
+      font-weight: 500;
+      color: #343a40;
     }
 
-    .text {
-      display: none; // Oculta o texto para mostrar apenas ícones
+    .profile-picture {
+      width: 40px;
+      height: 40px;
+      background-color: #e9ecef;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #6c757d;
+      font-size: 1.2rem;
+      font-weight: bold;
     }
 
     .logout-btn {
-      span.text {
-        // Oculta o texto do botão Sair também
-        display: none;
+      background-color: transparent;
+      border: none;
+      color: #dc3545; // Cor para o botão de logout
+      cursor: pointer;
+      font-size: 1rem;
+      transition: color 0.2s ease;
+
+      &:hover {
+        color: darken(#dc3545, 10%);
       }
     }
-
-    // Ajusta o alinhamento dos ícones no centro da sidebar estreita
-    .sidebar-nav ul li a,
-    .sidebar-footer .logout-btn {
-      justify-content: center;
-    }
-  }
-
-  .main-header {
-    flex-wrap: wrap; // Permite que os itens quebrem linha
-    justify-content: center; // Centraliza itens no cabeçalho em telas menores
-
-    .header-logo-icon {
-      margin-bottom: $spacing-xs; // Espaçamento abaixo do ícone
-    }
-
-    .page-title,
-    .user-info {
-      width: 100%; // Ocupam a largura total
-      text-align: center;
-    }
-  }
-
-  .content-area {
-    padding: $spacing-s; // Reduz o padding em telas menores
-  }
-}
-
-// Estilos para hover na sidebar quando o texto está oculto
-@media (min-width: 993px) {
-  .sidebar-nav ul li a:hover {
-    background-color: $color-secondary-lighter;
   }
 }

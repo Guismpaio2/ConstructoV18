@@ -1,50 +1,138 @@
+// src/app/pages/estoque/estoque.component.ts
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { EstoqueService } from '../../services/estoque.service';
-import { Observable, Subscription } from 'rxjs';
-import { Router } from '@angular/router';
-import { take } from 'rxjs/operators';
+import { ProdutoService } from '../../services/produto.service';
 import { AuthService } from '../../auth/auth.service';
 import { EstoqueItem } from '../../models/item-estoque.model';
-import { Timestamp } from '@angular/fire/firestore'; // Importar Timestamp
+import { Produto } from '../../models/produto.model';
+import { Observable, Subscription, combineLatest, BehaviorSubject } from 'rxjs';
+import { map, startWith } from 'rxjs/operators';
+import { Timestamp } from '@angular/fire/firestore';
+import { UserRole } from '../../models/user.model'; // Importar UserRole
 
 @Component({
   selector: 'app-estoque',
   templateUrl: './estoque.component.html',
-  styleUrls: ['./estoque.component.scss'], // Corrigido para .scss
+  styleUrls: ['./estoque.component.scss'],
 })
 export class EstoqueComponent implements OnInit, OnDestroy {
-  allEstoqueItems$: Observable<EstoqueItem[]>;
-  filteredEstoqueItems: EstoqueItem[] = [];
-  private estoqueSubscription!: Subscription;
+  allEstoqueItems$!: Observable<EstoqueItem[]>;
+  filteredEstoque: EstoqueItem[] = [];
+  produtos: Produto[] = []; // Para mapear produtoUid para nome
 
   searchTerm: string = '';
-  selectedProductFilter: string = '';
+  selectedTypeFilter: string = '';
   selectedSort: string = 'nomeProduto_asc';
 
-  canAddEditDeleteRegisterBaixa: boolean = false;
+  isAdmin$!: Observable<boolean>;
+  isEstoquista$!: Observable<boolean>; // Para verificar a role de Estoquista
 
-  productNamesForFilter: string[] = [];
+  private estoqueSubscription!: Subscription;
+  private filterTrigger = new BehaviorSubject<void>(undefined);
 
   constructor(
     private estoqueService: EstoqueService,
-    private router: Router,
+    private produtoService: ProdutoService,
     private authService: AuthService
-  ) {
-    this.allEstoqueItems$ = this.estoqueService.getEstoqueItems();
-  }
+  ) {}
 
   ngOnInit(): void {
-    this.authService
-      .hasRole('estoquista') // Assumindo que 'estoquista' é a role para permissões completas
-      .pipe(take(1))
-      .subscribe((hasEstoquistaRole) => {
-        this.canAddEditDeleteRegisterBaixa = hasEstoquistaRole;
+    this.isAdmin$ = this.authService.isAdmin();
+    // Usando o método isEstoquista() do AuthService que já verifica Admin e Estoquista
+    this.isEstoquista$ = this.authService.isEstoquista();
+
+    // Combina os produtos (para obter nomes) e os itens de estoque
+    combineLatest([
+      this.produtoService.getProdutos(),
+      this.estoqueService.getEstoqueItems(),
+    ])
+      .pipe(
+        map(([produtos, estoqueItems]) => {
+          this.produtos = produtos; // Armazena produtos para uso futuro
+          return estoqueItems.map((item) => {
+            const produto = produtos.find((p) => p.uid === item.produtoUid);
+            return {
+              ...item,
+              nomeProduto: produto?.nome || 'Produto Desconhecido',
+              unidadeMedida: produto?.unidadeMedida || 'N/A',
+              tipoProduto: produto?.tipo || 'N/A', // Adiciona tipo do produto para filtro
+              sku: item.sku || produto?.sku || 'N/A', // Garante que SKU esteja presente
+            };
+          });
+        })
+      )
+      .subscribe((itemsComNomes) => {
+        this.allEstoqueItems$ = new BehaviorSubject(itemsComNomes); // Atualiza o observable principal
+        this.triggerFilterAndSort(); // Re-filtra e ordena quando os dados base mudam
       });
 
-    this.estoqueSubscription = this.allEstoqueItems$.subscribe((items) => {
-      this.applyFilterAndSort(items);
-      this.updateProductNamesForFilter(items);
-    });
+    // Assina o Observable combinado de estoque e gatilho de filtro/ordenação
+    this.estoqueSubscription = combineLatest([
+      this.allEstoqueItems$,
+      this.filterTrigger.asObservable().pipe(startWith(undefined)), // startWith para acionar na inicialização
+    ])
+      .pipe(
+        map(([items, _]) => {
+          let tempItems = [...items];
+
+          // 1. Aplicar filtro de busca (searchTerm)
+          if (this.searchTerm) {
+            const lowerSearchTerm = this.searchTerm.toLowerCase();
+            tempItems = tempItems.filter(
+              (item) =>
+                (item.nomeProduto || '')
+                  .toLowerCase()
+                  .includes(lowerSearchTerm) ||
+                (item.localizacao || '')
+                  .toLowerCase()
+                  .includes(lowerSearchTerm) ||
+                (item.sku || '').toLowerCase().includes(lowerSearchTerm)
+            );
+          }
+
+          // 2. Aplicar filtro por Tipo de Produto
+          if (this.selectedTypeFilter) {
+            tempItems = tempItems.filter(
+              (item) => item.tipoProduto === this.selectedTypeFilter
+            );
+          }
+
+          // 3. Aplicar ordenação (selectedSort)
+          tempItems.sort((a, b) => {
+            if (this.selectedSort === 'nomeProduto_asc') {
+              return (a.nomeProduto || '').localeCompare(b.nomeProduto || '');
+            } else if (this.selectedSort === 'nomeProduto_desc') {
+              return (b.nomeProduto || '').localeCompare(a.nomeProduto || '');
+            } else if (this.selectedSort === 'quantidade_asc') {
+              return a.quantidade - b.quantidade;
+            } else if (this.selectedSort === 'quantidade_desc') {
+              return b.quantidade - a.quantidade;
+            } else if (this.selectedSort === 'validade_asc') {
+              const dateA = a.dataValidade
+                ? a.dataValidade.toMillis()
+                : Infinity;
+              const dateB = b.dataValidade
+                ? b.dataValidade.toMillis()
+                : Infinity;
+              return dateA - dateB;
+            } else if (this.selectedSort === 'validade_desc') {
+              const dateA = a.dataValidade
+                ? a.dataValidade.toMillis()
+                : -Infinity;
+              const dateB = b.dataValidade
+                ? b.dataValidade.toMillis()
+                : -Infinity;
+              return dateB - dateA;
+            }
+            return 0;
+          });
+
+          return tempItems;
+        })
+      )
+      .subscribe((filteredAndSortedItems) => {
+        this.filteredEstoque = filteredAndSortedItems;
+      });
   }
 
   ngOnDestroy(): void {
@@ -53,146 +141,30 @@ export class EstoqueComponent implements OnInit, OnDestroy {
     }
   }
 
-  updateProductNamesForFilter(items: EstoqueItem[]): void {
-    const uniqueNames = new Set<string>();
-    items.forEach((item) => uniqueNames.add(item.nomeProduto));
-    this.productNamesForFilter = Array.from(uniqueNames).sort();
-  }
-
-  applyFilterAndSort(items: EstoqueItem[]): void {
-    let tempItems = [...items];
-
-    if (this.searchTerm) {
-      const lowerCaseSearch = this.searchTerm.toLowerCase();
-      tempItems = tempItems.filter(
-        (item) =>
-          item.nomeProduto.toLowerCase().includes(lowerCaseSearch) ||
-          item.lote.toLowerCase().includes(lowerCaseSearch) ||
-          (item.localizacao &&
-            item.localizacao.toLowerCase().includes(lowerCaseSearch))
-      );
-    }
-
-    if (this.selectedProductFilter) {
-      tempItems = tempItems.filter(
-        (item) => item.nomeProduto === this.selectedProductFilter
-      );
-    }
-
-    switch (this.selectedSort) {
-      case 'nomeProduto_asc':
-        tempItems.sort((a, b) => a.nomeProduto.localeCompare(b.nomeProduto));
-        break;
-      case 'nomeProduto_desc':
-        tempItems.sort((a, b) => b.nomeProduto.localeCompare(a.nomeProduto));
-        break;
-      case 'lote_asc':
-        tempItems.sort((a, b) => a.lote.localeCompare(b.lote));
-        break;
-      case 'lote_desc':
-        tempItems.sort((a, b) => b.lote.localeCompare(a.lote));
-        break;
-      case 'quantidade_asc':
-        tempItems.sort((a, b) => a.quantidade - b.quantidade);
-        break;
-      case 'quantidade_desc':
-        tempItems.sort((a, b) => b.quantidade - a.quantidade);
-        break;
-      case 'validade_asc':
-        tempItems.sort((a, b) => {
-          const dateA = a.dataValidade
-            ? a.dataValidade.toDate().getTime()
-            : Infinity;
-          const dateB = b.dataValidade
-            ? b.dataValidade.toDate().getTime()
-            : Infinity;
-          return dateA - dateB;
-        });
-        break;
-      case 'validade_desc':
-        tempItems.sort((a, b) => {
-          const dateA = a.dataValidade
-            ? a.dataValidade.toDate().getTime()
-            : -Infinity;
-          const dateB = b.dataValidade
-            ? b.dataValidade.toDate().getTime()
-            : -Infinity;
-          return dateB - dateA;
-        });
-        break;
-      default:
-        break;
-    }
-    this.filteredEstoqueItems = tempItems;
-  }
-
   triggerFilterAndSort(): void {
-    this.allEstoqueItems$.pipe(take(1)).subscribe((items) => {
-      this.applyFilterAndSort(items);
-    });
+    this.filterTrigger.next();
   }
 
-  goToAddEstoqueItem(): void {
-    this.router.navigate(['/cadastro-estoque']);
-  }
-
-  goToEditEstoqueItem(uid: string): void {
-    this.router.navigate(['/edicao-estoque', uid]);
-  }
-
-  goToRegisterBaixa(uid: string): void {
-    this.router.navigate(['/registrar-baixa', uid]);
-  }
-
-  onDeleteEstoqueItem(uid: string, nomeProduto: string, lote: string): void {
+  async onDeleteEstoqueItem(uid: string, nomeProduto: string): Promise<void> {
     if (
       confirm(
-        `Tem certeza que deseja excluir o item do estoque "${nomeProduto}" (Lote: ${lote})? Esta ação é irreversível.`
+        `Tem certeza que deseja excluir o item de estoque "${nomeProduto}"? Esta ação é irreversível.`
       )
     ) {
-      this.estoqueService
-        .deleteEstoqueItem(uid)
-        .then(() => {
-          console.log('Item de estoque excluído com sucesso!');
-          alert('Item de estoque excluído com sucesso!');
-        })
-        .catch((error) => {
-          console.error('Erro ao excluir item de estoque:', error);
-          alert('Erro ao excluir item de estoque. Verifique as permissões.');
-        });
+      try {
+        await this.estoqueService.deleteEstoqueItem(uid);
+        alert('Item de estoque excluído com sucesso!');
+      } catch (error) {
+        console.error('Erro ao excluir item de estoque:', error);
+        alert('Erro ao excluir item de estoque. Tente novamente.');
+      }
     }
   }
 
-  formatTimestamp(timestamp: any): string {
-    if (timestamp && timestamp.toDate) {
+  formatTimestamp(timestamp: Timestamp | null | undefined): string {
+    if (timestamp instanceof Timestamp && timestamp.toDate) {
       return timestamp.toDate().toLocaleDateString('pt-BR');
     }
-    return 'N/A'; // Retorna N/A se a data for nula
-  }
-
-  isExpired(item: EstoqueItem): boolean {
-    if (!item.dataValidade) {
-      return false; // Não tem validade, não está vencido
-    }
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Zera a hora para comparar apenas a data
-    const expiryDate = item.dataValidade.toDate();
-    expiryDate.setHours(0, 0, 0, 0);
-    return expiryDate < today;
-  }
-
-  isNearExpiry(item: EstoqueItem): boolean {
-    if (!item.dataValidade || this.isExpired(item)) {
-      return false; // Se não tem validade ou já venceu, não está "próximo"
-    }
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const expiryDate = item.dataValidade.toDate();
-    expiryDate.setHours(0, 0, 0, 0);
-
-    const diffTime = expiryDate.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    // Considerar "próximo do vencimento" se faltam 30 dias ou menos
-    return diffDays <= 30 && diffDays > 0;
+    return 'N/A';
   }
 }

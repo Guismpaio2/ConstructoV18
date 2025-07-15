@@ -1,6 +1,7 @@
+// src/app/pages/produtos/cadastro-produto/cadastro-produto.component.ts
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Timestamp } from '@angular/fire/firestore'; // Importar Timestamp
 import { ProdutoService } from '../../../services/produto.service';
 import { Produto } from '../../../models/produto.model';
 
@@ -10,45 +11,36 @@ import { Produto } from '../../../models/produto.model';
   styleUrls: ['./cadastro-produto.component.scss'],
 })
 export class CadastroProdutoComponent implements OnInit {
-  cadastroProdutoForm!: FormGroup;
-
-  // Lista de tipos de produto e unidades de medida para dropdowns (opcional, mas bom para consistência)
-  tiposProduto: string[] = [
-    'Elétrico',
-    'Hidráulico',
-    'Alvenaria',
-    'Madeira',
-    'Ferramenta',
-    'Outro',
-  ];
-  unidadesMedida: string[] = [
-    'unidade',
-    'kg',
-    'metros',
-    'litros',
-    'caixa',
-    'pacote',
-  ];
+  cadastroForm!: FormGroup;
+  message: string = '';
+  isSuccess: boolean = false;
+  isLoading: boolean = false;
 
   constructor(
     private fb: FormBuilder,
-    private produtoService: ProdutoService,
-    private router: Router
+    private produtoService: ProdutoService
   ) {}
 
   ngOnInit(): void {
-    this.cadastroProdutoForm = this.fb.group({
+    this.cadastroForm = this.fb.group({
       nome: ['', Validators.required],
-      descricao: ['', Validators.required],
+      descricao: [''],
       tipo: ['', Validators.required],
-      marca: ['', Validators.required],
+      marca: [''],
       unidadeMedida: ['', Validators.required],
-      // imageUrl: [''] // Se for implementar upload de imagem
+      categoria: [''], // Adicionado para correção do model
+      sku: [''], // Adicionado para correção do model
+      imageUrl: [''],
     });
   }
 
   async onSubmit(): Promise<void> {
-    if (this.cadastroProdutoForm.valid) {
+    this.message = '';
+    this.isLoading = true;
+    if (this.cadastroForm.valid) {
+      const formValue = this.cadastroForm.value;
+
+      // Omitimos uid e os campos de auditoria, pois o serviço ProdutoService os adicionará
       const novoProduto: Omit<
         Produto,
         | 'uid'
@@ -56,22 +48,46 @@ export class CadastroProdutoComponent implements OnInit {
         | 'dataUltimaEdicao'
         | 'usuarioUltimaEdicaoUid'
         | 'usuarioUltimaEdicaoNome'
-      > = this.cadastroProdutoForm.value;
+      > = {
+        nome: formValue.nome,
+        descricao: formValue.descricao,
+        tipo: formValue.tipo,
+        marca: formValue.marca,
+        unidadeMedida: formValue.unidadeMedida,
+        categoria: formValue.categoria || undefined, // Garantir que são opcionais se não preenchidos
+        sku: formValue.sku || undefined, // Garantir que são opcionais se não preenchidos
+        imageUrl: formValue.imageUrl || undefined,
+      };
 
       try {
-        const produtoUid = await this.produtoService.addProduto(novoProduto);
-        alert('Produto cadastrado com sucesso! UID: ' + produtoUid);
-        this.router.navigate(['/produtos']); // Redireciona para a lista de produtos
+        await this.produtoService.addProduto(novoProduto);
+        this.message = 'Produto cadastrado com sucesso!';
+        this.isSuccess = true;
+        this.cadastroForm.reset();
+        // Para resetar os validadores de forma limpa após o reset
+        Object.keys(this.cadastroForm.controls).forEach((key) => {
+          this.cadastroForm.get(key)?.setErrors(null);
+        });
       } catch (error) {
         console.error('Erro ao cadastrar produto:', error);
-        alert('Erro ao cadastrar produto. Tente novamente.');
+        this.message = 'Erro ao cadastrar produto. Verifique o console.';
+        this.isSuccess = false;
+      } finally {
+        this.isLoading = false;
       }
     } else {
-      alert('Por favor, preencha todos os campos obrigatórios.');
+      this.message =
+        'Por favor, preencha todos os campos obrigatórios corretamente.';
+      this.isSuccess = false;
+      this.isLoading = false;
+      this.cadastroForm.markAllAsTouched(); // Marca todos os campos como "touched" para exibir mensagens de erro
     }
   }
 
-  goBack(): void {
-    this.router.navigate(['/produtos']); // Volta para a lista de produtos
+  onCancel(): void {
+    this.cadastroForm.reset();
+    this.message = '';
+    this.isSuccess = false;
+    this.isLoading = false;
   }
 }

@@ -1,132 +1,92 @@
-@import "../../../styles/variables";
-@import "../../../styles/styles";
+// src/app/pages/home/home.component.scss
+@import "~src/styles/_styles.scss"; // Importe estilos globais para acessar as variáveis.
 
-.home-container {
-  // Estilos específicos para o container da página Home
-  padding: $spacing-m; // Espaçamento interno
+.home-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 25px;
+  margin-bottom: 25px;
 }
 
-.header-banner {
-  width: 100%;
-  height: 180px; // Altura fixa para o banner
-  background-color: $color-secondary-base; // Cor de fallback se a imagem não carregar
-  border-radius: $border-radius-medium;
-  margin-bottom: $spacing-l;
-  display: flex;
-  align-items: flex-end; // Alinha o conteúdo na parte inferior
-  justify-content: center;
-  position: relative; // Para posicionar o texto sobre a imagem
-  overflow: hidden; // Garante que a imagem se ajuste
+.summary-card {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  padding: 25px;
+  text-align: center;
+  transition: transform 0.2s ease-in-out;
 
-  .banner-image {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover; // Cobre a área do container sem distorcer
-    opacity: 0.7; // Suaviza a imagem de fundo
+  &:hover {
+    transform: translateY(-5px);
   }
 
-  .welcome-message {
-    position: relative; // Para estar acima da imagem
-    z-index: 1;
-    color: $color-text-light;
-    text-align: center;
-    padding-bottom: $spacing-m; // Espaçamento da parte inferior
-    h2 {
-      font-size: $font-size-h2;
-      font-weight: bold;
-      color: $color-text-light; // Texto branco/claro no banner
-      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5); // Sombra para o texto
-    }
-  }
-
-  // Estilo para o info de tela cheia (já existe no _styles.scss, mas pode ser ajustado)
-  .fullscreen-info {
-    position: absolute;
-    top: $spacing-xs;
-    right: $spacing-xs;
-    background-color: rgba(0, 0, 0, 0.6);
-    color: $color-text-light;
-    padding: $spacing-xxs $spacing-xs;
-    border-radius: $border-radius-small;
-    font-size: $font-size-xsmall;
-    z-index: 10;
-  }
-}
-
-.section-title {
-  margin-bottom: $spacing-m; // Espaçamento abaixo do título da seção
   h3 {
-    color: $color-text-dark;
-  }
-}
-
-.table-container {
-  // Estilos da tabela são majoritariamente herdados de _styles.scss
-  .image-placeholder {
-    width: 50px;
-    height: 50px;
-    background-color: lighten(
-      $color-secondary-base,
-      40%
-    ); // Cor para placeholder de imagem
-    border-radius: $border-radius-small;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: $font-size-xsmall;
-    color: #fff;
-    overflow: hidden; // Para imagens dentro do placeholder
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
+    color: #343a40;
+    font-size: 1.8rem;
+    margin-bottom: 15px;
   }
 
-  .low-quantity {
-    color: $color-alert; // Cor de destaque para quantidade baixa
+  p {
+    font-size: 2.5rem;
     font-weight: bold;
-  }
-
-  .btn-details {
-    @extend .btn-cta; // Estende os estilos do botão CTA
-    padding: $spacing-xxs $spacing-xs; // Ajusta o padding para ser menor
-    font-size: $font-size-xsmall; // Ajusta a fonte
+    color: $color-primary; // Exemplo de uso de variável
+    margin-bottom: 0;
   }
 }
 
-/* Responsividade */
-@media (max-width: 768px) {
-  .home-container {
-    padding: $spacing-s;
+.home-section {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  padding: 25px;
+  margin-bottom: 25px;
+
+  h2 {
+    color: #343a40;
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 10px;
   }
-  .header-banner {
-    height: 120px; // Reduz a altura do banner em telas menores
-    .welcome-message h2 {
-      font-size: $font-size-large;
+
+  .table-responsive {
+    overflow-x: auto;
+  }
+
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+
+    th,
+    td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #e9ecef;
+      color: #6c757d;
+      font-size: 0.95rem;
+    }
+
+    th {
+      background-color: #f8f9fa;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.85rem;
+      color: #495057;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tbody tr:hover {
+      background-color: #f8f9fa;
     }
   }
-  .section-title h3 {
-    font-size: $font-size-h4;
-  }
-  .table-container {
-    table {
-      min-width: unset; // Remove o min-width para tabelas em telas pequenas
-    }
-    thead th,
-    tbody td {
-      padding: $spacing-xs; // Reduz o padding das células
-      font-size: $font-size-xsmall;
-    }
-    .image-placeholder {
-      width: 40px;
-      height: 40px;
-    }
-    .btn-details {
-      padding: $spacing-xxs; // Ainda menor
-    }
+
+  .no-data-message {
+    text-align: center;
+    color: #6c757d;
+    font-style: italic;
+    padding: 20px 0;
   }
 }

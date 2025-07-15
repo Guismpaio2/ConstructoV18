@@ -69,8 +69,8 @@ export class EstoqueService {
       );
   }
 
-  updateEstoqueItem(item: EstoqueItem): Promise<void> {
-    return this.estoqueCollection.doc(item.uid).update(item);
+  updateEstoqueItem(uid: string, data: Partial<EstoqueItem>): Promise<void> {
+    return this.estoqueCollection.doc(uid).update(data);
   }
 
   updateEstoqueItemQuantity(uid: string, newQuantity: number): Promise<void> {
