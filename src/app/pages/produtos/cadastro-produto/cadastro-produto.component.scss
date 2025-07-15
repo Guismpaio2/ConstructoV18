@@ -1,5 +1,7 @@
 @import "../../../../styles/variables";
-@import "../../../../styles/styles"; // Importa estilos gerais, incluindo botões e formulários
+@import "../../../../styles/styles";
+@import "../../../../styles/reset";
+// Importa estilos gerais, incluindo botões e formulários
 
 .main-content-container {
   padding: $spacing-m;

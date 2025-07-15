@@ -31,7 +31,7 @@ export class LoginComponent {
     this.isLoading = true;
 
     try {
-      await this.authService.login(this.email, this.password);
+      await this.authService.signIn(this.email, this.password);
       // Login bem-sucedido. O AuthGuard (se configurado) ou sua lógica de redirecionamento
       // no serviço/componente do Dashboard cuidará de levar o usuário ao lugar certo.
       this.router.navigate(['/home']); // Redireciona para a página principal após o login

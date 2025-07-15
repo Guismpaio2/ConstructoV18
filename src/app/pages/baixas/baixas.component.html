@@ -1,77 +1,114 @@
-<div class="main-content-container">
-  <div class="page-header">
-    <h1>Registros de Baixas</h1>
-    <div class="header-actions">
-      <button
-        class="btn btn-primary"
-        routerLink="/baixas/registrar"
-        *ngIf="isAdmin || isEstoquista"
-      >
-        <i class="fas fa-minus-circle"></i> Registrar Nova Baixa
-      </button>
-    </div>
+<div class="page-container">
+  <div class="header-container">
+    <h2>Registrar Nova Baixa de Estoque</h2>
   </div>
 
-  <div class="search-filter-bar">
-    <div class="search-input">
-      <i class="fas fa-search search-icon"></i>
+  <form [formGroup]="baixaForm" (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <label for="itemEstoqueUid">Item de Estoque:</label>
+      <select
+        id="itemEstoqueUid"
+        formControlName="itemEstoqueUid"
+        class="form-control"
+      >
+        <option [ngValue]="null" disabled>Selecione um item</option>
+        <ng-container *ngIf="itensEstoque$ | async as items; else loadingItems">
+          <option *ngFor="let item of items" [ngValue]="item.uid">
+            {{ item.nomeProduto }} (Lote: {{ item.lote }}, Qtd:
+            {{ item.quantidade }})
+          </option>
+        </ng-container>
+        <ng-template #loadingItems>
+          <option disabled>Carregando itens...</option>
+        </ng-template>
+      </select>
+      <div
+        *ngIf="
+          baixaForm.get('itemEstoqueUid')?.invalid &&
+          baixaForm.get('itemEstoqueUid')?.touched
+        "
+        class="error-message"
+      >
+        Item de estoque é obrigatório.
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="quantidadeBaixada">Quantidade a Baixar:</label>
+      <input
+        type="number"
+        id="quantidadeBaixada"
+        formControlName="quantidadeBaixada"
+        class="form-control"
+        placeholder="Quantidade (Disponível: {{ selectedItemStockQuantity }})"
+        [min]="1"
+        [max]="selectedItemStockQuantity"
+      />
+      <div
+        *ngIf="
+          baixaForm.get('quantidadeBaixada')?.invalid &&
+          baixaForm.get('quantidadeBaixada')?.touched
+        "
+        class="error-message"
+      >
+        <span *ngIf="baixaForm.get('quantidadeBaixada')?.errors?.['required']">
+          Quantidade é obrigatória.
+        </span>
+        <span *ngIf="baixaForm.get('quantidadeBaixada')?.errors?.['min']">
+          A quantidade deve ser no mínimo 1.
+        </span>
+        <span
+          *ngIf="baixaForm.get('quantidadeBaixada')?.errors?.['exceedsStock']"
+        >
+          A quantidade excede o estoque disponível ({{
+            selectedItemStockQuantity
+          }}).
+        </span>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="motivo">Motivo da Baixa:</label>
       <input
         type="text"
-        placeholder="Buscar por produto, lote, motivo, usuário..."
-        [(ngModel)]="searchTerm"
-        (keyup.enter)="onSearch()"
+        id="motivo"
+        formControlName="motivo"
+        class="form-control"
       />
+      <div
+        *ngIf="
+          baixaForm.get('motivo')?.invalid && baixaForm.get('motivo')?.touched
+        "
+        class="error-message"
+      >
+        Motivo é obrigatório.
+      </div>
     </div>
 
-    <select [(ngModel)]="selectedSort" (change)="onSortChange()">
-      <option value="data_baixa_desc">Mais Recentes</option>
-      <option value="data_baixa_asc">Mais Antigos</option>
-      <option value="usuario_asc">Usuário (A-Z)</option>
-      <option value="usuario_desc">Usuário (Z-A)</option>
-    </select>
-  </div>
+    <div class="form-group">
+      <label for="observacoes">Observações (Opcional):</label>
+      <textarea
+        id="observacoes"
+        formControlName="observacoes"
+        class="form-control"
+      ></textarea>
+    </div>
 
-  <div class="table-responsive">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>Produto / Lote</th>
-          <th>Quantidade Baixada</th>
-          <th>Motivo</th>
-          <th>Registrado Por</th>
-          <th>Data da Baixa</th>
-          <th *ngIf="isAdmin">Ações</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let baixa of filteredBaixas">
-          <td>
-            <ng-container *ngIf="baixa.nomeProduto && baixa.loteProduto">
-              {{ baixa.nomeProduto }} (Lote: {{ baixa.loteProduto }})
-            </ng-container>
-            <ng-container *ngIf="!baixa.nomeProduto || !baixa.loteProduto">
-              Produto Indisponível (ID: {{ baixa.estoqueItemUid }})
-            </ng-container>
-          </td>
-          <td>{{ baixa.quantidadeBaixada }}</td>
-          <td>{{ baixa.motivo }}</td>
-          <td>{{ baixa.usuarioResponsavelNome }}</td>
-          <td>{{ baixa.dataBaixa.toDate() | date : "dd/MM/yyyy HH:mm" }}</td>
-          <td *ngIf="isAdmin">
-            <button
-              class="btn btn-sm btn-danger"
-              (click)="onDeleteBaixa(baixa.uid)"
-            >
-              <i class="fas fa-trash"></i>
-            </button>
-          </td>
-        </tr>
-        <tr *ngIf="filteredBaixas.length === 0">
-          <td colspan="6" class="text-center">
-            Nenhum registro de baixa encontrado.
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+    <div class="form-actions">
+      <button
+        type="button"
+        class="secondary-button"
+        (click)="goToRegistrosBaixas()"
+      >
+        Ver Registros de Baixas
+      </button>
+      <button
+        type="submit"
+        class="primary-button"
+        [disabled]="baixaForm.invalid"
+      >
+        Registrar Baixa
+      </button>
+    </div>
+  </form>
 </div>

@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations'; // Adicionado
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -9,9 +9,9 @@ import { AppComponent } from './app.component';
 import { AngularFireModule } from '@angular/fire/compat';
 import { AngularFireAuthModule } from '@angular/fire/compat/auth';
 import { AngularFirestoreModule } from '@angular/fire/compat/firestore';
-import { AngularFireStorageModule } from '@angular/fire/compat/storage'; // Adicionado para Cloud Storage
+import { AngularFireStorageModule } from '@angular/fire/compat/storage';
 
-// Caminho para o environment (você já corrigiu para './enviroments/enviroment')
+// Caminho para o environment
 import { environment } from './enviroments/enviroment';
 
 // Components de Login
@@ -26,13 +26,13 @@ import { StarterComponent } from './LoginComponents/starter/starter.component';
 import { HomeComponent } from './pages/home/home.component';
 import { ProdutosComponent } from './pages/produtos/produtos.component';
 import { EstoqueComponent } from './pages/estoque/estoque.component';
-import { RegistrosBaixasComponent } from './pages/registros-baixas/registros-baixas.component'; // Confirmado que você usa este
+import { RegistrosBaixasComponent } from './pages/registros-baixas/registros-baixas.component';
 import { UsuariosComponent } from './pages/usuarios/usuarios.component';
 import { PerfilComponent } from './pages/perfil/perfil.component';
 import { CadastroProdutoComponent } from './pages/produtos/cadastro-produto/cadastro-produto.component';
 import { EdicaoProdutoComponent } from './pages/produtos/edicao-produto/edicao-produto.component';
 import { CadastroEstoqueComponent } from './pages/estoque/cadastro-estoque/cadastro-estoque.component';
-import { EdicaoEstoqueComponent } from './pages/estoque/edicao-estoque/edicao-estoque.component';// Caminho ajustado para 'pages/baixas'
+import { EdicaoEstoqueComponent } from './pages/estoque/edicao-estoque/edicao-estoque.component';// Importação correta
 
 // SharedModule para layouts e outros componentes/módulos compartilhados
 import { SharedModule } from './shared/shared.module';
@@ -50,28 +50,30 @@ import { BaixasComponent } from './pages/baixas/baixas.component';
     HomeComponent,
     ProdutosComponent,
     EstoqueComponent,
-    RegistrosBaixasComponent,
+    RegistrosBaixasComponent, // Este será o componente de listagem
     UsuariosComponent,
     PerfilComponent,
     CadastroProdutoComponent,
     EdicaoProdutoComponent,
     CadastroEstoqueComponent,
     EdicaoEstoqueComponent,
-    BaixasComponent, // Adicionei este componente aqui para garantir que esteja declarado
+    RegistrosBaixasComponent,
+    BaixasComponent,
+    RegistrosBaixasComponent,  // Componente para registrar a baixa
   ],
   imports: [
     BrowserModule,
-    BrowserAnimationsModule, // Adicionei para compatibilidade futura com animações
+    BrowserAnimationsModule,
     AppRoutingModule,
     FormsModule,
     ReactiveFormsModule,
-    SharedModule, // Importa o SharedModule que deve declarar e exportar os layouts
+    SharedModule,
 
     // Inicialização do Firebase
     AngularFireModule.initializeApp(environment.firebase),
     AngularFireAuthModule,
     AngularFirestoreModule,
-    AngularFireStorageModule, // Adicionado
+    AngularFireStorageModule,
   ],
   providers: [],
   bootstrap: [AppComponent],

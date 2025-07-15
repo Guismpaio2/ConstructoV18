@@ -1,9 +1,9 @@
-// src/app/pages/registros-baixas/registros-baixas.component.ts
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { EstoqueService } from '../../services/estoque.service';
+import { Subscription, Observable, BehaviorSubject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
+import { Router } from '@angular/router';
 import { BaixaEstoque } from '../../models/baixa-estoque.model';
-import { Observable, Subscription } from 'rxjs';
-import { Timestamp } from '@angular/fire/firestore';
+import { BaixaService } from '../../services/baixa.service';
 
 @Component({
   selector: 'app-registros-baixas',
@@ -11,26 +11,31 @@ import { Timestamp } from '@angular/fire/firestore';
   styleUrls: ['./registros-baixas.component.scss'],
 })
 export class RegistrosBaixasComponent implements OnInit, OnDestroy {
-  allBaixas$: Observable<BaixaEstoque[]>;
+  allBaixas: BaixaEstoque[] = [];
   filteredBaixas: BaixaEstoque[] = [];
-  private baixasSubscription!: Subscription;
-
   searchTerm: string = '';
-  selectedSort: string = 'dataBaixa_desc'; // Ordenação padrão
+  private baixasSubscription!: Subscription;
+  private searchTerms = new BehaviorSubject<string>('');
 
-  // Para filtros adicionais, se necessário
-  productNamesForFilter: string[] = []; // Nomes de produtos para filtro
-  selectedProductFilter: string = '';
-
-  constructor(private estoqueService: EstoqueService) {
-    this.allBaixas$ = this.estoqueService.getBaixas(); // Supondo que você tem um método para obter todas as baixas
-  }
+  constructor(private baixaService: BaixaService, private router: Router) {}
 
   ngOnInit(): void {
-    this.baixasSubscription = this.allBaixas$.subscribe((baixas) => {
-      this.applyFilterAndSort(baixas);
-      this.updateProductNamesForFilter(baixas); // Atualiza nomes de produtos para filtro
-    });
+    this.baixasSubscription = this.baixaService
+      .getBaixas()
+      .subscribe((baixas) => {
+        this.allBaixas = baixas;
+        this.applyFilter();
+      });
+
+    this.searchTerms
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        map((term) => term.trim().toLowerCase())
+      )
+      .subscribe((term) => {
+        this.applyFilter(term);
+      });
   }
 
   ngOnDestroy(): void {
@@ -39,82 +44,23 @@ export class RegistrosBaixasComponent implements OnInit, OnDestroy {
     }
   }
 
-  updateProductNamesForFilter(baixas: BaixaEstoque[]): void {
-    const uniqueNames = new Set<string>();
-    baixas.forEach((baixa) => uniqueNames.add(baixa.nomeProduto));
-    this.productNamesForFilter = Array.from(uniqueNames).sort();
+  onSearchTermChange(term: string): void {
+    this.searchTerms.next(term);
   }
 
-  applyFilterAndSort(baixas: BaixaEstoque[]): void {
-    let tempBaixas = [...baixas];
-
-    // 1. Filtrar
-    if (this.searchTerm) {
-      const lowerCaseSearch = this.searchTerm.toLowerCase();
-      tempBaixas = tempBaixas.filter(
-        (baixa) =>
-          baixa.nomeProduto.toLowerCase().includes(lowerCaseSearch) ||
-          baixa.lote.toLowerCase().includes(lowerCaseSearch) ||
-          baixa.usuarioNome.toLowerCase().includes(lowerCaseSearch) ||
-          (baixa.motivoBaixa &&
-            baixa.motivoBaixa.toLowerCase().includes(lowerCaseSearch)) ||
-          (baixa.observacao &&
-            baixa.observacao.toLowerCase().includes(lowerCaseSearch))
-      );
-    }
-
-    if (this.selectedProductFilter) {
-      tempBaixas = tempBaixas.filter(
-        (baixa) => baixa.nomeProduto === this.selectedProductFilter
-      );
-    }
-
-    // 2. Ordenar
-    switch (this.selectedSort) {
-      case 'dataBaixa_desc':
-        tempBaixas.sort(
-          (a, b) =>
-            b.dataBaixa.toDate().getTime() - a.dataBaixa.toDate().getTime()
-        );
-        break;
-      case 'dataBaixa_asc':
-        tempBaixas.sort(
-          (a, b) =>
-            a.dataBaixa.toDate().getTime() - b.dataBaixa.toDate().getTime()
-        );
-        break;
-      case 'nomeProduto_asc':
-        tempBaixas.sort((a, b) => a.nomeProduto.localeCompare(b.nomeProduto));
-        break;
-      case 'nomeProduto_desc':
-        tempBaixas.sort((a, b) => b.nomeProduto.localeCompare(a.nomeProduto));
-        break;
-      case 'usuario_asc':
-        tempBaixas.sort((a, b) => a.usuarioNome.localeCompare(b.usuarioNome));
-        break;
-      case 'usuario_desc':
-        tempBaixas.sort((a, b) => b.usuarioNome.localeCompare(a.usuarioNome));
-        break;
-      default:
-        break;
-    }
-    this.filteredBaixas = tempBaixas;
+  applyFilter(term: string = this.searchTerm): void {
+    const lowerCaseTerm = term.toLowerCase();
+    this.filteredBaixas = this.allBaixas.filter(
+      (baixa) =>
+        baixa.nomeProduto.toLowerCase().includes(lowerCaseTerm) ||
+        baixa.loteItemEstoque.toLowerCase().includes(lowerCaseTerm) ||
+        baixa.motivo.toLowerCase().includes(lowerCaseTerm) ||
+        baixa.usuarioResponsavelNome?.toLowerCase().includes(lowerCaseTerm)
+    );
   }
 
-  triggerFilterAndSort(): void {
-    this.allBaixas$.pipe(take(1)).subscribe((baixas) => {
-      this.applyFilterAndSort(baixas);
-    });
-  }
-
-  // Função para formatar o Timestamp para exibição
-  formatTimestamp(timestamp: Timestamp | Date | null | undefined): string {
-    if (timestamp) {
-      if ((timestamp as Timestamp).toDate) {
-        return (timestamp as Timestamp).toDate().toLocaleDateString('pt-BR');
-      }
-      return new Date(timestamp).toLocaleDateString('pt-BR');
-    }
-    return '';
+  // Redireciona para o componente 'baixas' que agora é o formulário de registro.
+  goToRegistrarBaixa(): void {
+    this.router.navigate(['/baixas']);
   }
 }

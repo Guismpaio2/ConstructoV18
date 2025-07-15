@@ -13,6 +13,7 @@
 
   h1 {
     margin: 0;
+    color: $color-text-dark;
   }
 }
 
@@ -21,12 +22,12 @@
   gap: $spacing-s;
   align-items: center;
   margin-bottom: $spacing-m;
-  flex-wrap: wrap;
+  flex-wrap: wrap; // Permite quebrar linha em telas pequenas
 
   .search-input {
     flex-grow: 1;
     position: relative;
-    min-width: 200px;
+    min-width: 250px; // Aumentado para melhor UX
   }
 
   input[type="text"] {
@@ -47,18 +48,93 @@
     color: #999;
   }
 
+  .filters {
+    display: flex;
+    gap: $spacing-s;
+    align-items: center;
+  }
+
+  .filter-button {
+    // Estilo para o botão "Filtros"
+    background-color: $color-secondary-base; // Ou uma cor que combine com a paleta
+    color: $color-text-light;
+    padding: $spacing-xs $spacing-m;
+    border-radius: $border-radius-small;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: $spacing-xxs;
+
+    &:hover {
+      background-color: darken($color-secondary-base, 10%);
+    }
+  }
+
   select {
     padding: $spacing-xs;
     border-radius: $border-radius-small;
     border: 1px solid #ccc;
     background-color: $color-background-card;
     color: $color-text-dark;
+    cursor: pointer;
   }
 }
 
-.table-container {
-  // Estilos globais da tabela já definidos em _styles.scss
-  // Adicione quaisquer estilos específicos se necessário
+.table-responsive {
+  overflow-x: auto; // Permite scroll horizontal em telas pequenas
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: $spacing-m;
+  background-color: $color-background-card;
+  box-shadow: $box-shadow-light;
+  border-radius: $border-radius-medium;
+  overflow: hidden; // Garante que o border-radius seja aplicado
+
+  th,
+  td {
+    padding: $spacing-s $spacing-m;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+    color: $color-text-dark;
+  }
+
+  th {
+    background-color: $color-primary-light; // Usando a nova variável
+    font-weight: 600;
+    color: $color-text-light;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  tbody tr:hover {
+    background-color: lighten($color-background-card, 2%);
+  }
+
+  .btn {
+    padding: $spacing-xxs $spacing-xs;
+    font-size: $font-size-small;
+    display: inline-flex;
+    align-items: center;
+    gap: $spacing-xxs;
+  }
+
+  .btn-danger {
+    background-color: $color-alert;
+    color: $color-text-light;
+    &:hover {
+      background-color: darken($color-alert, 10%);
+    }
+  }
+
+  .text-center {
+    text-align: center;
+  }
 }
 
 /* Responsividade */
@@ -68,8 +144,16 @@
   }
 
   .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: $spacing-s;
+
     h1 {
       font-size: $font-size-h3;
+    }
+
+    .btn {
+      width: 100%; // Botão "Registrar Baixa" ocupa a largura total
     }
   }
 
@@ -83,14 +167,21 @@
       width: 100%;
     }
 
-    select {
+    .filters {
+      flex-direction: column; // Botão de filtro e select um abaixo do outro
       width: 100%;
+      .filter-button,
+      select {
+        width: 100%;
+      }
     }
   }
 
-  .table-container {
-    table {
-      min-width: 600px;
+  .data-table {
+    font-size: $font-size-xsmall;
+    th,
+    td {
+      padding: $spacing-xs;
     }
   }
 }

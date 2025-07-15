@@ -13,11 +13,11 @@ import { CadastroSucessoComponent } from './LoginComponents/cadastro-sucesso/cad
 import { AuthLayoutComponent } from './shared/layout/auth-layout/auth-layout.component';
 import { DashboardLayoutComponent } from './shared/layout/dashboard-layout/dashboard-layout.component';
 
-// Componentes de Páginas (exemplo, você precisará criá-los)
+// Componentes de Páginas
 import { HomeComponent } from './pages/home/home.component';
 import { ProdutosComponent } from './pages/produtos/produtos.component';
 import { EstoqueComponent } from './pages/estoque/estoque.component';
-import { RegistrosBaixasComponent } from './pages/registros-baixas/registros-baixas.component'; // Mantido, mas pode ser renomeado para 'BaixasComponent' se você o mudou
+import { RegistrosBaixasComponent } from './pages/registros-baixas/registros-baixas.component'; // Lista de baixas
 import { UsuariosComponent } from './pages/usuarios/usuarios.component';
 import { PerfilComponent } from './pages/perfil/perfil.component';
 
@@ -26,12 +26,11 @@ import { CadastroProdutoComponent } from './pages/produtos/cadastro-produto/cada
 import { EdicaoProdutoComponent } from './pages/produtos/edicao-produto/edicao-produto.component';
 import { CadastroEstoqueComponent } from './pages/estoque/cadastro-estoque/cadastro-estoque.component';
 import { EdicaoEstoqueComponent } from './pages/estoque/edicao-estoque/edicao-estoque.component';
-import { RegistrarBaixaComponent } from './pages/baixas/registrar-baixa/registrar-baixa.component'; // Ajustado para 'pages/baixas'
-import { BaixasComponent } from './pages/baixas/baixas.component'; // Adicionado para a rota /baixas se RegistrosBaixasComponent for o principal
+import { BaixasComponent } from './pages/baixas/baixas.component'; // Agora é o FORMULÁRIO DE REGISTRO DE BAIXA
 
 // Importe seu AuthGuard
 import { AuthGuard } from './auth/auth.guard';
-import { UserRole } from './models/user.model'; // Importa UserRole para tipagem
+import { UserRole } from './models/user.model';
 
 const routes: Routes = [
   { path: '', redirectTo: 'starter', pathMatch: 'full' },
@@ -101,20 +100,19 @@ const routes: Routes = [
         },
       },
       {
-        path: 'registros-baixas', // Se este for o componente principal para exibir baixas
+        path: 'registros-baixas', // Esta é a LISTA de baixas (Screenshot_11.png)
         component: RegistrosBaixasComponent,
         data: {
           title: 'Registros de Baixas',
           roles: ['Administrador', 'Estoquista', 'Leitor'] as UserRole[],
         },
       },
-      // Se 'BaixasComponent' for o componente principal para visualização de baixas
       {
-        path: 'baixas',
+        path: 'baixas', // Esta é o FORMULÁRIO de REGISTRO de baixa (Screenshot_14.png)
         component: BaixasComponent,
         data: {
-          title: 'Baixas',
-          roles: ['Administrador', 'Estoquista', 'Leitor'] as UserRole[],
+          title: 'Registrar Baixa',
+          roles: ['Administrador', 'Estoquista'] as UserRole[], // Somente quem pode registrar
         },
       },
       {
@@ -128,58 +126,46 @@ const routes: Routes = [
       {
         path: 'usuarios',
         component: UsuariosComponent,
-        // canActivate: [AuthGuard], // Não é necessário repetir se já está no pai
         data: {
           title: 'Gerenciamento de Usuários',
           roles: ['Administrador'] as UserRole[],
-        }, // Apenas administradores
+        },
       },
       // Rotas para cadastro/edição com roles específicas
       {
         path: 'cadastro-produto',
         component: CadastroProdutoComponent,
-        // canActivate: [AuthGuard],
         data: {
           title: 'Cadastrar Produto',
           roles: ['Administrador', 'Estoquista'] as UserRole[],
-        }, // Estoquista e Admin podem cadastrar
+        },
       },
       {
         path: 'edicao-produto/:id',
         component: EdicaoProdutoComponent,
-        // canActivate: [AuthGuard],
         data: {
           title: 'Editar Produto',
           roles: ['Administrador', 'Estoquista'] as UserRole[],
-        }, // Estoquista e Admin podem editar
+        },
       },
       {
         path: 'cadastro-estoque',
-        component: CadastroEstoqueComponent, // Corrigido para CadastroEstoqueComponent
-        // canActivate: [AuthGuard],
+        component: CadastroEstoqueComponent,
         data: {
           title: 'Cadastrar Item no Estoque',
           roles: ['Administrador', 'Estoquista'] as UserRole[],
-        }, // Estoquista e Admin podem cadastrar
+        },
       },
       {
         path: 'edicao-estoque/:id',
         component: EdicaoEstoqueComponent,
-        // canActivate: [AuthGuard],
         data: {
           title: 'Editar Item no Estoque',
           roles: ['Administrador', 'Estoquista'] as UserRole[],
-        }, // Estoquista e Admin podem editar
+        },
       },
-      {
-        path: 'registrar-baixa/:id',
-        component: RegistrarBaixaComponent, // Corrigido para RegistrarBaixaComponent
-        // canActivate: [AuthGuard],
-        data: {
-          title: 'Registrar Baixa',
-          roles: ['Administrador', 'Estoquista'] as UserRole[],
-        }, // Estoquista e Admin podem registrar baixa
-      },
+      // Removida a rota 'registrar-baixa/:id' pois agora 'baixas' é o formulário.
+      // E a rota de 'registros-baixas' é para a lista.
     ],
   },
   // Rota wildcard para qualquer caminho não encontrado, redireciona para 'starter'

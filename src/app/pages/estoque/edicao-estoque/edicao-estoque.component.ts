@@ -1,13 +1,13 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { EstoqueService } from '../../../services/estoque.service';
 import { ProdutoService } from '../../../services/produto.service';
-import { ActivatedRoute, Router } from '@angular/router';
-import { ItemEstoque } from '../../../models/item-estoque.model';
-import { Produto } from '../../../models/produto.model';
 import { AuthService } from '../../../auth/auth.service';
-import { Subscription } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { EstoqueItem } from '../../../models/item-estoque.model';
+import { Produto } from '../../../models/produto.model';
+import { Observable, Subscription, forkJoin } from 'rxjs'; // Adicionado forkJoin
+import { switchMap, take, tap } from 'rxjs/operators'; // Adicionado tap
 
 @Component({
   selector: 'app-edicao-estoque',
@@ -16,116 +16,156 @@ import { take } from 'rxjs/operators';
 })
 export class EdicaoEstoqueComponent implements OnInit, OnDestroy {
   estoqueForm!: FormGroup;
-  itemId: string | null = null;
-  currentItemEstoque: ItemEstoque | null = null;
-  associatedProduto: Produto | null = null; // Para exibir os detalhes do produto associado
-  userId: string | null = null;
-  userName: string | null = null;
-  private routeSubscription!: Subscription;
+  itemId!: string;
+  estoqueItem!: EstoqueItem; // Definido para o template
+  associatedProduto!: Produto | undefined; // Definido para o template
+  produtos$!: Observable<Produto[]>;
+  private itemSubscription!: Subscription;
+  private currentUserSubscription!: Subscription;
+  private currentUserUid: string | null = null;
+  private currentUserDisplayName: string | null = null;
 
   constructor(
     private fb: FormBuilder,
-    private estoqueService: EstoqueService,
-    private produtoService: ProdutoService,
     private route: ActivatedRoute,
     private router: Router,
+    private estoqueService: EstoqueService,
+    private produtoService: ProdutoService,
     private authService: AuthService
   ) {}
 
   ngOnInit(): void {
-    this.estoqueForm = this.fb.group({
-      // produtoId não é editável diretamente aqui, mas pode ser exibido
-      quantidade: [null, [Validators.required, Validators.min(1)]],
-      dataValidade: [null],
+    this.currentUserSubscription = this.authService.user$.subscribe((user) => {
+      this.currentUserUid = user?.uid || null;
+      this.currentUserDisplayName = user
+        ? `${user.nome} ${user.sobrenome}`
+        : null;
     });
 
-    // Obter o UID e nome do usuário logado para registrar quem editou
-    this.authService.user$.pipe(take(1)).subscribe((user) => {
-      if (user) {
-        this.userId = user.uid;
-        this.userName = `${user.nome} ${user.sobrenome}`;
-      }
-    });
+    this.produtos$ = this.produtoService.getProdutos(); // Para o select, embora não usado no HTML atual
 
-    this.routeSubscription = this.route.paramMap.subscribe((params) => {
-      this.itemId = params.get('id');
-      if (this.itemId) {
-        this.estoqueService
-          .getItemEstoque(this.itemId)
-          .pipe(take(1))
-          .subscribe({
-            next: (item) => {
-              if (item) {
-                this.currentItemEstoque = item;
-                this.estoqueForm.patchValue({
-                  quantidade: item.quantidade,
-                  dataValidade: item.dataValidade
-                    ? item.dataValidade.toString().substring(0, 10)
-                    : null,
-                });
-
-                // Carrega os detalhes do produto associado
-                this.produtoService
-                  .getProduto(item.produtoId)
-                  .pipe(take(1))
-                  .subscribe({
-                    next: (produto) => {
-                      this.associatedProduto = produto ?? null;
-                    },
-                    error: (err) => {
-                      console.error('Erro ao buscar produto associado:', err);
-                      this.associatedProduto = null;
-                    },
-                  });
-              } else {
-                console.error('Item de estoque não encontrado.');
-                alert('Item de estoque não encontrado.');
-                this.router.navigate(['/estoque']);
-              }
-            },
-            error: (err) => {
-              console.error('Erro ao buscar item de estoque:', err);
-              alert('Erro ao carregar dados do item de estoque.');
-              this.router.navigate(['/estoque']);
-            },
-          });
-      }
-    });
+    this.itemSubscription = this.route.paramMap
+      .pipe(
+        switchMap((params) => {
+          this.itemId = params.get('id')!;
+          if (this.itemId) {
+            return this.estoqueService.getEstoqueItem(this.itemId).pipe(
+              switchMap((item) => {
+                if (item) {
+                  this.estoqueItem = item; // Armazena o item de estoque
+                  return this.produtoService
+                    .getProdutoOnce(item.produtoUid)
+                    .pipe(
+                      tap((produto) => {
+                        this.associatedProduto = produto; // Armazena o produto associado
+                        this.initForm(item, produto); // Passa o produto para initForm
+                      })
+                    );
+                } else {
+                  alert('Item de estoque não encontrado!');
+                  this.router.navigate(['/estoque']);
+                  return new Observable<Produto | undefined>(); // Retorna um observable vazio ou de erro
+                }
+              })
+            );
+          }
+          return new Observable<EstoqueItem | undefined>();
+        })
+      )
+      .subscribe({
+        next: () => {}, // Nenhuma ação específica no next, o tap já lida com a atribuição
+        error: (err) => console.error('Erro ao carregar item ou produto:', err),
+      });
   }
 
   ngOnDestroy(): void {
-    if (this.routeSubscription) {
-      this.routeSubscription.unsubscribe();
+    if (this.itemSubscription) {
+      this.itemSubscription.unsubscribe();
+    }
+    if (this.currentUserSubscription) {
+      this.currentUserSubscription.unsubscribe();
     }
   }
 
-  async onSubmit(): Promise<void> {
-    if (this.estoqueForm.valid && this.itemId && this.currentItemEstoque) {
-      try {
-        const updatedItemEstoqueData: Partial<ItemEstoque> = {
-          quantidade: this.estoqueForm.value.quantidade,
-          dataValidade: this.estoqueForm.value.dataValidade
-            ? new Date(this.estoqueForm.value.dataValidade)
-            : undefined,
-          // dataUltimaEdicao será atualizada no serviço
-          // usuarioQueEditou será adicionado/atualizado no serviço
-        };
+  initForm(item: EstoqueItem, produto?: Produto): void {
+    this.estoqueForm = this.fb.group({
+      // produtoUid: [item.produtoUid, Validators.required], // Não é editável
+      nomeProduto: [{ value: produto ? produto.nome : '', disabled: true }], // Exibe nome do produto, desabilitado
+      lote: [{ value: item.lote, disabled: true }], // Lote não é editável
+      quantidade: [item.quantidade, [Validators.required, Validators.min(0)]], // Quantidade pode ser 0
+      dataValidade: [
+        item.dataValidade
+          ? item.dataValidade.toDate().toISOString().substring(0, 10)
+          : null,
+      ], // Formato para input type="date"
+      localizacao: [item.localizacao || '', Validators.required],
+    });
+  }
 
-        await this.estoqueService.updateItemEstoque(
-          this.itemId,
-          updatedItemEstoqueData
-        );
-        console.log('Item de estoque atualizado com sucesso!');
-        alert('Item de estoque atualizado com sucesso!');
-        this.router.navigate(['/estoque']);
-      } catch (error) {
-        console.error('Erro ao atualizar item de estoque:', error);
-        alert('Erro ao atualizar item de estoque. Tente novamente.');
-      }
-    } else {
-      alert(
-        'Por favor, preencha todos os campos obrigatórios e certifique-se de que o ID do item está disponível.'
-      );
+  async onSubmit(): Promise<void> {
+    if (this.estoqueForm.invalid) {
+      this.estoqueForm.markAllAsTouched();
+      return;
     }
+
+    if (!this.currentUserUid || !this.currentUserDisplayName) {
+      alert(
+        'Erro: Dados do usuário não disponíveis. Tente fazer login novamente.'
+      );
+      return;
+    }
+
+    // Obtenha os valores do formulário (incluindo campos desabilitados)
+    const { quantidade, dataValidade, localizacao } =
+      this.estoqueForm.getRawValue();
+
+    try {
+      if (!this.estoqueItem) {
+        alert('Erro: Item de estoque não carregado.');
+        return;
+      }
+
+      // Re-busca o produto apenas para garantir que os dados de nomeProduto e tipoProduto estejam atualizados,
+      // caso o produto original tenha sido modificado no Firestore.
+      // Ou, alternativamente, pode-se confiar nos dados já carregados em `this.associatedProduto`
+      // se não houver preocupação com atualizações concorrentes do produto.
+      const produtoAtualizado = await this.produtoService
+        .getProdutoOnce(this.estoqueItem.produtoUid)
+        .pipe(take(1))
+        .toPromise();
+
+      if (!produtoAtualizado) {
+        alert(
+          'Produto associado não encontrado ou foi removido. A edição não pode ser concluída.'
+        );
+        return;
+      }
+
+      const updatedItem: EstoqueItem = {
+        ...this.estoqueItem, // Mantém o UID e outras propriedades inalteradas, como produtoUid e dataCadastro
+        nomeProduto: produtoAtualizado.nome, // Atualiza nome do produto
+        tipoProduto: produtoAtualizado.tipo, // Atualiza tipo do produto
+        quantidade: quantidade,
+        dataValidade: dataValidade
+          ? Timestamp.fromDate(new Date(dataValidade))
+          : null,
+        localizacao: localizacao,
+        dataUltimaAtualizacao: Timestamp.now(), // Atualiza a data de última atualização
+        usuarioUltimaEdicaoUid: this.currentUserUid,
+        usuarioUltimaEdicaoNome: this.currentUserDisplayName,
+        imageUrl: produtoAtualizado.imageUrl || '', // Garante que a URL da imagem esteja atualizada
+      };
+
+      await this.estoqueService.updateEstoqueItem(updatedItem);
+      alert('Item de estoque atualizado com sucesso!');
+      this.router.navigate(['/estoque']);
+    } catch (error) {
+      console.error('Erro ao atualizar item de estoque:', error);
+      alert('Erro ao atualizar item de estoque. Verifique o console.');
+    }
+  }
+
+  goBack(): void {
+    this.router.navigate(['/estoque']);
   }
 }

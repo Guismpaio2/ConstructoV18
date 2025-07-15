@@ -3,32 +3,30 @@ import { EstoqueService } from '../../services/estoque.service';
 import { Observable, Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { take } from 'rxjs/operators';
-import { AuthService } from '../../auth/auth.service'; // Para controle de acesso via role
-import { ProdutoService } from '../../services/produto.service'; // Para obter nome do produto
+import { AuthService } from '../../auth/auth.service';
 import { EstoqueItem } from '../../models/item-estoque.model';
+import { Timestamp } from '@angular/fire/firestore'; // Importar Timestamp
 
 @Component({
   selector: 'app-estoque',
   templateUrl: './estoque.component.html',
-  styleUrls: ['./estoque.component.scss'],
+  styleUrls: ['./estoque.component.scss'], // Corrigido para .scss
 })
 export class EstoqueComponent implements OnInit, OnDestroy {
-  allEstoqueItems$: Observable<EstoqueItem[]>; // Observable de todos os itens de estoque
-  filteredEstoqueItems: EstoqueItem[] = []; // Array para exibição filtrada/ordenada
+  allEstoqueItems$: Observable<EstoqueItem[]>;
+  filteredEstoqueItems: EstoqueItem[] = [];
   private estoqueSubscription!: Subscription;
 
   searchTerm: string = '';
-  selectedProductFilter: string = ''; // Filtro por nome do produto
+  selectedProductFilter: string = '';
   selectedSort: string = 'nomeProduto_asc';
 
-  canAddEditDeleteRegisterBaixa: boolean = false; // Controle de permissão
+  canAddEditDeleteRegisterBaixa: boolean = false;
 
-  // Lista de nomes de produtos únicos para o filtro (para preencher o dropdown)
   productNamesForFilter: string[] = [];
 
   constructor(
     private estoqueService: EstoqueService,
-    private produtoService: ProdutoService, // Injetar ProdutoService
     private router: Router,
     private authService: AuthService
   ) {
@@ -36,18 +34,16 @@ export class EstoqueComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // Verifica a permissão do usuário logado
     this.authService
-      .isEstoquista()
+      .hasRole('estoquista') // Assumindo que 'estoquista' é a role para permissões completas
       .pipe(take(1))
-      .subscribe((isEstoquista) => {
-        this.canAddEditDeleteRegisterBaixa = isEstoquista;
+      .subscribe((hasEstoquistaRole) => {
+        this.canAddEditDeleteRegisterBaixa = hasEstoquistaRole;
       });
 
-    // Assina o observable de itens de estoque para aplicar filtros e ordenação
     this.estoqueSubscription = this.allEstoqueItems$.subscribe((items) => {
       this.applyFilterAndSort(items);
-      this.updateProductNamesForFilter(items); // Atualiza os nomes de produtos para o filtro
+      this.updateProductNamesForFilter(items);
     });
   }
 
@@ -66,7 +62,6 @@ export class EstoqueComponent implements OnInit, OnDestroy {
   applyFilterAndSort(items: EstoqueItem[]): void {
     let tempItems = [...items];
 
-    // 1. Filtrar
     if (this.searchTerm) {
       const lowerCaseSearch = this.searchTerm.toLowerCase();
       tempItems = tempItems.filter(
@@ -84,7 +79,6 @@ export class EstoqueComponent implements OnInit, OnDestroy {
       );
     }
 
-    // 2. Ordenar
     switch (this.selectedSort) {
       case 'nomeProduto_asc':
         tempItems.sort((a, b) => a.nomeProduto.localeCompare(b.nomeProduto));
@@ -132,7 +126,6 @@ export class EstoqueComponent implements OnInit, OnDestroy {
     this.filteredEstoqueItems = tempItems;
   }
 
-  // Método chamado pelo UI para aplicar filtros/ordenação
   triggerFilterAndSort(): void {
     this.allEstoqueItems$.pipe(take(1)).subscribe((items) => {
       this.applyFilterAndSort(items);
@@ -170,11 +163,36 @@ export class EstoqueComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Função para formatar o Timestamp para exibição
   formatTimestamp(timestamp: any): string {
     if (timestamp && timestamp.toDate) {
-      return timestamp.toDate().toLocaleDateString('pt-BR'); // Ex: DD/MM/YYYY
+      return timestamp.toDate().toLocaleDateString('pt-BR');
     }
-    return '';
+    return 'N/A'; // Retorna N/A se a data for nula
+  }
+
+  isExpired(item: EstoqueItem): boolean {
+    if (!item.dataValidade) {
+      return false; // Não tem validade, não está vencido
+    }
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Zera a hora para comparar apenas a data
+    const expiryDate = item.dataValidade.toDate();
+    expiryDate.setHours(0, 0, 0, 0);
+    return expiryDate < today;
+  }
+
+  isNearExpiry(item: EstoqueItem): boolean {
+    if (!item.dataValidade || this.isExpired(item)) {
+      return false; // Se não tem validade ou já venceu, não está "próximo"
+    }
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const expiryDate = item.dataValidade.toDate();
+    expiryDate.setHours(0, 0, 0, 0);
+
+    const diffTime = expiryDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    // Considerar "próximo do vencimento" se faltam 30 dias ou menos
+    return diffDays <= 30 && diffDays > 0;
   }
 }

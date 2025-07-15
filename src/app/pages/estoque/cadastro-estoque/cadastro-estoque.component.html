@@ -4,7 +4,7 @@
   </div>
 
   <div class="form-container mt-4">
-    <form [formGroup]="cadastroEstoqueForm" (ngSubmit)="onSubmit()">
+    <form [formGroup]="estoqueForm" (ngSubmit)="onSubmit()">
       <div class="form-group">
         <label for="produtoUid">Produto:</label>
         <select
@@ -22,10 +22,11 @@
         </select>
         <div
           *ngIf="
-            cadastroEstoqueForm.get('produtoUid')?.invalid &&
-            cadastroEstoqueForm.get('produtoUid')?.touched
+            estoqueForm.get('produtoUid')?.invalid &&
+            estoqueForm.get('produtoUid')?.touched
           "
-          class="text-danger"
+          class="error-message"
+          role="alert"
         >
           Produto é obrigatório.
         </div>
@@ -54,10 +55,10 @@
         />
         <div
           *ngIf="
-            cadastroEstoqueForm.get('lote')?.invalid &&
-            cadastroEstoqueForm.get('lote')?.touched
+            estoqueForm.get('lote')?.invalid && estoqueForm.get('lote')?.touched
           "
-          class="text-danger"
+          class="error-message"
+          role="alert"
         >
           Lote é obrigatório.
         </div>
@@ -74,12 +75,18 @@
         />
         <div
           *ngIf="
-            cadastroEstoqueForm.get('quantidade')?.invalid &&
-            cadastroEstoqueForm.get('quantidade')?.touched
+            estoqueForm.get('quantidade')?.invalid &&
+            estoqueForm.get('quantidade')?.touched
           "
-          class="text-danger"
+          class="error-message"
+          role="alert"
         >
-          Quantidade é obrigatória e deve ser maior que 0.
+          <div *ngIf="estoqueForm.get('quantidade')?.errors?.['required']">
+            Quantidade é obrigatória.
+          </div>
+          <div *ngIf="estoqueForm.get('quantidade')?.errors?.['min']">
+            Quantidade deve ser maior que 0.
+          </div>
         </div>
       </div>
 
@@ -94,7 +101,7 @@
       </div>
 
       <div class="form-group">
-        <label for="localizacao">Localização no Estoque (opcional):</label>
+        <label for="localizacao">Localização no Estoque:</label>
         <input
           id="localizacao"
           type="text"
@@ -102,17 +109,27 @@
           class="form-control"
           placeholder="Ex: Corredor A, Prateleira 3"
         />
+        <div
+          *ngIf="
+            estoqueForm.get('localizacao')?.invalid &&
+            estoqueForm.get('localizacao')?.touched
+          "
+          class="error-message"
+          role="alert"
+        >
+          Localização é obrigatória.
+        </div>
       </div>
 
       <div class="form-actions mt-4">
         <button
           type="submit"
-          class="btn btn-primary"
-          [disabled]="cadastroEstoqueForm.invalid"
+          class="btn primary"
+          [disabled]="estoqueForm.invalid"
         >
           <i class="fas fa-save"></i> Adicionar ao Estoque
         </button>
-        <button type="button" class="btn btn-secondary ml-2" (click)="goBack()">
+        <button type="button" class="btn secondary ms-2" (click)="goBack()">
           <i class="fas fa-arrow-left"></i> Voltar
         </button>
       </div>

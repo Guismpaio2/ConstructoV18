@@ -3,13 +3,12 @@ import { Injectable } from '@angular/core';
 import {
   AngularFirestore,
   AngularFirestoreCollection,
-  AngularFirestoreDocument,
 } from '@angular/fire/compat/firestore';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { Produto } from '../models/produto.model';
+import { map, take } from 'rxjs/operators';
 import { Timestamp } from '@angular/fire/firestore';
 import { AuthService } from '../auth/auth.service';
+import { Produto } from '../models/produto.model';
 
 @Injectable({
   providedIn: 'root',
@@ -21,69 +20,58 @@ export class ProdutoService {
     this.produtosCollection = this.afs.collection<Produto>('produtos');
   }
 
-  async addProduto(
-    produto: Omit<
-      Produto,
-      | 'uid'
-      | 'dataCadastro'
-      | 'dataUltimaEdicao'
-      | 'usuarioUltimaEdicaoUid'
-      | 'usuarioUltimaEdicaoNome'
-    >
-  ): Promise<string> {
+  createId(): string {
+    return this.afs.createId();
+  }
+
+  async addProduto(produto: Omit<Produto, 'uid'>): Promise<void> {
+    const uid = this.afs.createId();
     const currentUserUid = await this.authService.getCurrentUserUid();
     const currentUserDisplayName =
       await this.authService.getCurrentUserDisplayName();
-    const newProduto: Produto = {
+
+    const produtoComId: Produto = {
       ...produto,
-      uid: this.afs.createId(),
-      dataCadastro: Timestamp.fromDate(new Date()),
-      dataUltimaEdicao: Timestamp.fromDate(new Date()),
+      uid: uid,
+      dataCadastro: Timestamp.now(),
+      dataUltimaEdicao: Timestamp.now(), // <--- MUDANÇA AQUI: de dataUltimaAtualizacao para dataUltimaEdicao
       usuarioUltimaEdicaoUid: currentUserUid || 'unknown',
-      usuarioUltimaEdicaoNome: currentUserDisplayName || 'Usuário Desconhecido',
+      usuarioUltimaEdicaoNome: currentUserDisplayName || 'Desconhecido',
     };
-    await this.produtosCollection.doc(newProduto.uid).set(newProduto);
-    return newProduto.uid;
+    return this.produtosCollection.doc(uid).set(produtoComId);
   }
 
-  // Obter todos os produtos
   getProdutos(): Observable<Produto[]> {
-    return this.produtosCollection.snapshotChanges().pipe(
-      map((actions) =>
-        actions.map((a) => {
-          const data = a.payload.doc.data() as Produto;
-          const uid = a.payload.doc.id;
-          // CORREÇÃO: Desestrutura 'data' para remover 'uid' antes de espalhar
-          const { uid: _, ...restOfData } = data; // Renomeia 'uid' para '_', que é ignorado
-          return { uid, ...restOfData }; // Adiciona o 'uid' do documento e o resto dos dados
-        })
-      )
-    );
+    return this.produtosCollection.valueChanges({ idField: 'uid' });
   }
-
-  // ... (restante do código permanece o mesmo)
 
   getProduto(uid: string): Observable<Produto | undefined> {
+    return this.produtosCollection.doc<Produto>(uid).valueChanges();
+  }
+
+  getProdutoOnce(uid: string): Observable<Produto | undefined> {
     return this.produtosCollection
       .doc<Produto>(uid)
       .valueChanges()
-      .pipe(map((produto) => (produto ? { ...produto, uid: uid } : undefined)));
+      .pipe(take(1));
   }
 
-  async updateProduto(uid: string, changes: Partial<Produto>): Promise<void> {
+  async updateProduto(
+    uid: string, // Adicionado uid como primeiro parâmetro
+    updatedFields: Partial<Produto> // Mudado para Partial<Produto>
+  ): Promise<void> {
     const currentUserUid = await this.authService.getCurrentUserUid();
     const currentUserDisplayName =
       await this.authService.getCurrentUserDisplayName();
-    const productRef: AngularFirestoreDocument<Produto> = this.afs.doc(
-      `produtos/${uid}`
-    );
-    const updatedChanges = {
-      ...changes,
-      dataUltimaEdicao: Timestamp.fromDate(new Date()),
+
+    const produtoAtualizado: Partial<Produto> = {
+      ...updatedFields, // Usa os campos passados para a atualização
+      dataUltimaEdicao: Timestamp.now(), // <--- MUDANÇA AQUI: de dataUltimaAtualizacao para dataUltimaEdicao
       usuarioUltimaEdicaoUid: currentUserUid || 'unknown',
-      usuarioUltimaEdicaoNome: currentUserDisplayName || 'Usuário Desconhecido',
+      usuarioUltimaEdicaoNome: currentUserDisplayName || 'Desconhecido',
     };
-    return productRef.update(updatedChanges);
+    // Atualiza apenas os campos fornecidos, incluindo os campos de auditoria
+    return this.produtosCollection.doc(uid).update(produtoAtualizado);
   }
 
   deleteProduto(uid: string): Promise<void> {

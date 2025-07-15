@@ -1,3 +1,5 @@
+/* src/app/pages/estoque/estoque.component.scss */
+
 @import "../../../styles/variables";
 @import "../../../styles/styles";
 
@@ -119,7 +121,8 @@
     gap: $spacing-xxs;
   }
 
-  .btn-info {
+  .btn.info {
+    // Usando a classe .info que você definiu em _styles.scss
     background-color: $color-info;
     color: $color-text-light;
     &:hover {
@@ -127,7 +130,8 @@
     }
   }
 
-  .btn-danger {
+  .btn.danger {
+    // Usando a classe .danger que você definiu em _styles.scss
     background-color: $color-alert;
     color: $color-text-light;
     &:hover {
@@ -135,7 +139,8 @@
     }
   }
 
-  .ml-2 {
+  .ms-2 {
+    // Equivalente a ml-2 no Bootstrap 5+
     margin-left: $spacing-xs;
   }
 

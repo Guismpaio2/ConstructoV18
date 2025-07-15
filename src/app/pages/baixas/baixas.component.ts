@@ -1,173 +1,167 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { EstoqueService } from '../../services/estoque.service';
-import { EstoqueItem } from '../../models/item-estoque.model'; // Agora importa EstoqueItem
-import { Observable, Subscription, combineLatest, of } from 'rxjs';
-import { map, switchMap, take } from 'rxjs/operators';
-import { AuthService } from '../../auth/auth.service';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  ValidatorFn,
+  AbstractControl,
+} from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Observable, Subscription, of } from 'rxjs';
+import { map, startWith, switchMap, take } from 'rxjs/operators';
 import { Timestamp } from '@angular/fire/firestore';
+import { EstoqueItem } from '../../models/item-estoque.model';
 import { User } from '../../models/user.model';
-// import { Baixa } from '../../models/baixa.model'; // REMOVIDO: Não usaremos mais 'Baixa'
-import { BaixaService } from '../../services/baixa.service'; // CORRIGIDO: Import do service
-import { BaixaEstoque } from '../../models/baixa-estoque.model'; // NOVO: Importa BaixaEstoque
-
-// Interface para combinar BaixaEstoque com EstoqueItem (para exibir nome do produto, lote, etc.)
-interface BaixaWithItemProduto extends BaixaEstoque {
-  // CORRIGIDO: Estende BaixaEstoque
-  itemEstoque: EstoqueItem | null; // Tipo para EstoqueItem, pode ser nulo
-  // nomeProduto e loteProduto já estão em BaixaEstoque. Vamos mantê-los para o mapeamento
-  // e garantir que eles sejam preenchidos a partir do itemEstoque, se disponível.
-  // Caso contrário, os campos da própria BaixaEstoque serão usados.
-  nomeProduto: string | null; // Redundantemente aqui para mapear do ItemEstoque
-  loteProduto: string | null; // Redundantemente aqui para mapear do ItemEstoque
-}
+import { EstoqueService } from '../../services/estoque.service';
+import { BaixaService } from '../../services/baixa.service';
+import { AuthService } from '../../auth/auth.service';
+import { BaixaEstoque } from '../../models/baixa-estoque.model';
 
 @Component({
-  selector: 'app-baixas',
+  selector: 'app-baixas', // Mantém o seletor original
   templateUrl: './baixas.component.html',
   styleUrls: ['./baixas.component.scss'],
 })
 export class BaixasComponent implements OnInit, OnDestroy {
-  baixas$!: Observable<BaixaWithItemProduto[]>;
-  filteredBaixas: BaixaWithItemProduto[] = [];
-  private baixasSubscription!: Subscription;
-  currentUser: User | null = null;
-  isAdmin: boolean = false;
-  isEstoquista: boolean = false;
+  baixaForm!: FormGroup;
+  itensEstoque$!: Observable<EstoqueItem[]>;
+  private currentUserSubscription!: Subscription;
+  private currentUser: User | null = null;
+  selectedItemStockQuantity: number = 0;
+  selectedEstoqueItem: EstoqueItem | null | undefined = null;
 
-  searchTerm: string = '';
-  selectedSort: string = 'data_baixa_desc';
+  // Não precisamos mais de 'preselectedItemUid' se não viermos de uma tela de seleção anterior.
+  // Se você ainda quiser que o usuário possa selecionar um item e a quantidade,
+  // manteremos o select de itemEstoqueUid.
 
   constructor(
-    private baixaService: BaixaService,
+    private fb: FormBuilder,
     private estoqueService: EstoqueService,
-    private authService: AuthService
+    private baixaService: BaixaService,
+    private authService: AuthService,
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
-    this.authService.user$.subscribe((user) => {
-      this.currentUser = user;
-      this.isAdmin = user?.role === 'Administrador';
+    this.currentUserSubscription = this.authService.user$.subscribe((user) => {
+      this.currentUser = user || null;
     });
 
-    this.authService
-      .isEstoquista()
-      .pipe(take(1))
-      .subscribe((isEstoquista) => {
-        this.isEstoquista = isEstoquista;
+    this.initForm();
+
+    this.itensEstoque$ = this.estoqueService
+      .getEstoqueItems()
+      .pipe(map((items) => items.filter((item) => item.quantidade > 0)));
+
+    this.baixaForm
+      .get('itemEstoqueUid')
+      ?.valueChanges.pipe(
+        startWith(null), // Inicia sem item selecionado
+        switchMap((uid) => {
+          if (uid) {
+            return this.estoqueService.getEstoqueItem(uid);
+          } else {
+            return of(undefined);
+          }
+        })
+      )
+      .subscribe((item) => {
+        this.selectedEstoqueItem = item;
+        this.selectedItemStockQuantity = item ? item.quantidade : 0;
+        // Atualiza a validade do campo quantidadeBaixada sempre que o item muda
+        this.baixaForm.get('quantidadeBaixada')?.updateValueAndValidity();
       });
-
-    this.baixas$ = this.baixaService.getBaixas().pipe(
-      switchMap((baixas) => {
-        if (baixas.length === 0) {
-          return of([]);
-        }
-        const baixaObservables = baixas.map((baixa) =>
-          // CORRIGIDO: Chamando estoqueService.getEstoqueItem (singular)
-          this.estoqueService.getEstoqueItem(baixa.estoqueItemUid).pipe(
-            map((itemEstoque) => ({
-              ...baixa,
-              itemEstoque: itemEstoque || null,
-              // Preenche nomeProduto e loteProduto. Prioriza o itemEstoque, senão usa os dados da própria baixa
-              nomeProduto:
-                itemEstoque?.nomeProduto || baixa.nomeProduto || null,
-              loteProduto: itemEstoque?.lote || baixa.loteItemEstoque || null,
-            }))
-          )
-        );
-        return combineLatest(baixaObservables);
-      })
-    );
-
-    this.baixasSubscription = this.baixas$.subscribe((baixas) => {
-      this.applyFilterAndSort(baixas);
-    });
   }
 
   ngOnDestroy(): void {
-    if (this.baixasSubscription) {
-      this.baixasSubscription.unsubscribe();
+    if (this.currentUserSubscription) {
+      this.currentUserSubscription.unsubscribe();
     }
   }
 
-  applyFilterAndSort(baixas: BaixaWithItemProduto[]): void {
-    let tempBaixas = [...baixas];
-
-    // 1. Filtrar
-    if (this.searchTerm) {
-      const lowerCaseSearch = this.searchTerm.toLowerCase();
-      tempBaixas = tempBaixas.filter(
-        (baixa) =>
-          (baixa.nomeProduto || '').toLowerCase().includes(lowerCaseSearch) ||
-          (baixa.loteProduto || '').toLowerCase().includes(lowerCaseSearch) ||
-          baixa.motivo.toLowerCase().includes(lowerCaseSearch) ||
-          baixa.usuarioResponsavelNome?.toLowerCase().includes(lowerCaseSearch) // CORRIGIDO: usuarioResponsavelNome
-      );
-    }
-
-    // 2. Ordenar
-    switch (this.selectedSort) {
-      case 'data_baixa_asc':
-        tempBaixas.sort(
-          (a, b) => a.dataBaixa.toMillis() - b.dataBaixa.toMillis()
-        );
-        break;
-      case 'data_baixa_desc':
-        tempBaixas.sort(
-          (a, b) => b.dataBaixa.toMillis() - a.dataBaixa.toMillis()
-        );
-        break;
-      case 'usuario_asc':
-        // CORRIGIDO: Adiciona verificação de null/undefined para safe compare
-        tempBaixas.sort((a, b) =>
-          (a.usuarioResponsavelNome || '').localeCompare(
-            b.usuarioResponsavelNome || ''
-          )
-        );
-        break;
-      case 'usuario_desc':
-        // CORRIGIDO: Adiciona verificação de null/undefined para safe compare
-        tempBaixas.sort((a, b) =>
-          (b.usuarioResponsavelNome || '').localeCompare(
-            a.usuarioResponsavelNome || ''
-          )
-        );
-        break;
-      default:
-        break;
-    }
-    this.filteredBaixas = tempBaixas;
-  }
-
-  onSearch(): void {
-    // A subscription já está ativa no ngOnInit, então o applyFilterAndSort será chamado automaticamente
-    // quando a lista de baixas for atualizada, ou quando o searchTerm mudar (via ngModelChange ou keyup.enter).
-    // Não é estritamente necessário re-assinar o observable aqui, mas não causa problema grave.
-    // Para otimização, poderia se basear em um BehaviorSubject para filteredBaixas.
-    this.baixas$.subscribe((baixas) => {
-      this.applyFilterAndSort(baixas);
+  initForm(): void {
+    this.baixaForm = this.fb.group({
+      itemEstoqueUid: ['', Validators.required],
+      quantidadeBaixada: [
+        '',
+        [Validators.required, Validators.min(1), this.stockQuantityValidator()],
+      ],
+      motivo: ['', Validators.required],
+      observacoes: [''],
     });
   }
 
-  onSortChange(): void {
-    // Similar ao onSearch, a subscription já está ativa.
-    this.baixas$.subscribe((baixas) => {
-      this.applyFilterAndSort(baixas);
-    });
-  }
-
-  async onDeleteBaixa(baixaId: string): Promise<void> {
-    if (
-      confirm(
-        'Tem certeza que deseja excluir este registro de baixa? Esta ação é irreversível.'
-      )
-    ) {
-      try {
-        await this.baixaService.deleteBaixa(baixaId);
-        alert('Registro de baixa excluído com sucesso!');
-      } catch (error) {
-        console.error('Erro ao excluir registro de baixa:', error);
-        alert('Erro ao excluir registro de baixa. Verifique as permissões.');
+  // Validator customizado para a quantidade
+  stockQuantityValidator(): ValidatorFn {
+    return (control: AbstractControl): { [key: string]: any } | null => {
+      const quantidadeBaixada = control.value;
+      if (
+        this.selectedEstoqueItem &&
+        quantidadeBaixada > this.selectedEstoqueItem.quantidade
+      ) {
+        return { exceedsStock: true };
       }
+      return null;
+    };
+  }
+
+  async onSubmit(): Promise<void> {
+    if (this.baixaForm.invalid) {
+      this.baixaForm.markAllAsTouched();
+      return;
     }
+
+    if (!this.currentUser) {
+      alert('Erro: Usuário não autenticado.');
+      return;
+    }
+
+    if (!this.selectedEstoqueItem) {
+      alert('Erro: Item de estoque não selecionado ou inválido.');
+      return;
+    }
+
+    const { itemEstoqueUid, quantidadeBaixada, motivo, observacoes } =
+      this.baixaForm.value;
+
+    try {
+      const novaBaixa: BaixaEstoque = {
+        uid: this.baixaService.createId(),
+        estoqueItemUid: itemEstoqueUid,
+        produtoUid: this.selectedEstoqueItem.produtoUid,
+        nomeProduto: this.selectedEstoqueItem.nomeProduto,
+        loteItemEstoque: this.selectedEstoqueItem.lote,
+        quantidadeBaixada: quantidadeBaixada,
+        motivo: motivo,
+        observacoes: observacoes,
+        usuarioResponsavelUid: this.currentUser.uid,
+        usuarioResponsavelNome:
+          this.currentUser.nome + ' ' + this.currentUser.sobrenome,
+        dataBaixa: Timestamp.now(),
+      };
+
+      await this.baixaService.addBaixa(novaBaixa);
+
+      const novaQuantidadeEstoque =
+        this.selectedEstoqueItem.quantidade - quantidadeBaixada;
+      await this.estoqueService.updateEstoqueItemQuantity(
+        itemEstoqueUid,
+        novaQuantidadeEstoque
+      );
+
+      alert('Baixa de estoque registrada e estoque atualizado com sucesso!');
+      this.baixaForm.reset();
+      this.router.navigate(['/registros-baixas']); // Redireciona para a lista de baixas
+    } catch (error) {
+      console.error('Erro ao registrar baixa ou atualizar estoque:', error);
+      alert('Erro ao registrar baixa. Verifique o console para mais detalhes.');
+    }
+  }
+
+  // Não haverá um "voltar" para uma tela de seleção se esta for a tela inicial de baixa.
+  // Pode ser um botão para ir para a tela de registros de baixa, ou simplesmente não ter.
+  goToRegistrosBaixas(): void {
+    this.router.navigate(['/registros-baixas']);
   }
 }
