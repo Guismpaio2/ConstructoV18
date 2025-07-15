@@ -1,65 +1,64 @@
 <div class="main-content-container">
   <div class="page-header">
     <h1>Cadastrar Novo Produto</h1>
-    <button class="btn btn-secondary" routerLink="/produtos">
-      Voltar para Produtos
-    </button>
   </div>
 
-  <div class="form-card">
-    <form [formGroup]="produtoForm" (ngSubmit)="onSubmit()">
+  <div class="form-container mt-4">
+    <form [formGroup]="cadastroProdutoForm" (ngSubmit)="onSubmit()">
       <div class="form-group">
         <label for="nome">Nome do Produto:</label>
         <input
-          type="text"
           id="nome"
+          type="text"
           formControlName="nome"
           class="form-control"
-          placeholder="Ex: Cimento Portland"
+          placeholder="Ex: Tinta Acrílica Branca"
         />
         <div
           *ngIf="
-            produtoForm.get('nome')?.invalid && produtoForm.get('nome')?.touched
+            cadastroProdutoForm.get('nome')?.invalid &&
+            cadastroProdutoForm.get('nome')?.touched
           "
-          class="error-message"
+          class="text-danger"
         >
           Nome é obrigatório.
         </div>
       </div>
 
       <div class="form-group">
-        <label for="lote">Lote:</label>
-        <input
-          type="text"
-          id="lote"
-          formControlName="lote"
+        <label for="descricao">Descrição:</label>
+        <textarea
+          id="descricao"
+          formControlName="descricao"
           class="form-control"
-          placeholder="Ex: LOTE-ABC-123"
-        />
+          rows="3"
+          placeholder="Ex: Tinta à base de água para ambientes internos e externos."
+        ></textarea>
         <div
           *ngIf="
-            produtoForm.get('lote')?.invalid && produtoForm.get('lote')?.touched
+            cadastroProdutoForm.get('descricao')?.invalid &&
+            cadastroProdutoForm.get('descricao')?.touched
           "
-          class="error-message"
+          class="text-danger"
         >
-          Lote é obrigatório.
+          Descrição é obrigatória.
         </div>
       </div>
 
       <div class="form-group">
         <label for="tipo">Tipo:</label>
-        <input
-          type="text"
-          id="tipo"
-          formControlName="tipo"
-          class="form-control"
-          placeholder="Ex: Cimento, Tijolo, Areia"
-        />
+        <select id="tipo" formControlName="tipo" class="form-control">
+          <option value="" disabled>Selecione um tipo</option>
+          <option *ngFor="let tipo of tiposProduto" [value]="tipo">
+            {{ tipo }}
+          </option>
+        </select>
         <div
           *ngIf="
-            produtoForm.get('tipo')?.invalid && produtoForm.get('tipo')?.touched
+            cadastroProdutoForm.get('tipo')?.invalid &&
+            cadastroProdutoForm.get('tipo')?.touched
           "
-          class="error-message"
+          class="text-danger"
         >
           Tipo é obrigatório.
         </div>
@@ -68,52 +67,58 @@
       <div class="form-group">
         <label for="marca">Marca:</label>
         <input
-          type="text"
           id="marca"
+          type="text"
           formControlName="marca"
           class="form-control"
-          placeholder="Ex: Votorantim, Gerdau"
+          placeholder="Ex: Coral, Suvinil"
         />
         <div
           *ngIf="
-            produtoForm.get('marca')?.invalid &&
-            produtoForm.get('marca')?.touched
+            cadastroProdutoForm.get('marca')?.invalid &&
+            cadastroProdutoForm.get('marca')?.touched
           "
-          class="error-message"
+          class="text-danger"
         >
           Marca é obrigatória.
         </div>
       </div>
 
       <div class="form-group">
-        <label for="descricao">Descrição (Opcional):</label>
-        <textarea
-          id="descricao"
-          formControlName="descricao"
+        <label for="unidadeMedida">Unidade de Medida:</label>
+        <select
+          id="unidadeMedida"
+          formControlName="unidadeMedida"
           class="form-control"
-          rows="3"
-          placeholder="Detalhes adicionais sobre o produto"
-        ></textarea>
+        >
+          <option value="" disabled>Selecione a unidade</option>
+          <option *ngFor="let unidade of unidadesMedida" [value]="unidade">
+            {{ unidade }}
+          </option>
+        </select>
+        <div
+          *ngIf="
+            cadastroProdutoForm.get('unidadeMedida')?.invalid &&
+            cadastroProdutoForm.get('unidadeMedida')?.touched
+          "
+          class="text-danger"
+        >
+          Unidade de Medida é obrigatória.
+        </div>
       </div>
 
-      <div class="form-group">
-        <label for="image">Imagem do Produto (Opcional):</label>
-        <input
-          type="file"
-          id="image"
-          (change)="onFileSelected($event)"
-          accept="image/*"
-          class="form-control-file"
-        />
+      <div class="form-actions mt-4">
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="cadastroProdutoForm.invalid"
+        >
+          <i class="fas fa-save"></i> Salvar Produto
+        </button>
+        <button type="button" class="btn btn-secondary ml-2" (click)="goBack()">
+          <i class="fas fa-arrow-left"></i> Voltar
+        </button>
       </div>
-
-      <button
-        type="submit"
-        class="btn btn-primary"
-        [disabled]="produtoForm.invalid"
-      >
-        Cadastrar Produto
-      </button>
     </form>
   </div>
 </div>

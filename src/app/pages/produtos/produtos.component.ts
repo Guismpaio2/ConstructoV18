@@ -2,10 +2,9 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ProdutoService } from '../../services/produto.service';
 import { Produto } from '../../models/produto.model';
 import { Observable, Subscription } from 'rxjs';
-import { AuthService } from '../../auth/auth.service';
-import { map } from 'rxjs/operators';
-import { Timestamp } from '@angular/fire/firestore'; // Adicione este import!
-import { User } from '../../models/user.model';
+import { Router } from '@angular/router';
+import { take } from 'rxjs/operators';
+import { AuthService } from '../../auth/auth.service'; // Para controle de acesso via role
 
 @Component({
   selector: 'app-produtos',
@@ -13,124 +12,130 @@ import { User } from '../../models/user.model';
   styleUrls: ['./produtos.component.scss'],
 })
 export class ProdutosComponent implements OnInit, OnDestroy {
-  produtos$!: Observable<Produto[]>;
-  filteredProdutos: Produto[] = [];
-  private produtosSubscription!: Subscription;
-  currentUser: User | null = null;
-  isAdmin: boolean = false;
-  isEstoquista: boolean = false;
+  allProducts$: Observable<Produto[]>; // Observable que obtém todos os produtos do serviço
+  filteredProducts: Produto[] = []; // Array que armazena os produtos filtrados e ordenados para exibição
+  private productsSubscription!: Subscription;
 
   searchTerm: string = '';
+  selectedTypeFilter: string = '';
   selectedSort: string = 'nome_asc';
+
+  canAddEditDelete: boolean = false; // Controle de permissão para adicionar/editar/excluir
 
   constructor(
     private produtoService: ProdutoService,
+    private router: Router,
     private authService: AuthService
-  ) {}
+  ) {
+    this.allProducts$ = this.produtoService.getProdutos();
+  }
 
   ngOnInit(): void {
-    // Obter o usuário logado e suas permissões
-    this.authService.user$.subscribe((user) => {
-      this.currentUser = user;
-      this.isAdmin = user?.role === 'Administrador';
-      this.isEstoquista = user?.role === 'Estoquista';
-      // Reaplicar filtros caso as permissões afetem a exibição (não essencial para este erro, mas boa prática)
-      this.applyFilterAndSort(this.filteredProdutos);
-    });
+    // Verifica a permissão do usuário logado para adicionar/editar/excluir produtos
+    this.authService
+      .isEstoquista()
+      .pipe(take(1))
+      .subscribe((isEstoquista) => {
+        this.canAddEditDelete = isEstoquista;
+      });
 
-    this.produtos$ = this.produtoService.getProdutos();
-
-    this.produtosSubscription = this.produtos$.subscribe((produtos) => {
-      this.applyFilterAndSort(produtos);
+    this.productsSubscription = this.allProducts$.subscribe((products) => {
+      this.applyFilterAndSort(products);
     });
   }
 
   ngOnDestroy(): void {
-    if (this.produtosSubscription) {
-      this.produtosSubscription.unsubscribe();
+    if (this.productsSubscription) {
+      this.productsSubscription.unsubscribe();
     }
   }
 
-  applyFilterAndSort(produtos: Produto[]): void {
-    let tempProdutos = [...produtos];
+  applyFilterAndSort(products: Produto[]): void {
+    let tempProducts = [...products];
 
     // 1. Filtrar
     if (this.searchTerm) {
       const lowerCaseSearch = this.searchTerm.toLowerCase();
-      tempProdutos = tempProdutos.filter(
-        (produto) =>
-          produto.nome.toLowerCase().includes(lowerCaseSearch) ||
-          produto.lote.toLowerCase().includes(lowerCaseSearch) ||
-          produto.tipo.toLowerCase().includes(lowerCaseSearch) ||
-          produto.marca.toLowerCase().includes(lowerCaseSearch) ||
-          (produto.descricao &&
-            produto.descricao.toLowerCase().includes(lowerCaseSearch))
+      tempProducts = tempProducts.filter(
+        (product) =>
+          product.nome.toLowerCase().includes(lowerCaseSearch) ||
+          product.descricao.toLowerCase().includes(lowerCaseSearch) ||
+          product.marca.toLowerCase().includes(lowerCaseSearch) ||
+          product.tipo.toLowerCase().includes(lowerCaseSearch)
+      );
+    }
+
+    if (this.selectedTypeFilter) {
+      tempProducts = tempProducts.filter(
+        (product) => product.tipo === this.selectedTypeFilter
       );
     }
 
     // 2. Ordenar
     switch (this.selectedSort) {
       case 'nome_asc':
-        tempProdutos.sort((a, b) => a.nome.localeCompare(b.nome));
+        tempProducts.sort((a, b) => a.nome.localeCompare(b.nome));
         break;
       case 'nome_desc':
-        tempProdutos.sort((a, b) => b.nome.localeCompare(a.nome));
+        tempProducts.sort((a, b) => b.nome.localeCompare(a.nome));
         break;
-      case 'lote_asc':
-        tempProdutos.sort((a, b) => a.lote.localeCompare(b.lote));
+      case 'tipo_asc':
+        tempProducts.sort((a, b) => a.tipo.localeCompare(b.tipo));
         break;
-      case 'lote_desc':
-        tempProdutos.sort((a, b) => b.lote.localeCompare(a.lote));
+      case 'tipo_desc':
+        tempProducts.sort((a, b) => b.tipo.localeCompare(a.tipo));
         break;
-      case 'data_cadastro_asc':
-        // Usa toMillis() para comparar Timestamps diretamente
-        tempProdutos.sort(
-          (a, b) =>
-            (a.dataCadastro?.toMillis() || 0) -
-            (b.dataCadastro?.toMillis() || 0)
-        );
+      case 'marca_asc':
+        tempProducts.sort((a, b) => a.marca.localeCompare(b.marca));
         break;
-      case 'data_cadastro_desc':
-        // Usa toMillis() para comparar Timestamps diretamente
-        tempProdutos.sort(
-          (a, b) =>
-            (b.dataCadastro?.toMillis() || 0) -
-            (a.dataCadastro?.toMillis() || 0)
-        );
+      case 'marca_desc':
+        tempProducts.sort((a, b) => b.marca.localeCompare(a.marca));
         break;
       default:
         break;
     }
-    this.filteredProdutos = tempProdutos;
+    this.filteredProducts = tempProducts;
   }
 
-  onSearch(): void {
-    this.produtos$.subscribe((produtos) => {
-      this.applyFilterAndSort(produtos);
+  // Método chamado pelo UI para aplicar filtros/ordenação
+  triggerFilterAndSort(): void {
+    this.allProducts$.pipe(take(1)).subscribe((products) => {
+      this.applyFilterAndSort(products);
     });
   }
 
-  onSortChange(): void {
-    this.produtos$.subscribe((produtos) => {
-      this.applyFilterAndSort(produtos);
-    });
+  goToAddProduct(): void {
+    this.router.navigate(['/cadastro-produto']);
   }
 
-  async onDeleteProduto(produtoId: string): Promise<void> {
+  goToEditProduct(uid: string): void {
+    this.router.navigate(['/edicao-produto', uid]);
+  }
+
+  onDeleteProduct(uid: string, productName: string): void {
     if (
       confirm(
-        'Tem certeza que deseja excluir este produto? Esta ação é irreversível e removerá todas as informações relacionadas a este produto.'
+        `Tem certeza que deseja excluir o produto "${productName}"? Esta ação é irreversível.`
       )
     ) {
-      try {
-        await this.produtoService.deleteProduto(produtoId);
-        alert('Produto excluído com sucesso!');
-      } catch (error) {
-        console.error('Erro ao excluir produto:', error);
-        alert(
-          'Erro ao excluir produto. Certifique-se de que não há itens de estoque ou baixas associadas a este produto.'
-        );
-      }
+      this.produtoService
+        .deleteProduto(uid)
+        .then(() => {
+          console.log('Produto excluído com sucesso!');
+          alert('Produto excluído com sucesso!');
+        })
+        .catch((error) => {
+          console.error('Erro ao excluir produto:', error);
+          alert('Erro ao excluir produto. Verifique as permissões.');
+        });
     }
+  }
+
+  // Função para formatar o Timestamp para exibição
+  formatTimestamp(timestamp: any): string {
+    if (timestamp && timestamp.toDate) {
+      return timestamp.toDate().toLocaleDateString('pt-BR'); // Ex: DD/MM/YYYY
+    }
+    return '';
   }
 }

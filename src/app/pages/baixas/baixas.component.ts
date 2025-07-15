@@ -1,19 +1,24 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { EstoqueService } from '../../services/estoque.service'; // Este serviço será implementado em breve
-import { ItemEstoque } from '../../models/item-estoque.model';
+import { EstoqueService } from '../../services/estoque.service';
+import { EstoqueItem } from '../../models/item-estoque.model'; // Agora importa EstoqueItem
 import { Observable, Subscription, combineLatest, of } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { map, switchMap, take } from 'rxjs/operators';
 import { AuthService } from '../../auth/auth.service';
 import { Timestamp } from '@angular/fire/firestore';
 import { User } from '../../models/user.model';
-import { Baixa } from '../../models/baixa.model';
-import { BaixaService } from '../../services/baixa-estoque.service';
+// import { Baixa } from '../../models/baixa.model'; // REMOVIDO: Não usaremos mais 'Baixa'
+import { BaixaService } from '../../services/baixa.service'; // CORRIGIDO: Import do service
+import { BaixaEstoque } from '../../models/baixa-estoque.model'; // NOVO: Importa BaixaEstoque
 
-// Interface para combinar Baixa com ItemEstoque e Produto (para exibir nome do produto)
-interface BaixaWithItemProduto extends Baixa {
-  itemEstoque: ItemEstoque | null;
-  nomeProduto: string | null;
-  loteProduto: string | null;
+// Interface para combinar BaixaEstoque com EstoqueItem (para exibir nome do produto, lote, etc.)
+interface BaixaWithItemProduto extends BaixaEstoque {
+  // CORRIGIDO: Estende BaixaEstoque
+  itemEstoque: EstoqueItem | null; // Tipo para EstoqueItem, pode ser nulo
+  // nomeProduto e loteProduto já estão em BaixaEstoque. Vamos mantê-los para o mapeamento
+  // e garantir que eles sejam preenchidos a partir do itemEstoque, se disponível.
+  // Caso contrário, os campos da própria BaixaEstoque serão usados.
+  nomeProduto: string | null; // Redundantemente aqui para mapear do ItemEstoque
+  loteProduto: string | null; // Redundantemente aqui para mapear do ItemEstoque
 }
 
 @Component({
@@ -27,9 +32,10 @@ export class BaixasComponent implements OnInit, OnDestroy {
   private baixasSubscription!: Subscription;
   currentUser: User | null = null;
   isAdmin: boolean = false;
+  isEstoquista: boolean = false;
 
   searchTerm: string = '';
-  selectedSort: string = 'data_baixa_desc'; // 'data_baixa_asc', 'usuario_asc', 'usuario_desc'
+  selectedSort: string = 'data_baixa_desc';
 
   constructor(
     private baixaService: BaixaService,
@@ -41,22 +47,30 @@ export class BaixasComponent implements OnInit, OnDestroy {
     this.authService.user$.subscribe((user) => {
       this.currentUser = user;
       this.isAdmin = user?.role === 'Administrador';
-      this.applyFilterAndSort(this.filteredBaixas); // Reaplicar filtros/ordenação
     });
+
+    this.authService
+      .isEstoquista()
+      .pipe(take(1))
+      .subscribe((isEstoquista) => {
+        this.isEstoquista = isEstoquista;
+      });
 
     this.baixas$ = this.baixaService.getBaixas().pipe(
       switchMap((baixas) => {
         if (baixas.length === 0) {
           return of([]);
         }
-        // Para cada baixa, buscar o item de estoque associado
         const baixaObservables = baixas.map((baixa) =>
-          this.estoqueService.getItemEstoque(baixa.itemEstoqueId).pipe(
+          // CORRIGIDO: Chamando estoqueService.getEstoqueItem (singular)
+          this.estoqueService.getEstoqueItem(baixa.estoqueItemUid).pipe(
             map((itemEstoque) => ({
               ...baixa,
               itemEstoque: itemEstoque || null,
-              nomeProduto: itemEstoque?.nomeProduto || null, // Assume nomeProduto no ItemEstoque para simplificar
-              loteProduto: itemEstoque?.lote || null, // Assume lote no ItemEstoque para simplificar
+              // Preenche nomeProduto e loteProduto. Prioriza o itemEstoque, senão usa os dados da própria baixa
+              nomeProduto:
+                itemEstoque?.nomeProduto || baixa.nomeProduto || null,
+              loteProduto: itemEstoque?.lote || baixa.loteItemEstoque || null,
             }))
           )
         );
@@ -86,7 +100,7 @@ export class BaixasComponent implements OnInit, OnDestroy {
           (baixa.nomeProduto || '').toLowerCase().includes(lowerCaseSearch) ||
           (baixa.loteProduto || '').toLowerCase().includes(lowerCaseSearch) ||
           baixa.motivo.toLowerCase().includes(lowerCaseSearch) ||
-          baixa.usuarioQueRegistrou.toLowerCase().includes(lowerCaseSearch)
+          baixa.usuarioResponsavelNome?.toLowerCase().includes(lowerCaseSearch) // CORRIGIDO: usuarioResponsavelNome
       );
     }
 
@@ -103,13 +117,19 @@ export class BaixasComponent implements OnInit, OnDestroy {
         );
         break;
       case 'usuario_asc':
+        // CORRIGIDO: Adiciona verificação de null/undefined para safe compare
         tempBaixas.sort((a, b) =>
-          a.usuarioQueRegistrou.localeCompare(b.usuarioQueRegistrou)
+          (a.usuarioResponsavelNome || '').localeCompare(
+            b.usuarioResponsavelNome || ''
+          )
         );
         break;
       case 'usuario_desc':
+        // CORRIGIDO: Adiciona verificação de null/undefined para safe compare
         tempBaixas.sort((a, b) =>
-          b.usuarioQueRegistrou.localeCompare(a.usuarioQueRegistrou)
+          (b.usuarioResponsavelNome || '').localeCompare(
+            a.usuarioResponsavelNome || ''
+          )
         );
         break;
       default:
@@ -119,12 +139,17 @@ export class BaixasComponent implements OnInit, OnDestroy {
   }
 
   onSearch(): void {
+    // A subscription já está ativa no ngOnInit, então o applyFilterAndSort será chamado automaticamente
+    // quando a lista de baixas for atualizada, ou quando o searchTerm mudar (via ngModelChange ou keyup.enter).
+    // Não é estritamente necessário re-assinar o observable aqui, mas não causa problema grave.
+    // Para otimização, poderia se basear em um BehaviorSubject para filteredBaixas.
     this.baixas$.subscribe((baixas) => {
       this.applyFilterAndSort(baixas);
     });
   }
 
   onSortChange(): void {
+    // Similar ao onSearch, a subscription já está ativa.
     this.baixas$.subscribe((baixas) => {
       this.applyFilterAndSort(baixas);
     });

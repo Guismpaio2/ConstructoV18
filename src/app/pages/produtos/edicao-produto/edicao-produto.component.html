@@ -1,65 +1,64 @@
 <div class="main-content-container">
   <div class="page-header">
     <h1>Editar Produto</h1>
-    <button class="btn btn-secondary" routerLink="/produtos">
-      Voltar para Produtos
-    </button>
   </div>
 
-  <div class="form-card">
-    <form [formGroup]="produtoForm" (ngSubmit)="onSubmit()">
+  <div *ngIf="produtoAtual" class="form-container mt-4">
+    <form [formGroup]="edicaoProdutoForm" (ngSubmit)="onSubmit()">
       <div class="form-group">
         <label for="nome">Nome do Produto:</label>
         <input
-          type="text"
           id="nome"
+          type="text"
           formControlName="nome"
           class="form-control"
-          placeholder="Ex: Cimento Portland"
+          placeholder="Ex: Tinta Acrílica Branca"
         />
         <div
           *ngIf="
-            produtoForm.get('nome')?.invalid && produtoForm.get('nome')?.touched
+            edicaoProdutoForm.get('nome')?.invalid &&
+            edicaoProdutoForm.get('nome')?.touched
           "
-          class="error-message"
+          class="text-danger"
         >
           Nome é obrigatório.
         </div>
       </div>
 
       <div class="form-group">
-        <label for="lote">Lote:</label>
-        <input
-          type="text"
-          id="lote"
-          formControlName="lote"
+        <label for="descricao">Descrição:</label>
+        <textarea
+          id="descricao"
+          formControlName="descricao"
           class="form-control"
-          placeholder="Ex: LOTE-ABC-123"
-        />
+          rows="3"
+          placeholder="Ex: Tinta à base de água para ambientes internos e externos."
+        ></textarea>
         <div
           *ngIf="
-            produtoForm.get('lote')?.invalid && produtoForm.get('lote')?.touched
+            edicaoProdutoForm.get('descricao')?.invalid &&
+            edicaoProdutoForm.get('descricao')?.touched
           "
-          class="error-message"
+          class="text-danger"
         >
-          Lote é obrigatório.
+          Descrição é obrigatória.
         </div>
       </div>
 
       <div class="form-group">
         <label for="tipo">Tipo:</label>
-        <input
-          type="text"
-          id="tipo"
-          formControlName="tipo"
-          class="form-control"
-          placeholder="Ex: Cimento, Tijolo, Areia"
-        />
+        <select id="tipo" formControlName="tipo" class="form-control">
+          <option value="" disabled>Selecione um tipo</option>
+          <option *ngFor="let tipo of tiposProduto" [value]="tipo">
+            {{ tipo }}
+          </option>
+        </select>
         <div
           *ngIf="
-            produtoForm.get('tipo')?.invalid && produtoForm.get('tipo')?.touched
+            edicaoProdutoForm.get('tipo')?.invalid &&
+            edicaoProdutoForm.get('tipo')?.touched
           "
-          class="error-message"
+          class="text-danger"
         >
           Tipo é obrigatório.
         </div>
@@ -68,70 +67,76 @@
       <div class="form-group">
         <label for="marca">Marca:</label>
         <input
-          type="text"
           id="marca"
+          type="text"
           formControlName="marca"
           class="form-control"
-          placeholder="Ex: Votorantim, Gerdau"
+          placeholder="Ex: Coral, Suvinil"
         />
         <div
           *ngIf="
-            produtoForm.get('marca')?.invalid &&
-            produtoForm.get('marca')?.touched
+            edicaoProdutoForm.get('marca')?.invalid &&
+            edicaoProdutoForm.get('marca')?.touched
           "
-          class="error-message"
+          class="text-danger"
         >
           Marca é obrigatória.
         </div>
       </div>
 
       <div class="form-group">
-        <label for="descricao">Descrição (Opcional):</label>
-        <textarea
-          id="descricao"
-          formControlName="descricao"
+        <label for="unidadeMedida">Unidade de Medida:</label>
+        <select
+          id="unidadeMedida"
+          formControlName="unidadeMedida"
           class="form-control"
-          rows="3"
-          placeholder="Detalhes adicionais sobre o produto"
-        ></textarea>
-      </div>
-
-      <div class="form-group">
-        <label>Imagem do Produto (Opcional):</label>
-        <div class="image-upload-container">
-          <input
-            type="file"
-            id="image"
-            (change)="onFileSelected($event)"
-            accept="image/*"
-            class="form-control-file"
-          />
-          <div *ngIf="imageUrlPreview" class="image-preview">
-            <img
-              [src]="imageUrlPreview"
-              alt="Pré-visualização da imagem do produto"
-            />
-            <button
-              type="button"
-              class="btn btn-outline-danger btn-delete-image"
-              (click)="onDeleteImage()"
-            >
-              <i class="fas fa-trash"></i> Remover Imagem
-            </button>
-          </div>
-          <p *ngIf="!selectedFile && !imageUrlPreview" class="no-image-text">
-            Nenhuma imagem selecionada.
-          </p>
+        >
+          <option value="" disabled>Selecione a unidade</option>
+          <option *ngFor="let unidade of unidadesMedida" [value]="unidade">
+            {{ unidade }}
+          </option>
+        </select>
+        <div
+          *ngIf="
+            edicaoProdutoForm.get('unidadeMedida')?.invalid &&
+            edicaoProdutoForm.get('unidadeMedida')?.touched
+          "
+          class="text-danger"
+        >
+          Unidade de Medida é obrigatória.
         </div>
       </div>
 
-      <button
-        type="submit"
-        class="btn btn-primary"
-        [disabled]="produtoForm.invalid"
-      >
-        Salvar Alterações
-      </button>
+      <div class="form-actions mt-4">
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="edicaoProdutoForm.invalid"
+        >
+          <i class="fas fa-save"></i> Salvar Alterações
+        </button>
+        <button type="button" class="btn btn-secondary ml-2" (click)="goBack()">
+          <i class="fas fa-arrow-left"></i> Voltar
+        </button>
+      </div>
     </form>
+    <div class="product-info mt-3" *ngIf="produtoAtual">
+      <p><strong>ID do Produto:</strong> {{ produtoAtual.uid }}</p>
+      <p>
+        <strong>Cadastrado em:</strong>
+        {{ formatTimestamp(produtoAtual.dataCadastro) }}
+      </p>
+      <p *ngIf="produtoAtual.dataUltimaEdicao">
+        <strong>Última Edição:</strong>
+        {{ formatTimestamp(produtoAtual.dataUltimaEdicao) }}
+      </p>
+      <p *ngIf="produtoAtual.usuarioUltimaEdicaoNome">
+        <strong>Editado por:</strong> {{ produtoAtual.usuarioUltimaEdicaoNome }}
+      </p>
+    </div>
+  </div>
+
+  <div *ngIf="!produtoAtual && produtoUid" class="alert alert-warning mt-4">
+    Carregando produto ou produto não encontrado...
   </div>
 </div>

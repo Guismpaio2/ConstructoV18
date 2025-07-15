@@ -1,11 +1,16 @@
-import firebase from 'firebase/compat/app';
+import { Timestamp } from '@angular/fire/firestore';
+
+// Defina os tipos de papel para padronização
+export type UserRole = 'Administrador' | 'Estoquista' | 'Leitor';
 
 export interface User {
-  uid: string;
+  uid: string; // User ID do Firebase Authentication
   email: string | null;
   nome: string;
   sobrenome: string;
-  employeeCode: string; // Código exclusivo para crachás
-  role: 'Administrador' | 'Estoquista' | 'Leitor';
-  dataCadastro?: Date | firebase.firestore.Timestamp; // Opcional, para registrar quando o usuário foi criado
+  employeeCode: string; // Código de funcionário, se aplicável
+  role: UserRole; // 'Administrador', 'Estoquista', 'Leitor'
+  dataCadastro: Timestamp; // Usar Timestamp do Firestore
+  lastLogin: Timestamp; // Usar Timestamp do Firestore
+  // Adicione outros campos conforme a necessidade
 }

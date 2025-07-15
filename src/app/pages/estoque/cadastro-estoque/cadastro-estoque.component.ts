@@ -1,74 +1,98 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { EstoqueService } from '../../../services/estoque.service';
-import { ProdutoService } from '../../../services/produto.service'; // Para buscar produtos existentes
 import { Router } from '@angular/router';
-import { ItemEstoque } from '../../../models/item-estoque.model';
+import { EstoqueService } from '../../../services/estoque.service';
+import { ProdutoService } from '../../../services/produto.service';
 import { Produto } from '../../../models/produto.model';
-import { AuthService } from '../../../auth/auth.service';
 import { Observable, Subscription } from 'rxjs';
 import { take } from 'rxjs/operators';
+import { Timestamp } from '@angular/fire/firestore';
+import { EstoqueItem } from '../../../models/item-estoque.model';
 
 @Component({
   selector: 'app-cadastro-estoque',
   templateUrl: './cadastro-estoque.component.html',
   styleUrls: ['./cadastro-estoque.component.scss'],
 })
-export class CadastroEstoqueComponent implements OnInit {
-  estoqueForm!: FormGroup;
-  produtos$!: Observable<Produto[]>; // Observable para a lista de produtos
-  userId: string | null = null;
-  userName: string | null = null;
+export class CadastroEstoqueComponent implements OnInit, OnDestroy {
+  cadastroEstoqueForm!: FormGroup;
+  produtos$: Observable<Produto[]>; // Para preencher o dropdown de produtos
+  private produtosSubscription!: Subscription;
 
   constructor(
     private fb: FormBuilder,
     private estoqueService: EstoqueService,
-    private produtoService: ProdutoService,
-    private router: Router,
-    private authService: AuthService
-  ) {}
+    private produtoService: ProdutoService, // Injeta o ProdutoService
+    private router: Router
+  ) {
+    this.produtos$ = this.produtoService.getProdutos(); // Obtém todos os produtos
+  }
 
   ngOnInit(): void {
-    this.estoqueForm = this.fb.group({
-      produtoId: ['', Validators.required], // ID do produto ao qual este item de estoque pertence
-      quantidade: [null, [Validators.required, Validators.min(1)]],
-      dataValidade: [null], // Opcional, Validators.required se for sempre necessário
+    this.cadastroEstoqueForm = this.fb.group({
+      produtoUid: ['', Validators.required], // UID do produto selecionado
+      nomeProduto: [{ value: '', disabled: true }, Validators.required], // Nome do produto, preenchido automaticamente
+      lote: ['', Validators.required],
+      quantidade: [1, [Validators.required, Validators.min(1)]],
+      dataValidade: [null], // Opcional
+      localizacao: [''], // Opcional
     });
 
-    // Carrega a lista de produtos para o dropdown
-    this.produtos$ = this.produtoService.getProdutos();
+    // Assina as mudanças do produtoUid para preencher o nomeProduto automaticamente
+    this.produtosSubscription =
+      this.cadastroEstoqueForm
+        .get('produtoUid')
+        ?.valueChanges.subscribe((produtoUid: string) => {
+          if (produtoUid) {
+            this.produtoService
+              .getProduto(produtoUid)
+              .pipe(take(1))
+              .subscribe((produto) => {
+                if (produto) {
+                  this.cadastroEstoqueForm
+                    .get('nomeProduto')
+                    ?.setValue(produto.nome);
+                }
+              });
+          } else {
+            this.cadastroEstoqueForm.get('nomeProduto')?.setValue('');
+          }
+        }) || new Subscription(); // Garante que a subscription seja inicializada
+  }
 
-    // Obter o UID e nome do usuário logado
-    this.authService.user$.pipe(take(1)).subscribe((user) => {
-      if (user) {
-        this.userId = user.uid;
-        this.userName = `${user.nome} ${user.sobrenome}`;
-      }
-    });
+  ngOnDestroy(): void {
+    if (this.produtosSubscription) {
+      this.produtosSubscription.unsubscribe();
+    }
   }
 
   async onSubmit(): Promise<void> {
-    if (this.estoqueForm.valid) {
-      try {
-        const newItemEstoque: Omit<
-          ItemEstoque,
-          'id' | 'dataCadastro' | 'dataUltimaEdicao'
-        > = {
-          produtoId: this.estoqueForm.value.produtoId,
-          quantidade: this.estoqueForm.value.quantidade,
-          dataValidade: this.estoqueForm.value.dataValidade
-            ? new Date(this.estoqueForm.value.dataValidade)
-            : undefined,
-          nomeProduto: '',
-          lote: ''
-        };
+    if (this.cadastroEstoqueForm.valid) {
+      const formValue = this.cadastroEstoqueForm.getRawValue(); // Usa getRawValue para pegar o nomeProduto desabilitado
 
-        const docRef = await this.estoqueService.addItemEstoque(newItemEstoque);
-        console.log(
-          'Item de estoque cadastrado com sucesso com ID:',
-          docRef.id
+      const novoEstoqueItem: Omit<
+        EstoqueItem,
+        | 'uid'
+        | 'dataEntrada'
+        | 'dataUltimaEdicao'
+        | 'usuarioUltimaEdicaoUid'
+        | 'usuarioUltimaEdicaoNome'
+      > = {
+        produtoUid: formValue.produtoUid,
+        nomeProduto: formValue.nomeProduto,
+        lote: formValue.lote,
+        quantidade: formValue.quantidade,
+        dataValidade: formValue.dataValidade
+          ? Timestamp.fromDate(new Date(formValue.dataValidade))
+          : null,
+        localizacao: formValue.localizacao || '',
+      };
+
+      try {
+        const estoqueItemUid = await this.estoqueService.addEstoqueItem(
+          novoEstoqueItem
         );
-        alert('Item de estoque cadastrado com sucesso!');
+        alert('Item de estoque cadastrado com sucesso! UID: ' + estoqueItemUid);
         this.router.navigate(['/estoque']); // Redireciona para a lista de estoque
       } catch (error) {
         console.error('Erro ao cadastrar item de estoque:', error);
@@ -79,5 +103,9 @@ export class CadastroEstoqueComponent implements OnInit {
         'Por favor, preencha todos os campos obrigatórios e verifique a quantidade.'
       );
     }
+  }
+
+  goBack(): void {
+    this.router.navigate(['/estoque']); // Volta para a lista de estoque
   }
 }

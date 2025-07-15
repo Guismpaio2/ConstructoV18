@@ -2,7 +2,8 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
 import { filter, map, switchMap } from 'rxjs/operators';
 import { Observable, Subscription } from 'rxjs';
-import { AuthService, User } from '../../../auth/auth.service';
+import { AuthService} from '../../../auth/auth.service';
+import { User } from '../../../models/user.model';
 
 @Component({
   selector: 'app-dashboard-layout',
@@ -43,10 +44,7 @@ export class DashboardLayoutComponent implements OnInit, OnDestroy {
         this.pageTitle = data['title'] || this.getPageTitleFromRoute(data);
       });
   }
-  // NOVO MÉTODO: Gerencia o logout
-  async logout(): Promise<void> {
-    await this.authService.logout();
-  }
+
 
   // NOVO MÉTODO: Obtém o título da página da rota
   private getPageTitleFromRoute(routeData: any): string {

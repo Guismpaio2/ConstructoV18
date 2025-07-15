@@ -1,12 +1,17 @@
-import { Timestamp } from '@angular/fire/firestore'; // Importe Timestamp aqui
+// src/app/models/item-estoque.model.ts
+import { Timestamp } from '@angular/fire/firestore';
 
-export interface ItemEstoque {
-  id?: string;
-  produtoId: string;
+export interface EstoqueItem {
+  // Garanta que o nome seja 'EstoqueItem' aqui
+  uid: string;
+  produtoUid: string;
+  nomeProduto: string;
+  lote: string;
   quantidade: number;
-  dataValidade?: Timestamp | null; // Definido como Timestamp ou null
-  dataCadastro: Timestamp; // Definido como Timestamp (presumindo que sempre existirá)
-  dataUltimaEdicao?: Timestamp | null; // Definido como Timestamp ou null
-  usuarioQueCadastrou: string;
-  usuarioQueEditou?: string;
+  dataValidade?: Timestamp | null;
+  localizacao?: string;
+  dataEntrada: Timestamp;
+  dataUltimaEdicao?: Timestamp;
+  usuarioUltimaEdicaoUid?: string;
+  usuarioUltimaEdicaoNome?: string;
 }

@@ -1,3 +1,4 @@
+// src/app/auth/auth.service.ts
 import { Injectable } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import {
@@ -8,8 +9,8 @@ import {
 import { Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { switchMap, map } from 'rxjs/operators';
-import { User } from '../models/user.model';
-import firebase from 'firebase/compat/app';
+import { User, UserRole } from '../models/user.model'; // Importa o modelo User e UserRole
+import { Timestamp } from '@angular/fire/firestore'; // Importação correta do Timestamp
 
 @Injectable({
   providedIn: 'root',
@@ -25,41 +26,78 @@ export class AuthService {
   ) {
     this.usersCollection = this.afs.collection<User>('users');
     this.user$ = this.afAuth.authState.pipe(
-      switchMap((user) => {
-        if (user) {
+      switchMap((firebaseUser) => {
+        if (firebaseUser) {
+          // Se o usuário está logado no Firebase Auth, busca os dados dele no Firestore
           return this.afs
-            .doc<User>(`users/${user.uid}`)
+            .doc<User>(`users/${firebaseUser.uid}`)
             .valueChanges()
             .pipe(
               map((firestoreUser) => {
                 if (firestoreUser) {
-                  // Certifique-se de que o timestamp é convertido para Date, se necessário
-                  if (
-                    firestoreUser.dataCadastro instanceof
-                    firebase.firestore.Timestamp
-                  ) {
-                    firestoreUser.dataCadastro =
-                      firestoreUser.dataCadastro.toDate();
-                  }
-                  return { ...firestoreUser, uid: user.uid };
+                  // Atualiza o lastLogin no Firestore sempre que o usuário for acessado
+                  this.afs
+                    .doc(`users/${firebaseUser.uid}`)
+                    .update({
+                      lastLogin: Timestamp.fromDate(new Date()),
+                    })
+                    .catch((error) =>
+                      console.error('Erro ao atualizar lastLogin:', error)
+                    );
+
+                  // Retorna o objeto User completo do Firestore, incluindo o UID
+                  return { ...firestoreUser, uid: firebaseUser.uid };
+                } else {
+                  // Caso o usuário exista no Auth mas não no Firestore,
+                  // cria um novo registro básico para ele com role 'Leitor'
+                  const newUser: User = {
+                    uid: firebaseUser.uid,
+                    // CORREÇÃO: firebaseUser.email já contém o email diretamente
+                    email: firebaseUser.email,
+                    nome: firebaseUser.displayName || 'Novo Usuário',
+                    sobrenome: '',
+                    employeeCode: '',
+                    role: 'Leitor',
+                    dataCadastro: Timestamp.fromDate(new Date()),
+                    lastLogin: Timestamp.fromDate(new Date()),
+                  };
+                  this.afs
+                    .doc(`users/${firebaseUser.uid}`)
+                    .set(newUser, { merge: true })
+                    .then(() =>
+                      console.log(
+                        'Novo usuário Firestore criado para:',
+                        firebaseUser.email
+                      )
+                    )
+                    .catch((error) =>
+                      console.error(
+                        'Erro ao criar novo usuário Firestore:',
+                        error
+                      )
+                    );
+                  return newUser;
                 }
-                return null;
               })
             );
         } else {
+          // Não há usuário logado, retorna null
           return of(null);
         }
       })
     );
   }
 
+  // ... (restante do código permanece o mesmo)
+
+  // Método para registro de novo usuário
   async signUp(
     email: string,
     password: string,
     nome: string,
     sobrenome: string,
     employeeCode: string,
-    role: 'Estoquista' | 'Leitor'
+    role: UserRole
   ): Promise<any> {
     try {
       const credential = await this.afAuth.createUserWithEmailAndPassword(
@@ -67,13 +105,19 @@ export class AuthService {
         password
       );
       if (credential.user) {
-        return this.updateUserData(
-          credential.user,
+        await credential.user.updateProfile({
+          displayName: `${nome} ${sobrenome}`,
+        });
+        return this.createOrUpdateUserData({
+          uid: credential.user.uid,
+          email: credential.user.email,
           nome,
           sobrenome,
           employeeCode,
-          role
-        );
+          role,
+          dataCadastro: Timestamp.fromDate(new Date()),
+          lastLogin: Timestamp.fromDate(new Date()),
+        });
       }
       return null;
     } catch (error) {
@@ -88,7 +132,6 @@ export class AuthService {
         email,
         password
       );
-      // O usuário será automaticamente populado via user$ observable
       return result;
     } catch (error) {
       console.error('Erro no login:', error);
@@ -101,68 +144,43 @@ export class AuthService {
     this.router.navigate(['/starter']);
   }
 
-  private updateUserData(
-    user: firebase.User,
-    nome: string,
-    sobrenome: string,
-    employeeCode: string,
-    role: 'Administrador' | 'Estoquista' | 'Leitor'
-  ): Promise<void> {
+  private createOrUpdateUserData(user: User): Promise<void> {
     const userRef: AngularFirestoreDocument<User> = this.afs.doc(
       `users/${user.uid}`
     );
-    const data: User = {
-      uid: user.uid,
-      email: user.email,
-      nome,
-      sobrenome,
-      employeeCode,
-      role,
-      dataCadastro: firebase.firestore.Timestamp.fromDate(new Date()), // Adiciona data de cadastro
-    };
-    return userRef.set(data, { merge: true });
+    return userRef.set(user, { merge: true });
   }
 
-  // Método para buscar todos os usuários (para uso do Admin)
   getUsersForAdminView(): Observable<User[]> {
     return this.usersCollection.snapshotChanges().pipe(
       map((actions) =>
         actions.map((a) => {
           const data = a.payload.doc.data() as User;
           const id = a.payload.doc.id;
-          // Converte Firestore Timestamp para Date, se necessário
-          if (data.dataCadastro instanceof firebase.firestore.Timestamp) {
-            data.dataCadastro = data.dataCadastro.toDate();
-          }
           return { id, ...data } as User;
         })
       )
     );
   }
 
-  // Método para atualizar a role de um usuário
-  updateUserRole(
-    uid: string,
-    newRole: 'Administrador' | 'Estoquista' | 'Leitor'
-  ): Promise<void> {
+  updateUserRole(uid: string, newRole: UserRole): Promise<void> {
     return this.usersCollection.doc(uid).update({ role: newRole });
   }
 
-  // Método para excluir um usuário (Firestore e Auth)
-  // **Importante**: A exclusão do usuário do Firebase Auth no frontend é geralmente desaconselhada
-  // para segurança e escalabilidade. Em um ambiente de produção, isso seria feito através de
-  // Cloud Functions ou um backend seguro. Este é um placeholder para fins de demonstração.
   async deleteUser(uid: string): Promise<void> {
-    // 1. Excluir o documento do usuário no Firestore
-    await this.usersCollection.doc(uid).delete();
-    // 2. Tentar excluir o usuário do Firebase Auth (requer permissões de Admin SDK ou Cloud Function)
-    // Este passo pode falhar se não estiver em um ambiente de servidor seguro.
-    // Para simplificar no cliente, não tentaremos a exclusão direta do Auth aqui sem um backend.
-    // console.warn('A exclusão do usuário do Firebase Authentication deve ser feita por um backend seguro (Cloud Functions/Admin SDK) para evitar erros de permissão.');
+    try {
+      await this.usersCollection.doc(uid).delete();
+      console.log(`Documento do usuário ${uid} excluído do Firestore.`);
+      console.warn(
+        'Lembre-se que o usuário precisa ser excluído do Firebase Authentication manualmente.'
+      );
+    } catch (error) {
+      console.error('Erro ao excluir usuário:', error);
+      throw error;
+    }
   }
 
-  // Método para verificar se o usuário atual tem uma determinada role
-  canAccess(allowedRoles: string[]): Observable<boolean> {
+  hasRole(allowedRoles: UserRole[]): Observable<boolean> {
     return this.user$.pipe(
       map((user) => {
         if (!user) {
@@ -171,5 +189,31 @@ export class AuthService {
         return allowedRoles.includes(user.role);
       })
     );
+  }
+
+  async logout(): Promise<void> {
+    await this.signOut();
+  }
+
+  isAdmin(): Observable<boolean> {
+    return this.hasRole(['Administrador']);
+  }
+
+  isEstoquista(): Observable<boolean> {
+    return this.hasRole(['Administrador', 'Estoquista']);
+  }
+
+  isLeitor(): Observable<boolean> {
+    return this.hasRole(['Administrador', 'Estoquista', 'Leitor']);
+  }
+
+  async getCurrentUserUid(): Promise<string | null> {
+    const currentUser = await this.afAuth.currentUser;
+    return currentUser ? currentUser.uid : null;
+  }
+
+  async getCurrentUserDisplayName(): Promise<string | null> {
+    const currentUser = await this.afAuth.currentUser;
+    return currentUser ? currentUser.displayName : null;
   }
 }

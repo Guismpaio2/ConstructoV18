@@ -1,91 +1,86 @@
 <div class="main-content-container">
   <div class="page-header">
-    <h1>Lista de Produtos</h1>
+    <h1>Gerenciamento de Produtos</h1>
     <button
+      *ngIf="canAddEditDelete"
       class="btn btn-primary"
-      routerLink="/produtos/cadastro"
-      *ngIf="isAdmin || isEstoquista"
+      (click)="goToAddProduct()"
     >
-      <i class="fas fa-plus"></i> Novo Produto
+      <i class="fas fa-plus"></i> Adicionar Produto
     </button>
   </div>
 
-  <div class="search-filter-bar">
+  <div class="search-filter-bar mt-4">
     <div class="search-input">
       <i class="fas fa-search search-icon"></i>
       <input
         type="text"
-        placeholder="Buscar por nome, lote, tipo, marca..."
+        placeholder="Buscar por nome, descrição, marca, tipo..."
         [(ngModel)]="searchTerm"
-        (keyup.enter)="onSearch()"
+        (input)="triggerFilterAndSort()"
       />
     </div>
 
-    <select [(ngModel)]="selectedSort" (change)="onSortChange()">
+    <select [(ngModel)]="selectedTypeFilter" (change)="triggerFilterAndSort()">
+      <option value="">Todos os Tipos</option>
+      <option value="Elétrico">Elétrico</option>
+      <option value="Hidráulico">Hidráulico</option>
+      <option value="Alvenaria">Alvenaria</option>
+      <option value="Madeira">Madeira</option>
+      <option value="Ferramenta">Ferramenta</option>
+    </select>
+
+    <select [(ngModel)]="selectedSort" (change)="triggerFilterAndSort()">
       <option value="nome_asc">Nome (A-Z)</option>
       <option value="nome_desc">Nome (Z-A)</option>
-      <option value="lote_asc">Lote (A-Z)</option>
-      <option value="lote_desc">Lote (Z-A)</option>
-      <option value="data_cadastro_asc">
-        Data de Cadastro (Antigo p/ Novo)
-      </option>
-      <option value="data_cadastro_desc">
-        Data de Cadastro (Novo p/ Antigo)
-      </option>
+      <option value="tipo_asc">Tipo (A-Z)</option>
+      <option value="tipo_desc">Tipo (Z-A)</option>
+      <option value="marca_asc">Marca (A-Z)</option>
+      <option value="marca_desc">Marca (Z-A)</option>
     </select>
   </div>
 
-  <div class="table-responsive">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>Imagem</th>
-          <th>Nome</th>
-          <th>Lote</th>
-          <th>Tipo</th>
-          <th>Marca</th>
-          <th>Descrição</th>
-          <th>Data Cadastro</th>
-          <th *ngIf="isAdmin || isEstoquista">Ações</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let produto of filteredProdutos">
-          <td>
-            <img
-              [src]="produto.imageUrl || 'assets/placeholder-image.png'"
-              alt="Imagem do Produto"
-              class="product-image"
-            />
-          </td>
-          <td>{{ produto.nome }}</td>
-          <td>{{ produto.lote }}</td>
-          <td>{{ produto.tipo }}</td>
-          <td>{{ produto.marca }}</td>
-          <td>{{ produto.descricao || "-" }}</td>
-          <td>
-            {{ produto.dataCadastro.toDate() | date : "dd/MM/yyyy HH:mm" }}
-          </td>
-          <td *ngIf="isAdmin || isEstoquista">
-            <button
-              class="btn btn-sm btn-info"
-              [routerLink]="['/produtos/edicao', produto.id]"
-            >
-              <i class="fas fa-edit"></i>
-            </button>
-            <button
-              class="btn btn-sm btn-danger ml-2"
-              (click)="onDeleteProduto(produto.id!)"
-              *ngIf="isAdmin"
-            >
-              <i class="fas fa-trash"></i>
-            </button>
-          </td>
-        </tr>
-        <tr *ngIf="filteredProdutos.length === 0">
-          <td colspan="8" class="text-center">Nenhum produto encontrado.</td>
-        </tr>
-      </tbody>
-    </table>
+  <div *ngIf="filteredProducts.length === 0" class="alert alert-info mt-4">
+    Nenhum produto encontrado.
+  </div>
+
+  <div *ngIf="filteredProducts.length > 0" class="products-grid mt-4">
+    <div class="product-card" *ngFor="let product of filteredProducts">
+      <h4>{{ product.nome }}</h4>
+      <p class="description">{{ product.descricao }}</p>
+      <div class="product-details">
+        <span><label>Tipo:</label> {{ product.tipo }}</span>
+        <span><label>Marca:</label> {{ product.marca }}</span>
+        <span><label>Unidade:</label> {{ product.unidadeMedida }}</span>
+      </div>
+      <div class="product-dates">
+        <small
+          ><label>Cadastrado em:</label>
+          {{ formatTimestamp(product.dataCadastro) }}</small
+        >
+        <small *ngIf="product.dataUltimaEdicao"
+          ><label>Última Edição:</label>
+          {{ formatTimestamp(product.dataUltimaEdicao) }}</small
+        >
+        <small *ngIf="product.usuarioUltimaEdicaoNome"
+          ><label>Por:</label> {{ product.usuarioUltimaEdicaoNome }}</small
+        >
+      </div>
+
+      <div class="product-actions" *ngIf="canAddEditDelete">
+        <button
+          class="btn btn-sm btn-outline-info"
+          (click)="goToEditProduct(product.uid)"
+        >
+          <i class="fas fa-edit"></i> Editar
+        </button>
+        <button
+          class="btn btn-sm btn-outline-danger"
+          (click)="onDeleteProduct(product.uid, product.nome)"
+        >
+          <i class="fas fa-trash-alt"></i> Excluir
+        </button>
+      </div>
+    </div>
   </div>
 </div>

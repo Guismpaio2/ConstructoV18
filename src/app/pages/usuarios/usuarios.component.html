@@ -10,18 +10,18 @@
         type="text"
         placeholder="Buscar por nome, email, código..."
         [(ngModel)]="searchTerm"
-        (input)="applyFilter()"
+        (input)="triggerFilterAndSort()"
       />
     </div>
 
-    <select [(ngModel)]="selectedRoleFilter" (change)="applyFilter()">
+    <select [(ngModel)]="selectedRoleFilter" (change)="triggerFilterAndSort()">
       <option value="">Todas as Roles</option>
       <option value="Administrador">Administrador</option>
       <option value="Estoquista">Estoquista</option>
       <option value="Leitor">Leitor</option>
     </select>
 
-    <select [(ngModel)]="selectedSort" (change)="applySort()">
+    <select [(ngModel)]="selectedSort" (change)="triggerFilterAndSort()">
       <option value="nome_asc">Nome (A-Z)</option>
       <option value="nome_desc">Nome (Z-A)</option>
       <option value="role_asc">Role (A-Z)</option>
@@ -64,10 +64,22 @@
           <option value="Leitor">Leitor</option>
         </select>
       </div>
+      <div class="user-info-detail">
+        <div>
+          <label>Data de Cadastro:</label>
+          <span>{{ formatTimestamp(user.dataCadastro) }}</span>
+        </div>
+      </div>
+      <div class="user-info-detail">
+        <div>
+          <label>Último Login:</label>
+          <span>{{ formatTimestamp(user.lastLogin) }}</span>
+        </div>
+      </div>
       <button
         *ngIf="user.uid !== currentUserId"
         class="btn btn-sm btn-outline-danger mt-3"
-        (click)="onDeleteUser(user.uid)"
+        (click)="onDeleteUser(user.uid, user.nome)"
       >
         <i class="fas fa-trash-alt"></i> Excluir Usuário
       </button>

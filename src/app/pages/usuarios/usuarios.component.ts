@@ -1,8 +1,8 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { AuthService } from '../../auth/auth.service'; // User now comes from auth.service or models/user.model
-import { Observable, Subscription, combineLatest } from 'rxjs';
-import { map, startWith, take } from 'rxjs/operators';
-import { User } from '../../models/user.model';
+import { AuthService } from '../../auth/auth.service';
+import { Observable, Subscription } from 'rxjs';
+import { take } from 'rxjs/operators';
+import { User, UserRole } from '../../models/user.model'; // Importa User e UserRole
 
 @Component({
   selector: 'app-usuarios',
@@ -10,25 +10,25 @@ import { User } from '../../models/user.model';
   styleUrls: ['./usuarios.component.scss'],
 })
 export class UsuariosComponent implements OnInit, OnDestroy {
-  users$!: Observable<User[]>;
-  filteredUsers: User[] = [];
+  users$!: Observable<User[]>; // Observable que obtém todos os usuários do serviço
+  filteredUsers: User[] = []; // Array que armazena os usuários filtrados e ordenados para exibição
   private usersSubscription!: Subscription;
   currentUserId: string | null = null; // Para desabilitar edição da própria role
 
   searchTerm: string = '';
-  selectedRoleFilter: '' | 'Administrador' | 'Estoquista' | 'Leitor' = '';
+  selectedRoleFilter: '' | UserRole = ''; // Usa o tipo UserRole
   selectedSort: string = 'nome_asc';
 
   constructor(private authService: AuthService) {}
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     // Obter o UID do usuário logado para desabilitar a edição da própria role
-    this.authService.user$.pipe(take(1)).subscribe((user) => {
-      this.currentUserId = user ? user.uid : null;
-    });
+    // Usamos async/await aqui para obter o UID de forma síncrona na inicialização
+    this.currentUserId = await this.authService.getCurrentUserUid();
 
-    this.users$ = this.authService.getUsersForAdminView(); // Agora este método está implementado
+    this.users$ = this.authService.getUsersForAdminView();
 
+    // Assina o observable de usuários para aplicar filtros e ordenação
     this.usersSubscription = this.users$.subscribe((users) => {
       this.applyFilterAndSort(users);
     });
@@ -81,13 +81,9 @@ export class UsuariosComponent implements OnInit, OnDestroy {
     this.filteredUsers = tempUsers;
   }
 
-  applyFilter(): void {
-    this.users$.pipe(take(1)).subscribe((users) => {
-      this.applyFilterAndSort(users);
-    });
-  }
-
-  applySort(): void {
+  // Métodos chamados pelo UI para aplicar filtros/ordenação
+  triggerFilterAndSort(): void {
+    // Obtém o valor atual de users$ e aplica o filtro/ordenação
     this.users$.pipe(take(1)).subscribe((users) => {
       this.applyFilterAndSort(users);
     });
@@ -97,8 +93,9 @@ export class UsuariosComponent implements OnInit, OnDestroy {
     // Certifique-se de que o usuário logado não está tentando mudar a própria role
     if (user.uid === this.currentUserId) {
       alert('Você não pode alterar sua própria permissão através desta tela.');
-      // Reverter a mudança no UI, se necessário
-      // user.role = // role original; você precisaria armazenar a role original antes da mudança
+      // Para reverter a mudança no UI, se a role já tiver sido atualizada
+      // na interface antes da confirmação, você precisaria armazenar a role
+      // original ou recarregar os dados. Por simplicidade, confiamos no alerta.
       return;
     }
 
@@ -107,7 +104,6 @@ export class UsuariosComponent implements OnInit, OnDestroy {
         `Tem certeza que deseja alterar a role de ${user.nome} para ${user.role}?`
       )
     ) {
-      // Chamar um método no AuthService para atualizar a role no Firestore
       this.authService
         .updateUserRole(user.uid, user.role)
         .then(() => {
@@ -119,27 +115,32 @@ export class UsuariosComponent implements OnInit, OnDestroy {
           alert('Erro ao atualizar role. Verifique as permissões.');
         });
     } else {
-      // Opcional: Reverter a alteração no UI se o usuário cancelar
-      // Você precisaria de uma cópia da role original para fazer isso.
+      // Se o usuário cancelar, reverte a seleção no dropdown para o valor original
+      // Para isso, você precisaria de uma forma de saber a role anterior.
+      // Uma abordagem simples é recarregar a lista ou ter uma cópia do objeto User antes da mudança.
+      // Neste caso, se o usuário cancelar, o valor no UI permanece o que ele selecionou,
+      // mas o backend não será atualizado. Ao recarregar a página, o valor correto será exibido.
+      this.users$.pipe(take(1)).subscribe((users) => {
+        const originalUser = users.find((u) => u.uid === user.uid);
+        if (originalUser) {
+          user.role = originalUser.role; // Reverte a role no objeto local
+        }
+      });
     }
   }
 
-  onDeleteUser(uid: string): void {
+  onDeleteUser(uid: string, userName: string): void {
     if (uid === this.currentUserId) {
       alert('Você não pode excluir sua própria conta através desta tela.');
       return;
     }
     if (
       confirm(
-        'Tem certeza que deseja excluir este usuário? Esta ação é irreversível.'
+        `Tem certeza que deseja excluir o usuário ${userName}? Esta ação é irreversível e excluirá o usuário do Firestore.`
       )
     ) {
-      // Chamar um método no AuthService para excluir o usuário (Firestore e Auth)
-      // **Atenção**: Excluir usuários do Firebase Auth no frontend é geralmente desaconselhado.
-      // É mais seguro fazer isso via Cloud Functions ou um backend seguro para evitar abusos.
-      // Para fins de demonstração, podemos adicionar aqui, mas tenha isso em mente.
       this.authService
-        .deleteUser(uid) // Você precisará criar este método no AuthService
+        .deleteUser(uid)
         .then(() => {
           console.log('Usuário excluído com sucesso!');
           alert('Usuário excluído com sucesso!');
@@ -151,5 +152,13 @@ export class UsuariosComponent implements OnInit, OnDestroy {
           );
         });
     }
+  }
+
+  // Função para formatar o Timestamp para exibição
+  formatTimestamp(timestamp: any): string {
+    if (timestamp && timestamp.toDate) {
+      return timestamp.toDate().toLocaleDateString('pt-BR'); // Ex: DD/MM/YYYY
+    }
+    return '';
   }
 }

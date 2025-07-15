@@ -3,70 +3,114 @@ import { Injectable } from '@angular/core';
 import {
   AngularFirestore,
   AngularFirestoreCollection,
-  DocumentReference,
+  AngularFirestoreDocument,
 } from '@angular/fire/compat/firestore';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { ItemEstoque } from '../models/item-estoque.model'; // Caminho para o modelo
-import { Timestamp } from '@angular/fire/firestore'; // Importação correta do Timestamp
+import { Timestamp } from '@angular/fire/firestore';
+import { AuthService } from '../auth/auth.service';
+import { EstoqueItem } from '../models/item-estoque.model'; // Assumindo item-estoque.model.ts como o modelo correto
 
 @Injectable({
   providedIn: 'root',
 })
 export class EstoqueService {
-  private estoqueCollection: AngularFirestoreCollection<ItemEstoque>;
+  private estoqueCollection: AngularFirestoreCollection<EstoqueItem>;
 
-  constructor(private afs: AngularFirestore) {
-    this.estoqueCollection = this.afs.collection<ItemEstoque>('estoque');
+  constructor(private afs: AngularFirestore, private authService: AuthService) {
+    this.estoqueCollection = this.afs.collection<EstoqueItem>('estoque');
   }
 
-  getItensEstoque(): Observable<ItemEstoque[]> {
+  // Adicionar um novo item ao estoque
+  async addEstoqueItem(
+    item: Omit<
+      EstoqueItem,
+      | 'uid'
+      | 'dataEntrada'
+      | 'dataUltimaEdicao'
+      | 'usuarioUltimaEdicaoUid'
+      | 'usuarioUltimaEdicaoNome'
+    >
+  ): Promise<string> {
+    const currentUserUid = await this.authService.getCurrentUserUid();
+    const currentUserDisplayName =
+      await this.authService.getCurrentUserDisplayName();
+    const newItem: EstoqueItem = {
+      ...item,
+      uid: this.afs.createId(), // Gera um UID para o documento
+      dataEntrada: Timestamp.fromDate(new Date()),
+      dataUltimaEdicao: Timestamp.fromDate(new Date()),
+      usuarioUltimaEdicaoUid: currentUserUid || 'unknown',
+      usuarioUltimaEdicaoNome: currentUserDisplayName || 'Usuário Desconhecido',
+    };
+    await this.estoqueCollection.doc(newItem.uid).set(newItem);
+    return newItem.uid;
+  }
+
+  // Obter todos os itens do estoque
+  getEstoqueItems(): Observable<EstoqueItem[]> {
     return this.estoqueCollection.snapshotChanges().pipe(
       map((actions) =>
         actions.map((a) => {
-          const data = a.payload.doc.data() as ItemEstoque;
-          const id = a.payload.doc.id;
-          // Não é necessário converter para Date aqui; as datas já virão como Timestamp
-          return { id, ...data };
+          const data = a.payload.doc.data() as EstoqueItem;
+          const uid = a.payload.doc.id;
+          return { ...data, uid };
         })
       )
     );
   }
 
-  getItemEstoque(id: string): Observable<ItemEstoque | undefined> {
+  // Obter um item de estoque por UID
+  getEstoqueItem(uid: string): Observable<EstoqueItem | undefined> {
     return this.estoqueCollection
-      .doc<ItemEstoque>(id)
+      .doc<EstoqueItem>(uid)
       .valueChanges()
-      .pipe(
-        map((data) => {
-          if (data) {
-            // Não é necessário converter para Date aqui
-            return { id, ...data };
-          }
-          return undefined;
-        })
-      );
+      .pipe(map((item) => (item ? { ...item, uid: uid } : undefined)));
   }
 
-  addItemEstoque(
-    item: Omit<ItemEstoque, 'id' | 'dataCadastro' | 'dataUltimaEdicao'>
-  ): Promise<DocumentReference<ItemEstoque>> {
-    const newItem: ItemEstoque = {
-      ...item,
-      dataCadastro: Timestamp.fromDate(new Date()), // Cria um Timestamp do Firestore
-    } as ItemEstoque;
-    return this.estoqueCollection.add(newItem);
-  }
-
-  updateItemEstoque(id: string, item: Partial<ItemEstoque>): Promise<void> {
-    const updatedItem: Partial<ItemEstoque> = {
-      ...item,
-      dataUltimaEdicao: Timestamp.fromDate(new Date()), // Cria um Timestamp do Firestore
+  // Atualizar um item de estoque existente
+  async updateEstoqueItem(
+    uid: string,
+    changes: Partial<EstoqueItem>
+  ): Promise<void> {
+    const currentUserUid = await this.authService.getCurrentUserUid();
+    const currentUserDisplayName =
+      await this.authService.getCurrentUserDisplayName();
+    const itemRef: AngularFirestoreDocument<EstoqueItem> = this.afs.doc(
+      `estoque/${uid}`
+    );
+    // Adiciona data de última edição e usuário
+    const updatedChanges = {
+      ...changes,
+      dataUltimaEdicao: Timestamp.fromDate(new Date()),
+      usuarioUltimaEdicaoUid: currentUserUid || 'unknown',
+      usuarioUltimaEdicaoNome: currentUserDisplayName || 'Usuário Desconhecido',
     };
-    return this.estoqueCollection.doc(id).update(updatedItem);
+    return itemRef.update(updatedChanges);
   }
 
-  deleteItemEstoque(id: string): Promise<void> {
-    return this.estoqueCollection.doc(id).delete();
+  // Excluir um item de estoque
+  deleteEstoqueItem(uid: string): Promise<void> {
+    return this.estoqueCollection.doc(uid).delete();
+  }
+
+  // Método para atualizar a quantidade de um item de estoque
+  // Usado principalmente após registrar uma baixa
+  async updateQuantidadeEstoque(
+    uid: string,
+    novaQuantidade: number
+  ): Promise<void> {
+    if (novaQuantidade < 0) {
+      throw new Error('A quantidade não pode ser negativa.');
+    }
+    const currentUserUid = await this.authService.getCurrentUserUid();
+    const currentUserDisplayName =
+      await this.authService.getCurrentUserDisplayName();
+    return this.estoqueCollection.doc(uid).update({
+      quantidade: novaQuantidade,
+      dataUltimaEdicao: Timestamp.fromDate(new Date()),
+      usuarioUltimaEdicaoUid: currentUserUid || 'unknown',
+      usuarioUltimaEdicaoNome: currentUserDisplayName || 'Usuário Desconhecido',
+    });
   }
 }

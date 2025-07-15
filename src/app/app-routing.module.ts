@@ -17,19 +17,21 @@ import { DashboardLayoutComponent } from './shared/layout/dashboard-layout/dashb
 import { HomeComponent } from './pages/home/home.component';
 import { ProdutosComponent } from './pages/produtos/produtos.component';
 import { EstoqueComponent } from './pages/estoque/estoque.component';
-import { RegistrosBaixasComponent } from './pages/registros-baixas/registros-baixas.component';
+import { RegistrosBaixasComponent } from './pages/registros-baixas/registros-baixas.component'; // Mantido, mas pode ser renomeado para 'BaixasComponent' se você o mudou
 import { UsuariosComponent } from './pages/usuarios/usuarios.component';
 import { PerfilComponent } from './pages/perfil/perfil.component';
 
-// // Novas importações para os componentes de cadastro/edição/baixa
-// import { CadastroProdutoComponent } from './pages/produtos/cadastro-produto/cadastro-produto.component';
-// import { EdicaoProdutoComponent } from './pages/produtos/edicao-produto/edicao-produto.component';
-// import { CadastroEstoqueComponent } from './pages/estoque/cadastro-estoque/cadastro-estoque.component';
-// import { EdicaoEstoqueComponent } from './pages/estoque/edicao-estoque/edicao-estoque.component';
-// import { RegistrarBaixaComponent } from './pages/estoque/registrar-baixa/registrar-baixa.component';
+// Novas importações para os componentes de cadastro/edição/baixa
+import { CadastroProdutoComponent } from './pages/produtos/cadastro-produto/cadastro-produto.component';
+import { EdicaoProdutoComponent } from './pages/produtos/edicao-produto/edicao-produto.component';
+import { CadastroEstoqueComponent } from './pages/estoque/cadastro-estoque/cadastro-estoque.component';
+import { EdicaoEstoqueComponent } from './pages/estoque/edicao-estoque/edicao-estoque.component';
+import { RegistrarBaixaComponent } from './pages/baixas/registrar-baixa/registrar-baixa.component'; // Ajustado para 'pages/baixas'
+import { BaixasComponent } from './pages/baixas/baixas.component'; // Adicionado para a rota /baixas se RegistrosBaixasComponent for o principal
 
 // Importe seu AuthGuard
 import { AuthGuard } from './auth/auth.guard';
+import { UserRole } from './models/user.model'; // Importa UserRole para tipagem
 
 const routes: Routes = [
   { path: '', redirectTo: 'starter', pathMatch: 'full' },
@@ -68,69 +70,115 @@ const routes: Routes = [
     ],
   },
 
-  // Rotas PROTEGIDAS (exigem autenticação)
+  // Rotas PROTEGIDAS (exigem autenticação e/ou roles específicas)
   {
     path: '',
     component: DashboardLayoutComponent,
     canActivate: [AuthGuard], // Aplica o AuthGuard a todas as rotas filhas
     children: [
-      { path: 'home', component: HomeComponent, data: { title: 'Início' } },
+      {
+        path: 'home',
+        component: HomeComponent,
+        data: {
+          title: 'Início',
+          roles: ['Administrador', 'Estoquista', 'Leitor'] as UserRole[],
+        },
+      },
       {
         path: 'produtos',
         component: ProdutosComponent,
-        data: { title: 'Produtos' },
+        data: {
+          title: 'Produtos',
+          roles: ['Administrador', 'Estoquista', 'Leitor'] as UserRole[],
+        },
       },
       {
         path: 'estoque',
         component: EstoqueComponent,
-        data: { title: 'Estoque' },
+        data: {
+          title: 'Estoque',
+          roles: ['Administrador', 'Estoquista', 'Leitor'] as UserRole[],
+        },
       },
       {
-        path: 'registros-baixas',
+        path: 'registros-baixas', // Se este for o componente principal para exibir baixas
         component: RegistrosBaixasComponent,
-        data: { title: 'Registros de Baixas' },
+        data: {
+          title: 'Registros de Baixas',
+          roles: ['Administrador', 'Estoquista', 'Leitor'] as UserRole[],
+        },
+      },
+      // Se 'BaixasComponent' for o componente principal para visualização de baixas
+      {
+        path: 'baixas',
+        component: BaixasComponent,
+        data: {
+          title: 'Baixas',
+          roles: ['Administrador', 'Estoquista', 'Leitor'] as UserRole[],
+        },
       },
       {
         path: 'perfil',
         component: PerfilComponent,
-        data: { title: 'Meu Perfil' },
+        data: {
+          title: 'Meu Perfil',
+          roles: ['Administrador', 'Estoquista', 'Leitor'] as UserRole[],
+        },
       },
       {
         path: 'usuarios',
         component: UsuariosComponent,
-        canActivate: [AuthGuard],
-        data: { title: 'Gerenciamento de Usuários', role: 'Administrador' }, // Apenas administradores
+        // canActivate: [AuthGuard], // Não é necessário repetir se já está no pai
+        data: {
+          title: 'Gerenciamento de Usuários',
+          roles: ['Administrador'] as UserRole[],
+        }, // Apenas administradores
       },
       // Rotas para cadastro/edição com roles específicas
       {
         path: 'cadastro-produto',
-        component: CadastroComponent,
-        canActivate: [AuthGuard],
-        data: { title: 'Cadastrar Produto', role: 'Estoquista' }, // Estoquista pode cadastrar
+        component: CadastroProdutoComponent,
+        // canActivate: [AuthGuard],
+        data: {
+          title: 'Cadastrar Produto',
+          roles: ['Administrador', 'Estoquista'] as UserRole[],
+        }, // Estoquista e Admin podem cadastrar
       },
       {
         path: 'edicao-produto/:id',
         component: EdicaoProdutoComponent,
-        canActivate: [AuthGuard],
-        data: { title: 'Editar Produto', role: 'Estoquista' }, // Estoquista pode editar
+        // canActivate: [AuthGuard],
+        data: {
+          title: 'Editar Produto',
+          roles: ['Administrador', 'Estoquista'] as UserRole[],
+        }, // Estoquista e Admin podem editar
       },
       {
         path: 'cadastro-estoque',
-        component: EstoqueComponent,
-        canActivate: [AuthGuard],
-        data: { title: 'Cadastrar Item no Estoque', role: 'Estoquista' }, // Estoquista pode cadastrar
+        component: CadastroEstoqueComponent, // Corrigido para CadastroEstoqueComponent
+        // canActivate: [AuthGuard],
+        data: {
+          title: 'Cadastrar Item no Estoque',
+          roles: ['Administrador', 'Estoquista'] as UserRole[],
+        }, // Estoquista e Admin podem cadastrar
       },
       {
         path: 'edicao-estoque/:id',
         component: EdicaoEstoqueComponent,
-        canActivate: [AuthGuard],
-        data: { title: 'Editar Item no Estoque', role: 'Estoquista' }, // Estoquista pode editar
+        // canActivate: [AuthGuard],
+        data: {
+          title: 'Editar Item no Estoque',
+          roles: ['Administrador', 'Estoquista'] as UserRole[],
+        }, // Estoquista e Admin podem editar
       },
       {
         path: 'registrar-baixa/:id',
-        component: RegistrosBaixasComponent,
-        canActivate: [AuthGuard],
-        data: { title: 'Registrar Baixa', role: 'Estoquista' }, // Estoquista pode registrar baixa
+        component: RegistrarBaixaComponent, // Corrigido para RegistrarBaixaComponent
+        // canActivate: [AuthGuard],
+        data: {
+          title: 'Registrar Baixa',
+          roles: ['Administrador', 'Estoquista'] as UserRole[],
+        }, // Estoquista e Admin podem registrar baixa
       },
     ],
   },

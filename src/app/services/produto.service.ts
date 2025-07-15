@@ -3,13 +3,13 @@ import { Injectable } from '@angular/core';
 import {
   AngularFirestore,
   AngularFirestoreCollection,
-  DocumentReference,
+  AngularFirestoreDocument,
 } from '@angular/fire/compat/firestore';
-import { AngularFireStorage } from '@angular/fire/compat/storage'; // Para upload de imagens
-import { Observable, from } from 'rxjs';
-import { map, finalize } from 'rxjs/operators';
-import { Produto } from '../models/produto.model'; // Caminho para o modelo
-import { Timestamp } from '@angular/fire/firestore'; // Importação correta do Timestamp
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { Produto } from '../models/produto.model';
+import { Timestamp } from '@angular/fire/firestore';
+import { AuthService } from '../auth/auth.service';
 
 @Injectable({
   providedIn: 'root',
@@ -17,96 +17,76 @@ import { Timestamp } from '@angular/fire/firestore'; // Importação correta do 
 export class ProdutoService {
   private produtosCollection: AngularFirestoreCollection<Produto>;
 
-  constructor(
-    private afs: AngularFirestore,
-    private storage: AngularFireStorage
-  ) {
+  constructor(private afs: AngularFirestore, private authService: AuthService) {
     this.produtosCollection = this.afs.collection<Produto>('produtos');
-  }
-
-  getProdutos(): Observable<Produto[]> {
-    return this.produtosCollection.snapshotChanges().pipe(
-      map((actions) =>
-        actions.map((a) => {
-          const data = a.payload.doc.data() as Produto;
-          const id = a.payload.doc.id;
-          // Não é necessário converter para Date aqui; as datas já virão como Timestamp
-          return { id, ...data };
-        })
-      )
-    );
-  }
-
-  getProduto(id: string): Observable<Produto | undefined> {
-    return this.produtosCollection
-      .doc<Produto>(id)
-      .valueChanges()
-      .pipe(
-        map((data) => {
-          if (data) {
-            // Não é necessário converter para Date aqui
-            return { id, ...data };
-          }
-          return undefined;
-        })
-      );
   }
 
   async addProduto(
     produto: Omit<
       Produto,
-      'id' | 'dataCadastro' | 'dataUltimaEdicao' | 'imageUrl'
-    >,
-    file?: File
-  ): Promise<DocumentReference<Produto>> {
+      | 'uid'
+      | 'dataCadastro'
+      | 'dataUltimaEdicao'
+      | 'usuarioUltimaEdicaoUid'
+      | 'usuarioUltimaEdicaoNome'
+    >
+  ): Promise<string> {
+    const currentUserUid = await this.authService.getCurrentUserUid();
+    const currentUserDisplayName =
+      await this.authService.getCurrentUserDisplayName();
     const newProduto: Produto = {
       ...produto,
-      dataCadastro: Timestamp.fromDate(new Date()), // Cria um Timestamp do Firestore
-    } as Produto;
-
-    if (file) {
-      const filePath = `produtos/${Date.now()}_${file.name}`;
-      const fileRef = this.storage.ref(filePath);
-      const task = this.storage.upload(filePath, file);
-
-      const snapshot = await task
-        .snapshotChanges()
-        .pipe(finalize(() => {}))
-        .toPromise();
-      if (snapshot) {
-        newProduto.imageUrl = await fileRef.getDownloadURL().toPromise();
-      }
-    }
-    return this.produtosCollection.add(newProduto);
-  }
-
-  async updateProduto(
-    id: string,
-    produto: Partial<Produto>,
-    file?: File
-  ): Promise<void> {
-    const updatedProduto: Partial<Produto> = {
-      ...produto,
-      dataUltimaEdicao: Timestamp.fromDate(new Date()), // Cria um Timestamp do Firestore
+      uid: this.afs.createId(),
+      dataCadastro: Timestamp.fromDate(new Date()),
+      dataUltimaEdicao: Timestamp.fromDate(new Date()),
+      usuarioUltimaEdicaoUid: currentUserUid || 'unknown',
+      usuarioUltimaEdicaoNome: currentUserDisplayName || 'Usuário Desconhecido',
     };
-
-    if (file) {
-      const filePath = `produtos/${Date.now()}_${file.name}`;
-      const fileRef = this.storage.ref(filePath);
-      const task = this.storage.upload(filePath, file);
-
-      const snapshot = await task
-        .snapshotChanges()
-        .pipe(finalize(() => {}))
-        .toPromise();
-      if (snapshot) {
-        updatedProduto.imageUrl = await fileRef.getDownloadURL().toPromise();
-      }
-    }
-    return this.produtosCollection.doc(id).update(updatedProduto);
+    await this.produtosCollection.doc(newProduto.uid).set(newProduto);
+    return newProduto.uid;
   }
 
-  deleteProduto(id: string): Promise<void> {
-    return this.produtosCollection.doc(id).delete();
+  // Obter todos os produtos
+  getProdutos(): Observable<Produto[]> {
+    return this.produtosCollection.snapshotChanges().pipe(
+      map((actions) =>
+        actions.map((a) => {
+          const data = a.payload.doc.data() as Produto;
+          const uid = a.payload.doc.id;
+          // CORREÇÃO: Desestrutura 'data' para remover 'uid' antes de espalhar
+          const { uid: _, ...restOfData } = data; // Renomeia 'uid' para '_', que é ignorado
+          return { uid, ...restOfData }; // Adiciona o 'uid' do documento e o resto dos dados
+        })
+      )
+    );
+  }
+
+  // ... (restante do código permanece o mesmo)
+
+  getProduto(uid: string): Observable<Produto | undefined> {
+    return this.produtosCollection
+      .doc<Produto>(uid)
+      .valueChanges()
+      .pipe(map((produto) => (produto ? { ...produto, uid: uid } : undefined)));
+  }
+
+  async updateProduto(uid: string, changes: Partial<Produto>): Promise<void> {
+    const currentUserUid = await this.authService.getCurrentUserUid();
+    const currentUserDisplayName =
+      await this.authService.getCurrentUserDisplayName();
+    const productRef: AngularFirestoreDocument<Produto> = this.afs.doc(
+      `produtos/${uid}`
+    );
+    const updatedChanges = {
+      ...changes,
+      dataUltimaEdicao: Timestamp.fromDate(new Date()),
+      usuarioUltimaEdicaoUid: currentUserUid || 'unknown',
+      usuarioUltimaEdicaoNome: currentUserDisplayName || 'Usuário Desconhecido',
+    };
+    return productRef.update(updatedChanges);
+  }
+
+  deleteProduto(uid: string): Promise<void> {
+    return this.produtosCollection.doc(uid).delete();
   }
 }

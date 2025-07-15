@@ -50,17 +50,17 @@
               {{ baixa.nomeProduto }} (Lote: {{ baixa.loteProduto }})
             </ng-container>
             <ng-container *ngIf="!baixa.nomeProduto || !baixa.loteProduto">
-              Produto Indisponível (ID: {{ baixa.itemEstoqueId }})
+              Produto Indisponível (ID: {{ baixa.estoqueItemUid }})
             </ng-container>
           </td>
           <td>{{ baixa.quantidadeBaixada }}</td>
           <td>{{ baixa.motivo }}</td>
-          <td>{{ baixa.usuarioQueRegistrou }}</td>
+          <td>{{ baixa.usuarioResponsavelNome }}</td>
           <td>{{ baixa.dataBaixa.toDate() | date : "dd/MM/yyyy HH:mm" }}</td>
           <td *ngIf="isAdmin">
             <button
               class="btn btn-sm btn-danger"
-              (click)="onDeleteBaixa(baixa.id!)"
+              (click)="onDeleteBaixa(baixa.uid)"
             >
               <i class="fas fa-trash"></i>
             </button>
