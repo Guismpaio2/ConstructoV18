@@ -7,8 +7,8 @@ import { ProdutoService } from '../../services/produto.service';
 import { User } from '../../models/user.model';
 import { BaixaEstoque } from '../../models/baixa-estoque.model';
 import { EstoqueItem } from '../../models/item-estoque.model';
-import { Observable, Subscription, combineLatest, of } from 'rxjs'; // Adicionado 'of'
-import { map, take, startWith } from 'rxjs/operators'; // Adicionado 'startWith'
+import { Observable, Subscription, combineLatest, of } from 'rxjs';
+import { map, take, startWith } from 'rxjs/operators';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { Timestamp } from '@angular/fire/firestore';
 
@@ -19,12 +19,13 @@ import { Timestamp } from '@angular/fire/firestore';
 })
 export class HomeComponent implements OnInit, OnDestroy {
   user$: Observable<User | null | undefined>;
-  ultimasBaixas$!: Observable<BaixaEstoque[]>;
-  materiaisEmFalta$!: Observable<EstoqueItem[]>;
+  ultimasBaixas$: Observable<BaixaEstoque[]> = of([]);
+  materiaisEmFalta$: Observable<EstoqueItem[]> = of([]);
 
-  totalEstoqueItems$!: Observable<number>;
-  totalBaixasMes$!: Observable<number>;
-  totalProdutosCadastrados$!: Observable<number>;
+  // MUDANÇA AQUI: Inicialize as propriedades com um Observable de número 0
+  totalEstoqueItems$: Observable<number> = of(0);
+  totalBaixasMes$: Observable<number> = of(0);
+  totalProdutosCadastrados$: Observable<number> = of(0);
 
   private userSubscription!: Subscription;
   private subscriptions: Subscription[] = [];
@@ -40,33 +41,31 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // Busca as últimas 5 baixas, ordenadas pela data de baixa
+    // Estas atribuições agora sobrescreverão os `of([])` iniciais.
     this.ultimasBaixas$ = this.afs
       .collection<BaixaEstoque>('baixas', (ref) =>
         ref.orderBy('dataBaixa', 'desc').limit(5)
       )
       .valueChanges({ idField: 'uid' })
-      .pipe(startWith([])); // Adicionado startWith para garantir um valor inicial
+      .pipe(startWith([]));
     this.subscriptions.push(this.ultimasBaixas$.subscribe());
 
-    // Busca materiais em falta (exemplo: quantidade <= 5)
     this.materiaisEmFalta$ = this.afs
       .collection<EstoqueItem>('estoque', (ref) =>
         ref.where('quantidade', '<=', 5).orderBy('quantidade', 'asc')
       )
       .valueChanges({ idField: 'uid' })
-      .pipe(startWith([])); // Adicionado startWith para garantir um valor inicial
+      .pipe(startWith([]));
     this.subscriptions.push(this.materiaisEmFalta$.subscribe());
 
     // --- Novos Observables para os cartões de resumo ---
-    // Total de itens em estoque
+    // A inicialização aqui sobrescreverá o `of(0)` inicial.
     this.totalEstoqueItems$ = this.estoqueService.getEstoqueItems().pipe(
       map((items) => items.length),
-      startWith(0) // Adicionado startWith para garantir um valor inicial
+      startWith(0)
     );
     this.subscriptions.push(this.totalEstoqueItems$.subscribe());
 
-    // Total de baixas no mês (exemplo: mês atual)
     const startOfMonth = Timestamp.fromDate(
       new Date(new Date().getFullYear(), new Date().getMonth(), 1)
     );
@@ -90,19 +89,16 @@ export class HomeComponent implements OnInit, OnDestroy {
       .valueChanges()
       .pipe(
         map((baixas) => baixas.length),
-        startWith(0) // Adicionado startWith para garantir um valor inicial
+        startWith(0)
       );
     this.subscriptions.push(this.totalBaixasMes$.subscribe());
 
-    // Total de produtos cadastrados
     this.totalProdutosCadastrados$ = this.produtoService.getProdutos().pipe(
       map((produtos) => produtos.length),
-      startWith(0) // Adicionado startWith para garantir um valor inicial
+      startWith(0)
     );
     this.subscriptions.push(this.totalProdutosCadastrados$.subscribe());
 
-    // Se user$ for usado com async pipe, não precisa de subscription manual aqui.
-    // Se precisar de alguma lógica que dependa do usuário, use:
     this.userSubscription = this.user$.subscribe((user) => {
       // Lógica se precisar do objeto user aqui
     });
@@ -110,11 +106,9 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    // Desinscrever todas as subscriptions gerenciadas
     this.subscriptions.forEach((sub) => sub.unsubscribe());
   }
 
-  // Método auxiliar para formatar Timestamp
   formatTimestamp(timestamp: Timestamp | null | undefined): string {
     if (timestamp instanceof Timestamp && timestamp.toDate) {
       return timestamp.toDate().toLocaleString('pt-BR', {

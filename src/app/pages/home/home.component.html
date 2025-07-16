@@ -1,154 +1,109 @@
 <div class="main-content-container">
-   
   <div class="page-header">
-       
     <h1>Bem-vindo, {{ (user$ | async)?.nome || "Usuário" }}!</h1>
-     
   </div>
 
-   
   <div class="home-grid">
-       
     <div class="summary-card">
-           
       <h3>Itens em Estoque</h3>
-           
+
       <p class="summary-value">{{ totalEstoqueItems$ | async }}</p>
-         
     </div>
-       
+
     <div class="summary-card">
-           
       <h3>Baixas do Mês</h3>
-           
+
       <p class="summary-value">{{ totalBaixasMes$ | async }}</p>
-         
     </div>
-       
+
     <div class="summary-card">
-           
       <h3>Produtos Cadastrados</h3>
-           
+
       <p class="summary-value">{{ totalProdutosCadastrados$ | async }}</p>
-         
     </div>
-     
   </div>
 
-   
   <div class="home-section">
-       
     <h2>Últimas Baixas Registradas</h2>
 
-       
-    <div *ngIf="(ultimasBaixas$ | async)?.length === 0" class="no-data-message">
-            Nenhuma baixa registrada recentemente.    
-    </div>
-       
-    <div *ngIf="(ultimasBaixas$ | async)?.length > 0" class="table-responsive">
-           
-      <table class="table">
-               
-        <thead>
-                   
-          <tr>
-                       
-            <th>Produto</th>
-                       
-            <th>Quantidade</th>
-                       
-            <th>Tipo de Baixa</th>
-                       
-            <th>Data da Baixa</th>
-                       
-            <th>Registrado por</th>
-                     
-          </tr>
-                 
-        </thead>
-               
-        <tbody>
-                   
-          <tr *ngFor="let baixa of ultimasBaixas$ | async">
-                       
-            <td>{{ baixa.nomeProduto }}</td>
-                       
-            <td>{{ baixa.quantidadeBaixada }} {{ baixa.unidadeMedida }}</td>
-                       
-            <td>{{ baixa.motivo }}</td>
-                       
-            <td>{{ formatTimestamp(baixa.dataBaixa) }}</td>
-                       
-            <td>{{ baixa.usuarioResponsavelNome }}</td>
-                     
-          </tr>
-                 
-        </tbody>
-             
-      </table>
-         
-    </div>
-     
+    <ng-container *ngIf="ultimasBaixas$ | async as ultimasBaixas">
+      <div *ngIf="ultimasBaixas.length === 0" class="no-data-message">
+        Nenhuma baixa registrada recentemente.
+      </div>
+
+      <div *ngIf="ultimasBaixas.length > 0" class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Produto</th>
+
+              <th>Quantidade</th>
+
+              <th>Tipo de Baixa</th>
+
+              <th>Data da Baixa</th>
+
+              <th>Registrado por</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let baixa of ultimasBaixas">
+              <td>{{ baixa.nomeProduto }}</td>
+
+              <td>{{ baixa.quantidadeBaixada }} {{ baixa.unidadeMedida }}</td>
+
+              <td>{{ baixa.motivo }}</td>
+
+              <td>{{ formatTimestamp(baixa.dataBaixa) }}</td>
+
+              <td>{{ baixa.usuarioResponsavelNome }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </ng-container>
   </div>
 
-   
   <div class="home-section">
-       
     <h2>Materiais em Falta/Atenção</h2>
-       
-    <div
-      *ngIf="(materiaisEmFalta$ | async)?.length === 0"
-      class="no-data-message"
-    >
-            Nenhum material em falta ou que precise de atenção.    
-    </div>
-       
-    <div
-      *ngIf="(materiaisEmFalta$ | async)?.length > 0"
-      class="table-responsive"
-    >
-           
-      <table class="table">
-               
-        <thead>
-                   
-          <tr>
-                       
-            <th>Produto</th>
-                       
-            <th>SKU</th>
-                       
-            <th>Quantidade</th>
-                       
-            <th>Unidade</th>
-                       
-            <th>Data Validade (Prox.)</th>
-                     
-          </tr>
-                 
-        </thead>
-               
-        <tbody>
-                   
-          <tr *ngFor="let item of materiaisEmFalta$ | async">
-                       
-            <td>{{ item.nomeProduto }}</td>
-                       
-            <td>{{ item.sku }}</td>
-                       
-            <td>{{ item.quantidade }}</td>
-                       
-            <td>{{ item.unidadeMedida }}</td>
-                       
-            <td>{{ formatTimestamp(item.dataValidade) }}</td>
-                     
-          </tr>
-                 
-        </tbody>
-             
-      </table>
-         
-    </div>
-     
+
+    <ng-container *ngIf="materiaisEmFalta$ | async as materiaisEmFalta">
+      <div *ngIf="materiaisEmFalta.length === 0" class="no-data-message">
+        Nenhum material em falta ou que precise de atenção.
+      </div>
+
+      <div *ngIf="materiaisEmFalta.length > 0" class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Produto</th>
+
+              <th>SKU</th>
+
+              <th>Quantidade</th>
+
+              <th>Unidade</th>
+
+              <th>Data Validade (Prox.)</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let item of materiaisEmFalta">
+              <td>{{ item.nomeProduto }}</td>
+
+              <td>{{ item.sku }}</td>
+
+              <td>{{ item.quantidade }}</td>
+
+              <td>{{ item.unidadeMedida }}</td>
+
+              <td>{{ formatTimestamp(item.dataValidade) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </ng-container>
   </div>
 </div>

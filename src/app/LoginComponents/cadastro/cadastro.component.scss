@@ -1,6 +1,7 @@
 /* src/app/LoginComponents/cadastro/cadastro.component.scss */
-@import "variables"; // Importa suas variáveis de SCSS
+@import "../../../styles/variables"; // Importa suas variáveis de SCSS
 @import "../../../styles/styles"; // Importa estilos globais, como para botões e inputs, se existirem
+@import "../../../styles.scss";
 
 .cadastro-container-wrapper {
   // Este wrapper é o que está dentro do auth-left-panel.
