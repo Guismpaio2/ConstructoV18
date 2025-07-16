@@ -136,9 +136,9 @@ export class BaixasComponent implements OnInit, OnDestroy {
         motivo: motivo,
         observacoes: observacoes,
         usuarioResponsavelUid: this.currentUser.uid,
-        usuarioResponsavelNome:
-          this.currentUser.nome + ' ' + this.currentUser.sobrenome,
+        usuarioResponsavelNome: this.currentUser.nome + ' ' + this.currentUser.sobrenome,
         dataBaixa: Timestamp.now(),
+        unidadeMedida: ''
       };
 
       await this.baixaService.addBaixa(novaBaixa);

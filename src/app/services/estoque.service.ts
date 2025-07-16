@@ -80,4 +80,9 @@ export class EstoqueService {
   deleteEstoqueItem(uid: string): Promise<void> {
     return this.estoqueCollection.doc(uid).delete();
   }
+
+  // Novo método público para gerar um UID
+  generateId(): string {
+    return this.afs.createId();
+  }
 }

@@ -50,10 +50,10 @@
       background-color: $color-brand-base;
       color: $color-text-light;
       &:hover {
-        background-color: $color-brand-lighter;
+        background-color: $color-brand-lighter; // Usando a nova variável
       }
       &:active {
-        background-color: $color-brand-darker;
+        background-color: $color-brand-darker; // Usando a nova variável
       }
     }
 

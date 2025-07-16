@@ -1,9 +1,10 @@
 // src/app/pages/produtos/cadastro-produto/cadastro-produto.component.ts
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Timestamp } from '@angular/fire/firestore'; // Importar Timestamp
+import { Timestamp } from '@angular/fire/firestore';
 import { ProdutoService } from '../../../services/produto.service';
 import { Produto } from '../../../models/produto.model';
+import { Router } from '@angular/router'; // Importar Router
 
 @Component({
   selector: 'app-cadastro-produto',
@@ -11,25 +12,50 @@ import { Produto } from '../../../models/produto.model';
   styleUrls: ['./cadastro-produto.component.scss'],
 })
 export class CadastroProdutoComponent implements OnInit {
-  cadastroForm!: FormGroup;
+  cadastroForm!: FormGroup; // Renomeado para consistência com o HTML
   message: string = '';
   isSuccess: boolean = false;
-  isLoading: boolean = false;
+  isLoading: boolean = false; // Listas para popular os selects
+
+  tiposProduto: string[] = [
+    'Ferragem',
+    'Hidráulica',
+    'Elétrica',
+    'Pintura',
+    'Madeira',
+    'Alvenaria',
+    'Revestimento',
+    'Ferramenta',
+    'Material Básico',
+    'Outros',
+  ];
+  unidadesMedida: string[] = [
+    'Unidade',
+    'Caixa',
+    'Pacote',
+    'Metro',
+    'Litro',
+    'Quilograma',
+    'Saco',
+    'Galão',
+    'Lata',
+  ];
 
   constructor(
     private fb: FormBuilder,
-    private produtoService: ProdutoService
+    private produtoService: ProdutoService,
+    private router: Router // Injetar Router
   ) {}
 
   ngOnInit(): void {
     this.cadastroForm = this.fb.group({
       nome: ['', Validators.required],
-      descricao: [''],
+      descricao: [''], // Opcional no TS, mas HTML pode ter validação visual
       tipo: ['', Validators.required],
-      marca: [''],
+      marca: [''], // Opcional no TS, mas HTML pode ter validação visual
       unidadeMedida: ['', Validators.required],
-      categoria: [''], // Adicionado para correção do model
-      sku: [''], // Adicionado para correção do model
+      categoria: [''],
+      sku: [''],
       imageUrl: [''],
     });
   }
@@ -40,7 +66,6 @@ export class CadastroProdutoComponent implements OnInit {
     if (this.cadastroForm.valid) {
       const formValue = this.cadastroForm.value;
 
-      // Omitimos uid e os campos de auditoria, pois o serviço ProdutoService os adicionará
       const novoProduto: Omit<
         Produto,
         | 'uid'
@@ -50,12 +75,12 @@ export class CadastroProdutoComponent implements OnInit {
         | 'usuarioUltimaEdicaoNome'
       > = {
         nome: formValue.nome,
-        descricao: formValue.descricao,
+        descricao: formValue.descricao || undefined,
         tipo: formValue.tipo,
-        marca: formValue.marca,
+        marca: formValue.marca || undefined,
         unidadeMedida: formValue.unidadeMedida,
-        categoria: formValue.categoria || undefined, // Garantir que são opcionais se não preenchidos
-        sku: formValue.sku || undefined, // Garantir que são opcionais se não preenchidos
+        categoria: formValue.categoria || undefined,
+        sku: formValue.sku || undefined,
         imageUrl: formValue.imageUrl || undefined,
       };
 
@@ -64,7 +89,6 @@ export class CadastroProdutoComponent implements OnInit {
         this.message = 'Produto cadastrado com sucesso!';
         this.isSuccess = true;
         this.cadastroForm.reset();
-        // Para resetar os validadores de forma limpa após o reset
         Object.keys(this.cadastroForm.controls).forEach((key) => {
           this.cadastroForm.get(key)?.setErrors(null);
         });
@@ -80,7 +104,7 @@ export class CadastroProdutoComponent implements OnInit {
         'Por favor, preencha todos os campos obrigatórios corretamente.';
       this.isSuccess = false;
       this.isLoading = false;
-      this.cadastroForm.markAllAsTouched(); // Marca todos os campos como "touched" para exibir mensagens de erro
+      this.cadastroForm.markAllAsTouched();
     }
   }
 
@@ -89,5 +113,14 @@ export class CadastroProdutoComponent implements OnInit {
     this.message = '';
     this.isSuccess = false;
     this.isLoading = false;
+    this.cadastroForm.markAsPristine(); // Limpa o estado "touched"
+    this.cadastroForm.markAsUntouched(); // Limpa o estado "touched"
+    Object.keys(this.cadastroForm.controls).forEach((key) => {
+      this.cadastroForm.get(key)?.setErrors(null);
+    });
+  }
+
+  goBack(): void {
+    this.router.navigate(['/produtos']); // Ajuste o caminho conforme sua rota de produtos
   }
 }

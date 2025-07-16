@@ -10,6 +10,7 @@ import { Observable, Subscription, combineLatest } from 'rxjs'; // combineLatest
 import { map, startWith } from 'rxjs/operators'; // startWith não está sendo usado
 import { Timestamp } from '@angular/fire/firestore';
 import { take, filter } from 'rxjs/operators'; // Adicionado take e filter
+import { AngularFirestore } from '@angular/fire/compat/firestore';
 
 @Component({
   selector: 'app-cadastro-estoque',
@@ -17,6 +18,8 @@ import { take, filter } from 'rxjs/operators'; // Adicionado take e filter
   styleUrls: ['./cadastro-estoque.component.scss'],
 })
 export class CadastroEstoqueComponent implements OnInit, OnDestroy {
+  cadastroEstoqueForm!: FormGroup; // Declare o FormGroup
+
   estoqueForm!: FormGroup; // Renomeado de cadastroEstoqueForm para estoqueForm
   produtos$!: Observable<Produto[]>;
   private currentUserSubscription!: Subscription;
@@ -29,7 +32,8 @@ export class CadastroEstoqueComponent implements OnInit, OnDestroy {
     private estoqueService: EstoqueService,
     private produtoService: ProdutoService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private afs: AngularFirestore
   ) {}
 
   ngOnInit(): void {
@@ -107,7 +111,7 @@ export class CadastroEstoqueComponent implements OnInit, OnDestroy {
       }
 
       const novoEstoqueItem: EstoqueItem = {
-        uid: this.estoqueService.afs.createId(), // Gerar UID para o novo item
+        uid: this.estoqueService.generateId(), // Gerar UID para o novo item
         produtoUid: produtoUid,
         nomeProduto: produto.nome,
         tipoProduto: produto.tipo,
@@ -121,7 +125,9 @@ export class CadastroEstoqueComponent implements OnInit, OnDestroy {
         dataUltimaAtualizacao: Timestamp.now(), // Adicionado
         usuarioUltimaEdicaoUid: this.currentUserUid,
         usuarioUltimaEdicaoNome: this.currentUserDisplayName,
-        imageUrl: produto.imageUrl || '', // Opcional, garantir que seja string
+        imageUrl: produto.imageUrl || '',
+        sku: '',
+        unidadeMedida: '',
       };
 
       await this.estoqueService.addEstoqueItem(novoEstoqueItem);

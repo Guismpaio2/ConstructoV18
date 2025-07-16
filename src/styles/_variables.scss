@@ -1,7 +1,18 @@
+// src/styles/_variables.scss
 // Cores
 $color-brand-base: #ff6f00; // Laranja principal, do logo e botões CTA
 $color-brand-light: #f29c5a; // Variação mais clara
 $color-brand-dark: #b24e00; // Variação mais escura
+
+// Novas definições para resolver o erro "Undefined variable"
+$color-brand-lighter: lighten(
+  $color-brand-base,
+  15%
+); // Variação um pouco mais clara que 'light'
+$color-brand-darker: darken(
+  $color-brand-base,
+  15%
+); // Variação um pouco mais escura que 'dark'
 
 $color-primary: #1e3a9f; // Exemplo
 $color-secondary-base: #f2f2f2; // Certifique-se que está definida!
@@ -9,7 +20,6 @@ $color-accent: #ffc107; // Exemplo
 
 $color-secondary-lighter: #f9f9f9;
 $color-secondary-darker: #e0e0e0; // Variação mais escura da cor secundária
-
 
 // Cores de feedback
 $color-danger: #f00000;
@@ -69,8 +79,8 @@ $box-shadow-medium: 0 4px 8px rgba(0, 0, 0, 0.12);
 $box-shadow-heavy: 0 8px 16px rgba(0, 0, 0, 0.16);
 
 // Outras variáveis comuns (fontes, tamanhos, espaçamentos, etc.)
-$font-family-base: 'Roboto', sans-serif;
-$font-size-base: 1rem;
+$font-family-base: "Roboto", sans-serif;
+// $font-size-base: 1rem; // Duplicado, já definido acima
 $padding-base: 1rem;
 $margin-base: 1rem;
 

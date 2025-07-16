@@ -16,5 +16,5 @@ export interface EstoqueItem {
   usuarioUltimaEdicaoNome: string;
   imageUrl?: string;
   sku: string;
-  unidadeMedida: string; // ADICIONAR ESTA LINHA
+  unidadeMedida: string; // ADICIONAR ESTA LINH
 }

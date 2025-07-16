@@ -1,5 +1,7 @@
 // src/app/LoginComponents/recuperar-senha/recuperar-senha.component.scss
-@import "~src/styles/_styles.scss"; // Importe estilos globais para acessar as variáveis.
+@import "../../../styles.scss";
+@import "../../../styles/variables.scss";
+// Importe estilos globais para acessar as variáveis.
 
 .forgot-password-container {
   display: flex;
