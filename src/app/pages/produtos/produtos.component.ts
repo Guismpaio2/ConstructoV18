@@ -50,25 +50,24 @@ export class ProdutosComponent implements OnInit, OnDestroy {
   }
 
   setupPermissions(): void {
-    // Usando Observable diretamente
     this.canAddEditDelete$ = this.authService.userRole$.pipe(
       map((role: string | null) => {
-        const hasPermission = role === 'administrador' || role === 'estoquista';
+        // CORREÇÃO AQUI: Converter o papel para minúsculas antes de comparar
+        const lowerCaseRole = role ? role.toLowerCase() : null;
+        const hasPermission =
+          lowerCaseRole === 'administrador' || lowerCaseRole === 'estoquista';
         console.log(
           'Permissão canAddEditDelete:',
           hasPermission,
           'Role:',
           role
-        );
+        ); // Manter o log para depuração
         return hasPermission;
       }),
-      // Adiciona um valor inicial de 'false' para que o *ngIf funcione corretamente na primeira renderização
-      // Isso evita que os botões pisquem ou não apareçam se a permissão demorar para ser carregada.
       startWith(false),
-      // Adiciona tratamento de erro caso o Observable falhe
       catchError((error) => {
         console.error('Erro ao verificar permissão do usuário:', error);
-        return of(false); // Retorna false em caso de erro
+        return of(false);
       })
     );
   }
