@@ -1,0 +1,91 @@
+<div class="page-header">
+  <h2>Gerenciamento de Produtos</h2>
+  <button
+    *ngIf="canAddEditDelete"
+    class="btn btn-primary"
+    (click)="openProductModal(null)"
+  >
+    <i class="fas fa-plus"></i> Adicionar Produto
+  </button>
+</div>
+
+<div class="filters-section">
+  <input
+    type="text"
+    placeholder="Buscar por nome, descrição, marca, tipo..."
+    [(ngModel)]="searchTerm"
+    (input)="triggerFilterAndSort()"
+    class="form-control mb-3"
+  />
+
+  <div class="form-group">
+    <label for="typeFilter">Filtrar por Tipo:</label>
+    <select
+      id="typeFilter"
+      [(ngModel)]="selectedTypeFilter"
+      (change)="triggerFilterAndSort()"
+      class="form-control"
+    >
+      <option value="todos">Todos os Tipos</option>
+      <option *ngFor="let type of availableTypes" [value]="type">
+        {{ type }}
+      </option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="sortOrder">Ordenar por:</label>
+    <select
+      id="sortOrder"
+      [(ngModel)]="selectedSort"
+      (change)="triggerFilterAndSort()"
+      class="form-control"
+    >
+      <option value="nomeProdutoAsc">Nome (A-Z)</option>
+      <option value="nomeProdutoDesc">Nome (Z-A)</option>
+      <option value="dataCadastroDesc">Mais Recente</option>
+      <option value="dataCadastroAsc">Mais Antigo</option>
+    </select>
+  </div>
+</div>
+
+<div class="product-list-container">
+  <div
+    *ngIf="filteredProducts.length === 0 && !isLoading"
+    class="no-products-message alert alert-info"
+  >
+    Nenhum produto encontrado com os critérios de busca/filtro.
+  </div>
+
+  <div *ngIf="isLoading" class="loading-message">Carregando produtos...</div>
+
+  <div *ngIf="filteredProducts.length > 0" class="products-grid mt-3">
+    <div *ngFor="let produto of filteredProducts" class="product-card">
+      <div class="product-info">
+        <h3>{{ produto.nome }}</h3>
+        <p>Tipo: {{ produto.tipo }}</p>
+        <p>Marca: {{ produto.marca }}</p>
+        <p *ngIf="produto.descricao">Descrição: {{ produto.descricao }}</p>
+        <small
+          >Cadastrado em:
+          {{ produto.dataCadastro | date : "dd/MM/yyyy HH:mm" }}</small
+        >
+        <small *ngIf="produto.dataUltimaEdicao"
+          >Última edição:
+          {{ produto.dataUltimaEdicao | date : "dd/MM/yyyy HH:mm" }}</small
+        >
+        <small *ngIf="produto.usuarioUltimaEdicaoNome"
+          >Por: {{ produto.usuarioUltimaEdicaoNome }}</small
+        >
+      </div>
+      <div class="product-actions" *ngIf="canAddEditDelete">
+        <button class="btn btn-secondary" (click)="openProductModal(produto)">
+          <i class="fas fa-edit"></i> Editar
+        </button>
+        <button class="btn btn-danger" (click)="confirmDeleteProduct(produto)">
+          <i class="fas fa-trash-alt"></i> Excluir
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,57 +1,94 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { FormsModule } from '@angular/forms'; // Já estava aqui
+import { ReactiveFormsModule } from '@angular/forms'; // Já estava aqui
+import { CommonModule } from '@angular/common'; // <--- ADICIONAR ESTE PARA PIPES E NGLIKE
+import { RouterModule } from '@angular/router'; // <--- ADICIONAR ESTE PARA ROUTER-OUTLET
+
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { environment } from '../environments/environment';
 
-// Firebase
-import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
-import { provideAuth, getAuth } from '@angular/fire/auth';
-import { provideFirestore, getFirestore } from '@angular/fire/firestore';
+// Importações do AngularFire
+import { AngularFireModule } from '@angular/fire/compat';
+import { AngularFireAuthModule } from '@angular/fire/compat/auth';
+import { AngularFirestoreModule } from '@angular/fire/compat/firestore';
+import { AngularFireStorageModule } from '@angular/fire/compat/storage';
 
-// Módulos para formulários
-import { ReactiveFormsModule, FormsModule } from '@angular/forms'; // Adicione FormsModule também para ngModel
+// Caminho para o environment
+// VERIFIQUE SE O CAMINHO E O NOME DA PASTA 'enviroments' ESTÃO CORRETOS.
+// Geralmente é './environments/environment' (com "s" no final)
+import { environment } from './enviroments/enviroment';
 
-// Seus componentes de login/cadastro (já fizemos um rascunho na resposta anterior)
+// Components de Login
 import { LoginComponent } from './LoginComponents/login/login.component';
 import { CadastroComponent } from './LoginComponents/cadastro/cadastro.component';
-// import { RecuperarSenhaComponent } from './LoginComponents/recuperar-senha/recuperar-senha.component'; // A ser criado
-// import { CadastroSenhaComponent } from './LoginComponents/cadastro-senha/cadastro-senha.component'; // A ser criado
+import { CadastroSenhaComponent } from './LoginComponents/cadastro-senha/cadastro-senha.component';
+import { RecuperarSenhaComponent } from './LoginComponents/recuperar-senha/recuperar-senha.component';
+import { CadastroSucessoComponent } from './LoginComponents/cadastro-sucesso/cadastro-sucesso.component';
+import { StarterComponent } from './LoginComponents/starter/starter.component';
 
-// Componentes da página inicial (Home)
+// Componentes de Páginas
 import { HomeComponent } from './pages/home/home.component';
+import { ProdutosComponent } from './pages/produtos/produtos.component';
+import { EstoqueComponent } from './pages/estoque/estoque.component';
+import { RegistrosBaixasComponent } from './pages/registros-baixas/registros-baixas.component';
+import { UsuariosComponent } from './pages/usuarios/usuarios.component';
+import { PerfilComponent } from './pages/perfil/perfil.component';
+import { CadastroProdutoComponent } from './pages/produtos/cadastro-produto/cadastro-produto.component';
+import { EdicaoProdutoComponent } from './pages/produtos/edicao-produto/edicao-produto.component';
+import { CadastroEstoqueComponent } from './pages/estoque/cadastro-estoque/cadastro-estoque.component';
+import { EdicaoEstoqueComponent } from './pages/estoque/edicao-estoque/edicao-estoque.component';
+import { BaixasComponent } from './pages/baixas/baixas.component';
 
-// Componentes Shared (Feedback Message você já deve ter, adicionando os layouts e modal)
-import { FeedbackMessageComponent } from './shared/feedback-message/feedback-message.component'; // Verifique o caminho correto
-import { AuthLayoutComponent } from './shared/layout/auth-layout/auth-layout.component';
-import { DashboardLayoutComponent } from './shared/layout/dashboard-layout/dashboard-layout.component';
-import { ModalWrapperComponent } from './shared/components/modal-wrapper/modal-wrapper.component';
-import { SharedModule } from './shared.module';
+// ATENÇÃO: Verifique este caminho! O erro "Could not resolve" aponta para ele.
+// Se product-form-modal.component.ts estiver em './pages/produtos/produto-form-modal/', o caminho está correto.
+// Se não, ajuste.// Importação correta (verifique o caminho)
+
+// O ProdutoFormComponent que você declarou também
+import { ProdutoFormComponent } from './pages/produtos/produto-form/produto-form.component';
+
+// SharedModule para layouts e outros componentes/módulos compartilhados
+import { SharedModule } from './shared/shared.module';
 
 @NgModule({
   declarations: [
     AppComponent,
-    HomeComponent,
     LoginComponent,
     CadastroComponent,
-    // RecuperarSenhaComponent, // Descomente quando criar
-    // CadastroSenhaComponent, // Descomente quando criar
-    FeedbackMessageComponent,
-    AuthLayoutComponent,
-    DashboardLayoutComponent,
-    ModalWrapperComponent,
-    // ... adicione aqui todos os outros componentes à medida que forem criados
+    CadastroSenhaComponent,
+    RecuperarSenhaComponent,
+    CadastroSucessoComponent,
+    StarterComponent,
+    HomeComponent,
+    ProdutosComponent,
+    EstoqueComponent,
+    RegistrosBaixasComponent,
+    UsuariosComponent,
+    PerfilComponent,
+    CadastroProdutoComponent,
+    EdicaoProdutoComponent,
+    CadastroEstoqueComponent,
+    EdicaoEstoqueComponent,
+    BaixasComponent,
+    ProdutoFormComponent, // Confirme que este componente é o que você quer declarar
   ],
   imports: [
     BrowserModule,
+    BrowserAnimationsModule,
     AppRoutingModule,
+    FormsModule,
     ReactiveFormsModule,
-    FormsModule, // Importe para ngModel
-    // Configuração do Firebase:
-    provideFirebaseApp(() => initializeApp(environment.firebase)),
-    provideAuth(() => getAuth()),
-    provideFirestore(() => getFirestore()),
-    SharedModule,
+    CommonModule, // <--- ADICIONADO AQUI
+    RouterModule, // <--- ADICIONADO AQUI PARA ROUTER-OUTLET
+
+    SharedModule, // SharedModule já está importado e deve exportar ModalWrapperComponent
+
+    // Inicialização do Firebase
+    AngularFireModule.initializeApp(environment.firebase),
+    AngularFireAuthModule,
+    AngularFirestoreModule,
+    AngularFireStorageModule,
   ],
   providers: [],
   bootstrap: [AppComponent],

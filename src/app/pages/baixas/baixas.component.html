@@ -1,0 +1,114 @@
+<div class="page-container">
+  <div class="header-container">
+    <h2>Registrar Nova Baixa de Estoque</h2>
+  </div>
+
+  <form [formGroup]="baixaForm" (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <label for="itemEstoqueUid">Item de Estoque:</label>
+      <select
+        id="itemEstoqueUid"
+        formControlName="itemEstoqueUid"
+        class="form-control"
+      >
+        <option [ngValue]="null" disabled>Selecione um item</option>
+        <ng-container *ngIf="itensEstoque$ | async as items; else loadingItems">
+          <option *ngFor="let item of items" [ngValue]="item.uid">
+            {{ item.nomeProduto }} (Lote: {{ item.lote }}, Qtd:
+            {{ item.quantidade }})
+          </option>
+        </ng-container>
+        <ng-template #loadingItems>
+          <option disabled>Carregando itens...</option>
+        </ng-template>
+      </select>
+      <div
+        *ngIf="
+          baixaForm.get('itemEstoqueUid')?.invalid &&
+          baixaForm.get('itemEstoqueUid')?.touched
+        "
+        class="error-message"
+      >
+        Item de estoque é obrigatório.
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="quantidadeBaixada">Quantidade a Baixar:</label>
+      <input
+        type="number"
+        id="quantidadeBaixada"
+        formControlName="quantidadeBaixada"
+        class="form-control"
+        placeholder="Quantidade (Disponível: {{ selectedItemStockQuantity }})"
+        [min]="1"
+        [max]="selectedItemStockQuantity"
+      />
+      <div
+        *ngIf="
+          baixaForm.get('quantidadeBaixada')?.invalid &&
+          baixaForm.get('quantidadeBaixada')?.touched
+        "
+        class="error-message"
+      >
+        <span *ngIf="baixaForm.get('quantidadeBaixada')?.errors?.['required']">
+          Quantidade é obrigatória.
+        </span>
+        <span *ngIf="baixaForm.get('quantidadeBaixada')?.errors?.['min']">
+          A quantidade deve ser no mínimo 1.
+        </span>
+        <span
+          *ngIf="baixaForm.get('quantidadeBaixada')?.errors?.['exceedsStock']"
+        >
+          A quantidade excede o estoque disponível ({{
+            selectedItemStockQuantity
+          }}).
+        </span>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="motivo">Motivo da Baixa:</label>
+      <input
+        type="text"
+        id="motivo"
+        formControlName="motivo"
+        class="form-control"
+      />
+      <div
+        *ngIf="
+          baixaForm.get('motivo')?.invalid && baixaForm.get('motivo')?.touched
+        "
+        class="error-message"
+      >
+        Motivo é obrigatório.
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="observacoes">Observações (Opcional):</label>
+      <textarea
+        id="observacoes"
+        formControlName="observacoes"
+        class="form-control"
+      ></textarea>
+    </div>
+
+    <div class="form-actions">
+      <button
+        type="button"
+        class="secondary-button"
+        (click)="goToRegistrosBaixas()"
+      >
+        Ver Registros de Baixas
+      </button>
+      <button
+        type="submit"
+        class="primary-button"
+        [disabled]="baixaForm.invalid"
+      >
+        Registrar Baixa
+      </button>
+    </div>
+  </form>
+</div>

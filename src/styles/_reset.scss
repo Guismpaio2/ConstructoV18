@@ -1,4 +1,3 @@
-/* Um reset CSS simples para remover margens e paddings padrão do navegador */
 *,
 *::before,
 *::after {
@@ -7,44 +6,48 @@
   padding: 0;
 }
 
-html {
-  font-family: sans-serif; // Usar uma fonte padrão, pode ser substituída por uma específica como 'Inter', 'Roboto'
-  line-height: 1.15;
-  -webkit-text-size-adjust: 100%;
-}
-
 body {
-  margin: 0;
-  background-color: $color-background; // Fundo geral do aplicativo
-  color: $color-text-dark; // Cor padrão do texto
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  font-family: "Roboto", sans-serif; /* Assumindo que você usará Roboto, adicione ao index.html */
 }
 
-// Remova estilos padrão de alguns elementos
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  overflow-wrap: break-word;
+}
+
+#root,
+#__next {
+  isolation: isolate;
+}
+
 a {
-  background-color: transparent;
   text-decoration: none;
   color: inherit;
 }
 
-button,
-input,
-optgroup,
-select,
-textarea {
-  font-family: inherit;
-  font-size: 100%;
-  line-height: 1.15;
-  margin: 0;
-}
-
-button,
-[type="button"],
-[type="reset"],
-[type="submit"] {
-  -webkit-appearance: button;
-  appearance: button;
-}
-
-template {
-  display: none;
+ul {
+  list-style: none;
 }

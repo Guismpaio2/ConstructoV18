@@ -1,0 +1,151 @@
+// src/app/pages/usuarios/usuarios.component.scss
+@import "../../../styles.scss"; // Importe estilos globais para acessar as variáveis.
+
+.page-header {
+  margin-bottom: 25px;
+  h1 {
+    color: #343a40;
+    font-size: 2.2rem;
+    font-weight: 600;
+  }
+}
+
+.search-filter-bar {
+  display: flex;
+  flex-wrap: wrap; // Permite que os itens quebrem a linha em telas menores
+  gap: 15px;
+  margin-bottom: 30px;
+  align-items: center;
+
+  .search-input {
+    position: relative;
+    flex-grow: 1; // Permite que o input de busca ocupe o espaço disponível
+    min-width: 250px; // Largura mínima para o campo de busca
+
+    input {
+      width: 100%;
+      padding: 10px 10px 10px 40px; /* Left padding for icon */
+      border: 1px solid #ced4da;
+      border-radius: 5px;
+      font-size: 1rem;
+      color: #495057;
+      &:focus {
+        border-color: #80bdff;
+        outline: 0;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+      }
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #6c757d;
+    }
+  }
+
+  select {
+    padding: 10px 15px;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    background-color: #fff;
+    color: #495057;
+    cursor: pointer;
+    &:focus {
+      border-color: #80bdff;
+      outline: 0;
+      box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+  }
+}
+
+.users-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 25px;
+}
+
+.user-card {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  padding: 25px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transition: transform 0.2s ease-in-out;
+
+  &:hover {
+    transform: translateY(-5px);
+  }
+
+  .profile-circle {
+    width: 80px;
+    height: 80px;
+    background-color: #e9ecef;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 15px;
+    .fas.fa-user {
+      font-size: 3rem;
+      color: #6c757d;
+    }
+  }
+
+  h4 {
+    color: #343a40;
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+  }
+
+  .user-info-detail {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-bottom: 10px; // Espaçamento entre os detalhes
+    text-align: left;
+
+    label {
+      font-weight: 500;
+      color: #495057;
+      font-size: 0.9rem;
+      margin-bottom: 5px;
+    }
+
+    span,
+    select {
+      color: #6c757d;
+      font-size: 1rem;
+      padding: 8px 12px;
+      border: 1px solid #e9ecef;
+      border-radius: 4px;
+      background-color: #f8f9fa;
+      width: 100%;
+      box-sizing: border-box; // Inclui padding e border na largura
+    }
+
+    select {
+      cursor: pointer;
+      background-color: #fff; // Override para select ficar branco
+      &:disabled {
+        background-color: #e9ecef;
+        cursor: not-allowed;
+      }
+    }
+  }
+
+  .btn-sm {
+    padding: 8px 15px;
+    font-size: 0.9rem;
+    border-radius: 4px;
+  }
+}
+
+.alert-info {
+  margin-top: 20px;
+  text-align: center;
+}

@@ -1,0 +1,14 @@
+// src/app/pages/estoque/cadastro-estoque/cadastro-estoque.component.scss
+@import "../../../../styles.scss"; // Importe estilos globais para acessar as variáveis.
+
+.cadastro-estoque-form-card {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 25px;
+}

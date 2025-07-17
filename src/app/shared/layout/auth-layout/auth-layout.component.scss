@@ -1,33 +1,116 @@
-@import '../../../../styles/variables';
+@import "../../../../styles/variables";
+@import "../../../../styles/styles";
 
-.auth-layout-container {
+.auth-layout-wrapper {
   display: flex;
-  height: 100vh; // Ocupa a altura total da viewport
-  width: 100vw; // Ocupa a largura total da viewport
-  background-color: $color-background; // Cor de fundo padrão
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  width: 100vw;
+  background-color: $color-background;
+  overflow: hidden;
+}
 
-  .auth-content-left {
-    flex: 1; // Ocupa 1 parte do espaço (ex: 50% se o outro for 1)
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: $spacing-xl; // Espaçamento interno
-    background-color: $color-background-card; // Fundo branco para a área de formulário
+.auth-content-container {
+  display: flex;
+  background-color: $color-background-card;
+  border-radius: $border-radius-large;
+  box-shadow: $box-shadow-heavy;
+  overflow: hidden;
+  width: 90%;
+  max-width: 1100px;
+  height: 90vh;
+  max-height: 800px;
+
+  @media (max-width: 992px) {
+    flex-direction: column;
+    width: 100%;
+    max-width: 100%;
+    height: 100vh;
+    max-height: 100vh;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+
+.auth-left-panel {
+  flex: 1;
+  min-width: 400px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: $spacing-l;
+  box-sizing: border-box;
+  background-color: $color-background-card;
+
+  @media (max-width: 992px) {
+    min-width: auto;
+    width: 100%;
+    height: auto;
+    padding: $spacing-m;
+  }
+}
+
+.auth-right-panel {
+  flex: 1;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  padding: $spacing-xl;
+  box-sizing: border-box;
+  position: relative;
+
+  &.bg-starter {
+    background-image: url("/assets/images/starter-background.jpg"); 
   }
 
-  .auth-background-right {
-    flex: 1; // Ocupa a outra parte do espaço (ex: 50%)
-    background-size: cover; // Cobre toda a área sem distorcer a imagem
-    background-position: center center; // Centraliza a imagem
-    background-repeat: no-repeat;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: $color-text-light; // Cor do texto sobre a imagem
-    font-size: $font-size-h2;
-    font-weight: bold;
-    text-align: center;
-    padding: $spacing-m;
-    box-shadow: inset 0 0 100px rgba(0,0,0,0.5); // Sombra interna para escurecer a imagem levemente e fazer o texto se destacar
+  &.bg-login {
+    background-image: url("/assets/images/login-background.jpg"); 
+  }
+
+  &.bg-cadastro {
+    background-image: url("/assets/images/cadastro-background.jpg");
+  }
+
+  &.bg-recuperar-senha {
+    background-image: url("/assets/images/cadastro-background.jpg"); 
+  }
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.7) 0%,
+      rgba(0, 0, 0, 0) 50%
+    );
+  }
+
+  @media (max-width: 992px) {
+    display: none;
+  }
+}
+
+.auth-right-text {
+  color: $color-text-light;
+  font-size: $font-size-h2;
+  font-weight: bold;
+  text-align: center;
+  max-width: 80%;
+  line-height: 1.3;
+  text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.8);
+  z-index: 1;
+}
+
+@media (max-width: 576px) {
+  .auth-left-panel {
+    padding: $spacing-s;
   }
 }

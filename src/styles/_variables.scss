@@ -1,48 +1,90 @@
-// Cores da Paleta
-$color-secondary-base: #1e3a5f; // Azul escuro
-$color-secondary-lighter: #40618c; // Azul mais claro (ex: para hover da sidebar)
-$color-secondary-darker: #08172b; // Azul bem escuro
+// src/styles/_variables.scss
+// Cores
+$color-brand-base: #ff6f00; // Laranja principal, do logo e botões CTA
+$color-brand-light: #f29c5a; // Variação mais clara
+$color-brand-dark: #b24e00; // Variação mais escura
 
-$color-brand-base: #ff6f00; // Laranja
-$color-brand-lighter: #f29c5a; // Laranja mais claro
-$color-brand-darker: #b24e00; // Laranja mais escuro
+// Novas definições para resolver o erro "Undefined variable"
+$color-brand-lighter: lighten(
+  $color-brand-base,
+  15%
+); // Variação um pouco mais clara que 'light'
+$color-brand-darker: darken(
+  $color-brand-base,
+  15%
+); // Variação um pouco mais escura que 'dark'
 
-$color-background: #f2f2f2; // Cinza claro de fundo
-$color-background-card: #ffffff; // Branco para cards e modais
+$color-primary: #1e3a9f; // Exemplo
+$color-secondary-base: #f2f2f2; // Certifique-se que está definida!
+$color-accent: #ffc107; // Exemplo
 
-$color-text-dark: #061d3d; // Azul muito escuro para textos principais
-$color-text-light: #dfe9f5; // Branco acinzentado para textos em fundos escuros
+$color-secondary-lighter: #f9f9f9;
+$color-secondary-darker: #e0e0e0; // Variação mais escura da cor secundária
 
-$color-success: #00fd1d; // Verde para sucesso
-$color-alert: #f90000; // Vermelho para alertas/erros
+// Cores de feedback
+$color-danger: #f00000;
 
-// Tamanhos de fonte (exemplo, ajuste conforme a necessidade e a escala do Figma)
-$font-size-base: 16px;
-$font-size-large: 20px;
-$font-size-h1: 32px;
-$font-size-h2: 28px;
-$font-size-h3: 24px;
-$font-size-small: 14px;
-$font-size-xsmall: 12px;
+$color-primary-base: #1e3a9f; // Azul escuro, da "Cor Secundária 0" do Figma
+$color-primary-dark: #0b172b; // Variação mais escura, da "Cor Secundária +1"
+$color-primary-light: #4061bc; // Variação mais clara, da "Cor Secundária -1"
+$color-secondary-base: #1E3A5F; // Cor de fundo clara, da "Cor Secundária 0"
 
-// Espaçamentos comuns
+$color-background-light: #f2f2f2; // Cor de fundo principal
+$color-background-card: #ffffff; // Fundo de cards
+
+$color-text-dark: #061d3d; // Cor principal para textos escuros
+$color-text-light: #dffbf5; // Cor para textos claros (em fundos escuros)
+
+$color-success: #00f01d; // Verde para sucesso/confirmação
+$color-alert: #f00000; // Vermelho para erro/alerta
+$color-warning: #ffbf00; // Amarelo para avisos (inferido, não explícito no Figma mas comum para near-expiry)
+$color-info: #17a2b8; // Azul padrão para informações (inferido, Bootstrap default) - pode ser ajustado
+
+$color-background: #f2f2f2; // Exemplo, use a cor que desejar
+$color-secondary: #40618c;
+
+// Transições
+$transition-speed: 0.3s; // Adicione esta linha para definir a velocidade de transição
+
+// Espaçamentos
 $spacing-xxs: 4px;
 $spacing-xs: 8px;
-$spacing-s: 16px;
-$spacing-m: 24px;
-$spacing-l: 32px;
-$spacing-xl: 48px;
-$spacing-xxl: 64px;
+$spacing-s: 12px;
+$spacing-m: 16px;
+$spacing-l: 24px;
+$spacing-xl: 32px;
+$spacing-xxl: 48px;
+
+// Font Sizes
+$font-size-xsmall: 0.75rem; // 12px
+$font-size-small: 0.875rem; // 14px
+$font-size-base: 1rem; // 16px
+$font-size-large: 1.125rem; // 18px
+
+// Heading Sizes
+$font-size-h1: 2.5rem; // 40px
+$font-size-h2: 2rem; // 32px
+$font-size-h3: 1.75rem; // 28px
+$font-size-h4: 1.5rem; // 24px
+$font-size-h5: 1.25rem; // 20px
+$font-size-h6: 1rem; // 16px
 
 // Border Radius
 $border-radius-small: 4px;
 $border-radius-medium: 8px;
 $border-radius-large: 12px;
 
-// Sombras
-$box-shadow-light: 0 2px 10px rgba(0, 0, 0, 0.08);
-$box-shadow-medium: 0 4px 15px rgba(0, 0, 0, 0.1);
-$box-shadow-heavy: 0 8px 25px rgba(0, 0, 0, 0.2);
+// Box Shadow
+$box-shadow-light: 0 2px 4px rgba(0, 0, 0, 0.08);
+$box-shadow-medium: 0 4px 8px rgba(0, 0, 0, 0.12);
+$box-shadow-heavy: 0 8px 16px rgba(0, 0, 0, 0.16);
 
-// Transições
-$transition-speed: 0.3s ease-in-out;
+// Outras variáveis comuns (fontes, tamanhos, espaçamentos, etc.)
+$font-family-base: "Roboto", sans-serif;
+// $font-size-base: 1rem; // Duplicado, já definido acima
+$padding-base: 1rem;
+$margin-base: 1rem;
+
+// Sombras
+$box-shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+$box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);

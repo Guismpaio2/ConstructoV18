@@ -1,38 +1,31 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router'; // Necessário se houver routerLink em componentes shared
+import { RouterModule } from '@angular/router'; // Importe o RouterModule
 
-// Importações dos componentes compartilhados
+// Importe seus componentes compartilhados
+import { ModalWrapperComponent } from './components/modal-wrapper/modal-wrapper.component';
 import { AuthLayoutComponent } from './layout/auth-layout/auth-layout.component';
 import { DashboardLayoutComponent } from './layout/dashboard-layout/dashboard-layout.component';
-import { ModalWrapperComponent } from './components/modal-wrapper/modal-wrapper.component';
 import { FeedbackMessageComponent } from './feedback-message/feedback-message.component';
 
 @NgModule({
   declarations: [
+    // Declare os componentes que pertencem a este módulo
+    ModalWrapperComponent,
+    FeedbackMessageComponent,
     AuthLayoutComponent,
     DashboardLayoutComponent,
-    ModalWrapperComponent,
-    FeedbackMessageComponent, 
   ],
   imports: [
     CommonModule,
-    ReactiveFormsModule,
-    FormsModule,
-    RouterModule, // Importei pois componentes compartilhados usarem rotas
+    RouterModule, // Importe o RouterModule aqui para que <router-outlet> funcione nos layouts
   ],
   exports: [
-    // ESSAS EXPORTAÇÕES SÃO VITAIS para que outros módulos possam usar esses componentes
+    // Exporte os componentes para que outros módulos possam usá-los
+    ModalWrapperComponent,
+    FeedbackMessageComponent,
     AuthLayoutComponent,
     DashboardLayoutComponent,
-    ModalWrapperComponent,
-    FeedbackMessageComponent, // Exporte aqui
-    // Exporte também os módulos que são comumente usados pelos componentes compartilhados
-    CommonModule,
-    ReactiveFormsModule,
-    FormsModule,
-    RouterModule, // Exporte se os módulos que importam SharedModule forem usar routerLink e não o importarem diretamente
   ],
 })
 export class SharedModule {}

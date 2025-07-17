@@ -1,0 +1,142 @@
+// src/app/pages/registros-baixas/registros-baixas.component.scss
+@import "../../../styles/styles"; // Importe estilos globais para acessar as variáveis.
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  h1 {
+    color: #343a40;
+    font-size: 2.2rem;
+    font-weight: 600;
+  }
+}
+
+.search-filter-bar {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 25px;
+  align-items: center;
+
+  .search-input {
+    position: relative;
+    flex-grow: 1;
+
+    input {
+      width: 100%;
+      padding: 10px 10px 10px 40px; /* Left padding for icon */
+      border: 1px solid #ced4da;
+      border-radius: 5px;
+      font-size: 1rem;
+      color: #495057;
+      &:focus {
+        border-color: #80bdff;
+        outline: 0;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+      }
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #6c757d;
+    }
+  }
+
+  select {
+    padding: 10px 15px;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    background-color: #fff;
+    color: #495057;
+    cursor: pointer;
+    &:focus {
+      border-color: #80bdff;
+      outline: 0;
+      box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+  }
+}
+
+.table-responsive {
+  overflow-x: auto;
+  margin-bottom: 20px;
+}
+
+.baixas-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+  overflow: hidden; // Ensures rounded corners apply to table content
+
+  th,
+  td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #e9ecef;
+  }
+
+  th {
+    background-color: #f2f2f2;
+    color: #495057;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+  }
+
+  td {
+    color: #6c757d;
+    font-size: 0.95rem;
+
+    .btn-action {
+      margin-right: 8px;
+      padding: 6px 10px;
+      font-size: 0.8rem;
+
+      i {
+        margin-right: 5px;
+      }
+    }
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  tbody tr:hover {
+    background-color: #f8f9fa;
+  }
+}
+
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+
+  button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    margin: 0 5px;
+
+    &:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+  }
+
+  span {
+    font-size: 1rem;
+    color: #343a40;
+  }
+}

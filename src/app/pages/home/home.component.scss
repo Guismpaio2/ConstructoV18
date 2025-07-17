@@ -1,36 +1,92 @@
-@import '../../../styles/variables';
+// src/app/pages/home/home.component.scss
+@import "../../../styles.scss"; // Importe estilos globais para acessar as variáveis.
 
-// Estilos específicos para o conteúdo da página Home dentro do AuthLayout
-.home-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  max-width: 400px; // Limita a largura do conteúdo para não ficar muito esticado
-  padding: $spacing-m; // Padding para o conteúdo
+.home-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 25px;
+  margin-bottom: 25px;
+}
 
-  .app-logo {
-    width: 150px; // Ajuste o tamanho do logo
-    height: auto;
-    margin-bottom: $spacing-s;
+.summary-card {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  padding: 25px;
+  text-align: center;
+  transition: transform 0.2s ease-in-out;
+
+  &:hover {
+    transform: translateY(-5px);
   }
 
-  .app-name {
-    color: $color-text-dark;
-    font-size: $font-size-h1;
+  h3 {
+    color: #343a40;
+    font-size: 1.8rem;
+    margin-bottom: 15px;
+  }
+
+  p {
+    font-size: 2.5rem;
     font-weight: bold;
-    margin-bottom: $spacing-xl; // Espaço antes dos botões
+    color: $color-primary; // Exemplo de uso de variável
+    margin-bottom: 0;
+  }
+}
+
+.home-section {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  padding: 25px;
+  margin-bottom: 25px;
+
+  h2 {
+    color: #343a40;
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 10px;
   }
 
-  .action-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: $spacing-s; // Espaço entre os botões
-    width: 100%;
+  .table-responsive {
+    overflow-x: auto;
+  }
 
-    .btn {
-      width: 100%; // Faz com que os botões ocupem a largura total
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+
+    th,
+    td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #e9ecef;
+      color: #6c757d;
+      font-size: 0.95rem;
     }
+
+    th {
+      background-color: #f8f9fa;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.85rem;
+      color: #495057;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tbody tr:hover {
+      background-color: #f8f9fa;
+    }
+  }
+
+  .no-data-message {
+    text-align: center;
+    color: #6c757d;
+    font-style: italic;
+    padding: 20px 0;
   }
 }

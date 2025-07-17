@@ -1,0 +1,95 @@
+<div class="cadastro-senha-container">
+  <div class="cadastro-senha-card">
+    <h2>Criar Senha</h2>
+    <p>Defina a senha para sua conta.</p>
+
+    <form [formGroup]="passwordForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="password">Senha:</label>
+        <div class="password-input-group">
+          <input
+            id="password"
+            [type]="passwordVisible ? 'text' : 'password'"
+            formControlName="password"
+            class="form-control"
+            placeholder="Mínimo 6 caracteres"
+          />
+          <span class="password-toggle" (click)="togglePasswordVisibility()">
+            <i class="fas fa-eye" *ngIf="!passwordVisible"></i>
+            <i class="fas fa-eye-slash" *ngIf="passwordVisible"></i>
+          </span>
+        </div>
+        <div
+          *ngIf="
+            passwordForm.get('password')?.invalid &&
+            passwordForm.get('password')?.touched
+          "
+          class="error-message"
+        >
+          <span *ngIf="passwordForm.get('password')?.errors?.['required']">
+            A senha é obrigatória.
+          </span>
+          <span *ngIf="passwordForm.get('password')?.errors?.['minlength']">
+            A senha deve ter no mínimo 6 caracteres.
+          </span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="confirmPassword">Confirmar Senha:</label>
+        <div class="password-input-group">
+          <input
+            id="confirmPassword"
+            [type]="confirmPasswordVisible ? 'text' : 'password'"
+            formControlName="confirmPassword"
+            class="form-control"
+            placeholder="Confirme sua senha"
+          />
+          <span
+            class="password-toggle"
+            (click)="toggleConfirmPasswordVisibility()"
+          >
+            <i class="fas fa-eye" *ngIf="!confirmPasswordVisible"></i>
+            <i class="fas fa-eye-slash" *ngIf="confirmPasswordVisible"></i>
+          </span>
+        </div>
+        <div
+          *ngIf="
+            passwordForm.get('confirmPassword')?.invalid &&
+            passwordForm.get('confirmPassword')?.touched
+          "
+          class="error-message"
+        >
+          <span
+            *ngIf="passwordForm.get('confirmPassword')?.errors?.['required']"
+          >
+            A confirmação da senha é obrigatória.
+          </span>
+          <span
+            *ngIf="passwordForm.errors?.['mismatch'] && passwordForm.get('confirmPassword')?.value"
+          >
+            As senhas não coincidem.
+          </span>
+        </div>
+      </div>
+
+      <div *ngIf="errorMessage" class="alert alert-danger">
+        {{ errorMessage }}
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="secondary-button" (click)="goBack()">
+          Voltar
+        </button>
+        <button
+          type="submit"
+          class="primary-button"
+          [disabled]="passwordForm.invalid || isLoading"
+        >
+          <span *ngIf="!isLoading">Criar Conta</span>
+          <span *ngIf="isLoading">Criando...</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

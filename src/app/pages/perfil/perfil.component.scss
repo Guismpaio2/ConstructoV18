@@ -1,0 +1,38 @@
+// src/app/pages/perfil/perfil.component.scss
+@import "../../../styles.scss"; // Importe estilos globais para acessar as variáveis.
+
+.profile-card {
+  max-width: 700px;
+  margin: 0 auto; // Centraliza o card na página
+}
+
+.profile-header {
+  text-align: center;
+  margin-bottom: 25px;
+
+  h2 {
+    color: #343a40;
+    font-size: 2rem;
+    margin-bottom: 5px;
+  }
+
+  .role-display {
+    color: #6c757d;
+    font-size: 1.1rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid #e9ecef;
+  margin: 20px 0;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px; // Espaçamento entre os botões
+}

@@ -1,63 +1,62 @@
-<div class="dashboard-layout-container">
-  <div class="sidebar">
-    <div class="sidebar-header">
-      <img
-        src="assets/images/logo.png"
-        alt="Constructo Logo"
-        class="sidebar-logo"
-      />
+<div class="dashboard-container">
+  <aside class="sidebar">
+    <div class="logo">
+      <img src="../../../../assets/icons/logo-icon.svg" alt="Constructo Logo" />
     </div>
-
-    <nav class="sidebar-nav">
+    <nav class="nav-menu">
       <ul>
         <li>
-          <a routerLink="/dashboard" routerLinkActive="active">
-            <span class="icon">🏠</span>
-            <span class="text">Início</span>
+          <a routerLink="/home" routerLinkActive="active-link">
+            <i class="fas fa-home"></i> Início
           </a>
         </li>
         <li>
-          <a routerLink="/dashboard/produtos" routerLinkActive="active">
-            <span class="icon">📦</span>
-            <span class="text">Produtos</span>
+          <a routerLink="/produtos" routerLinkActive="active-link">
+            <i class="fas fa-boxes"></i> Produtos
           </a>
         </li>
         <li>
-          <a routerLink="/dashboard/estoque" routerLinkActive="active">
-            <span class="icon">📊</span>
-            <span class="text">Estoque</span>
+          <a routerLink="/estoque" routerLinkActive="active-link">
+            <i class="fas fa-warehouse"></i> Estoque
           </a>
         </li>
         <li>
-          <a routerLink="/dashboard/registros-baixas" routerLinkActive="active">
-            <span class="icon">📉</span>
-            <span class="text">Registro de Baixas</span>
+          <a routerLink="/baixas" routerLinkActive="active-link">
+            <i class="fas fa-minus-circle"></i> Registrar Baixa
           </a>
         </li>
         <li>
-          <a routerLink="/dashboard/perfil" routerLinkActive="active">
-            <span class="icon">👤</span>
-            <span class="text">Perfil</span>
+          <a routerLink="/registros-baixas" routerLinkActive="active-link">
+            <i class="fas fa-file-alt"></i> Registros de Baixas
+          </a>
+        </li>
+        <li *ngIf="isAdmin$ | async">
+          <a routerLink="/usuarios" routerLinkActive="active-link">
+            <i class="fas fa-users-cog"></i> Gerenciar Usuários
           </a>
         </li>
         <li>
-          <a routerLink="/dashboard/usuarios" routerLinkActive="active">
-            <span class="icon">👥</span>
-            <span class="text">Usuários</span>
+          <a routerLink="/perfil" routerLinkActive="active-link">
+            <i class="fas fa-user-circle"></i> Meu Perfil
           </a>
         </li>
       </ul>
     </nav>
-  </div>
-
-  <div class="main-content">
-    <header class="main-header">
-      <h1 class="page-title">{{ pageTitle }}</h1>
-      <div class="user-info"></div>
-    </header>
-
-    <div class="content-area">
-      <ng-content></ng-content>
+    <div class="sidebar-footer">
+      <button class="btn" (click)="onLogout()">Sair</button>
     </div>
-  </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="top-bar">
+      <h1 class="page-title">{{ pageTitle }}</h1>
+      <div class="user-info">
+        <span class="username">{{ (authService.user$ | async)?.email }}</span>
+        <div class="profile-picture">
+          {{ (authService.user$ | async)?.nome?.charAt(0)?.toUpperCase() }}
+        </div>
+      </div>
+    </div>
+    <router-outlet></router-outlet>
+  </main>
 </div>

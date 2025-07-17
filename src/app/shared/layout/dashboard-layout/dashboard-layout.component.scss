@@ -1,120 +1,150 @@
-@import "../../../../styles/variables";
+// src/app/shared/layout/dashboard-layout/dashboard-layout.component.scss
+@import "../../../../styles.scss"; // Importe estilos globais para acessar as variáveis.
 
-.dashboard-layout-container {
+.dashboard-container {
   display: flex;
   min-height: 100vh;
-  background-color: $color-background; // Fundo geral
+  background-color: #f8f9fa;
+}
 
-  .sidebar {
-    width: 250px; // Largura padrão da sidebar
-    background-color: $color-secondary-base; // Azul escuro da sidebar
-    color: $color-text-light;
-    padding: $spacing-m $spacing-s;
-    box-shadow: $box-shadow-medium;
-    display: flex;
-    flex-direction: column;
-    transition: width $transition-speed; // Para futura funcionalidade de expandir/recolher
+.sidebar {
+  width: 250px;
+  background-color: #343a40; // Cor da barra lateral
+  color: #fff;
+  padding: 20px;
+  box-shadow: 2px 0 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  position: fixed; // Fixa a barra lateral
+  height: 100%;
+  overflow-y: auto; // Rolagem se o conteúdo for muito longo
 
-    .sidebar-header {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding-bottom: $spacing-l;
-      margin-bottom: $spacing-l;
-      border-bottom: 1px solid rgba($color-text-light, 0.1);
-
-      .sidebar-logo {
-        width: 100px; // Ajuste o tamanho do logo conforme necessário
-        height: auto;
-      }
+  .logo {
+    text-align: center;
+    margin-bottom: 30px;
+    img {
+      max-width: 150px;
+      height: auto;
     }
+  }
 
-    .sidebar-nav {
-      ul {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-      }
+  .nav-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex-grow: 1; // Faz a lista de navegação ocupar o espaço restante
 
-      li {
-        margin-bottom: $spacing-xs; // Espaçamento entre os itens do menu
+    li {
+      margin-bottom: 10px;
 
-        a {
-          display: flex;
-          align-items: center;
-          padding: $spacing-s $spacing-m; // Padding interno dos itens do menu
-          border-radius: $border-radius-medium;
-          color: $color-text-light;
-          text-decoration: none;
-          font-size: $font-size-base;
-          transition: background-color $transition-speed,
-            color $transition-speed;
+      a {
+        display: flex;
+        align-items: center;
+        padding: 12px 15px;
+        color: rgba(255, 255, 255, 0.8);
+        text-decoration: none;
+        border-radius: 5px;
+        transition: background-color 0.2s ease, color 0.2s ease;
 
-          .icon {
-            font-size: $font-size-large; // Tamanho dos ícones (ajuste para Font Awesome ou ícones reais)
-            margin-right: $spacing-s;
-            line-height: 1; // Garante que o ícone esteja bem alinhado
-          }
+        i {
+          margin-right: 12px;
+          font-size: 1.2rem;
+        }
 
-          .text {
-            white-space: nowrap; // Evita quebra de linha no texto
-          }
+        &:hover {
+          background-color: rgba(255, 255, 255, 0.1);
+          color: #fff;
+        }
 
-          &:hover {
-            background-color: $color-secondary-lighter; // Azul mais claro no hover
-            color: $color-background-card; // Letra branca no hover
-          }
-
-          &.active {
-            background-color: $color-brand-base; // Laranja para item ativo
-            color: $color-text-light;
-            &:hover {
-              background-color: $color-brand-darker;
-            }
-          }
+        &.active-link {
+          background-color: $color-secondary-base; // Usa a variável
+          color: #fff;
+          font-weight: 500;
         }
       }
     }
   }
 
-  .main-content {
-    flex-grow: 1; // Ocupa o restante do espaço
-    display: flex;
-    flex-direction: column;
-    padding: $spacing-m; // Padding geral do conteúdo principal
+  .sidebar-footer {
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.6);
 
-    .main-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: $spacing-m;
-      padding: $spacing-s $spacing-m;
-      background-color: $color-background-card;
-      border-radius: $border-radius-medium;
-      box-shadow: $box-shadow-light;
+    button {
+      background-color: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: #fff;
+      padding: 8px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.2s ease, border-color 0.2s ease;
 
-      .page-title {
-        font-size: $font-size-h2;
-        color: $color-text-dark;
-        margin: 0;
-      }
-
-      .user-info {
-        // Estilos para "Bem-vindo, Usuário 1" ou avatar
-        font-size: $font-size-base;
-        color: $color-text-dark;
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.5);
       }
     }
+  }
+}
 
-    .content-area {
-      flex-grow: 1;
-      padding: $spacing-m; // Padding interno da área de conteúdo
-      background-color: $color-background-card;
-      border-radius: $border-radius-medium;
-      box-shadow: $box-shadow-light;
+.main-content {
+  margin-left: 250px; // Offset para a sidebar fixa
+  flex-grow: 1;
+  padding: 20px; // Padding geral do conteúdo
+}
+
+.top-bar {
+  background-color: #fff;
+  padding: 15px 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px; // Espaçamento entre a top-bar e o conteúdo abaixo
+
+  .page-title {
+    color: #343a40;
+    font-size: 1.8rem;
+    margin: 0;
+    font-weight: 600;
+  }
+
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+
+    .username {
+      font-weight: 500;
+      color: #343a40;
+    }
+
+    .profile-picture {
+      width: 40px;
+      height: 40px;
+      background-color: #e9ecef;
+      border-radius: 50%;
       display: flex;
-      flex-direction: column; // Permite que o conteúdo interno se organize
-      overflow: auto; // Garante rolagem se o conteúdo for muito grande
+      justify-content: center;
+      align-items: center;
+      color: #6c757d;
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+
+    .logout-btn {
+      background-color: transparent;
+      border: none;
+      color: #dc3545; // Cor para o botão de logout
+      cursor: pointer;
+      font-size: 1rem;
+      transition: color 0.2s ease;
+
+      &:hover {
+        color: darken(#dc3545, 10%);
+      }
     }
   }
 }

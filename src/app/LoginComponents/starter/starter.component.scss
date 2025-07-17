@@ -1,0 +1,72 @@
+/* src/app/LoginComponents/starter/starter.component.scss */
+
+@import "../../../styles/variables";
+@import "../../../styles/styles";
+
+.starter-content-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  max-width: 320px;
+  text-align: center;
+
+  .logo-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: $spacing-xl;
+
+    img {
+      width: 200px;
+      height: auto;
+      margin-bottom: $spacing-s;
+    }
+
+    h1 {
+      font-size: $font-size-h1;
+      color: $color-text-dark;
+      font-weight: bold;
+    }
+  }
+
+  .buttons-group {
+    display: flex;
+    flex-direction: row;
+    gap: $spacing-s;
+    width: 100%;
+
+    .btn {
+      flex: 1;
+      padding: $spacing-s $spacing-m;
+      font-size: $font-size-large;
+      border-radius: $border-radius-medium;
+      white-space: nowrap;
+    }
+
+    .btn.primary {
+      background-color: $color-brand-base;
+      color: $color-text-light;
+      &:hover {
+        background-color: $color-brand-lighter; // Usando a nova variável
+      }
+      &:active {
+        background-color: $color-brand-darker; // Usando a nova variável
+      }
+    }
+
+    .btn.secondary {
+      background-color: transparent;
+      color: $color-brand-base;
+      border: 1px solid $color-brand-base;
+      &:hover {
+        background-color: lighten($color-brand-base, 40%);
+      }
+      &:active {
+        background-color: lighten($color-brand-base, 30%);
+      }
+    }
+  }
+}

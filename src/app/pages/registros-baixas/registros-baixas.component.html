@@ -1,0 +1,60 @@
+<div class="page-container">
+  <div class="header-container">
+    <h2>Registro de Baixas</h2>
+    <div class="search-bar">
+      <input
+        type="text"
+        placeholder="Pesquisar"
+        [(ngModel)]="searchTerm"
+        (input)="onSearchTermChange(searchTerm)"
+      />
+      <i class="fas fa-search search-icon"></i>
+    </div>
+  </div>
+
+  <div class="controls-bar">
+    <button class="filter-button"><i class="fas fa-filter"></i> Filtros</button>
+    <div class="sort-dropdown">
+      <select>
+        <option>Ordenar Por</option>
+      </select>
+    </div>
+    <button class="primary-button" (click)="goToRegistrarBaixa()">
+      Registrar Nova Baixa
+    </button>
+  </div>
+
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Nº Lote</th>
+          <th>Data da Baixa</th>
+          <th>Quantidade</th>
+          <th>Motivo</th>
+          <th>Usuário</th>
+        </tr>
+      </thead>
+      <tbody>
+        <ng-container *ngIf="filteredBaixas.length > 0; else noBaixas">
+          <tr *ngFor="let baixa of filteredBaixas">
+            <td>{{ baixa.nomeProduto }}</td>
+            <td>{{ baixa.loteItemEstoque }}</td>
+            <td>{{ baixa.dataBaixa.toDate() | date : "dd/MM/yyyy HH:mm" }}</td>
+            <td>{{ baixa.quantidadeBaixada }} un.</td>
+            <td>{{ baixa.motivo }}</td>
+            <td>{{ baixa.usuarioResponsavelNome }}</td>
+          </tr>
+        </ng-container>
+        <ng-template #noBaixas>
+          <tr>
+            <td colspan="6" class="no-data-message">
+              Nenhuma baixa registrada encontrada.
+            </td>
+          </tr>
+        </ng-template>
+      </tbody>
+    </table>
+  </div>
+</div>
