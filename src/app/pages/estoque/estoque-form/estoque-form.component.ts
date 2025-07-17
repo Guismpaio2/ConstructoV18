@@ -8,9 +8,9 @@ import { AuthService } from '../../../auth/auth.service';
 import { EstoqueItem } from '../../../models/item-estoque.model';
 import { Produto } from '../../../models/produto.model';
 import { Observable, Subscription, of } from 'rxjs';
-import { map, take, filter, switchMap, tap } from 'rxjs/operators'; // Certifique-se que map está aqui
+import { map, take, filter, switchMap, tap } from 'rxjs/operators';
 import { Timestamp } from '@angular/fire/firestore';
-import { ToastrService } from 'ngx-toastr'; // Importar ToastrService
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-estoque-form',
@@ -26,7 +26,7 @@ export class EstoqueFormComponent implements OnInit, OnDestroy {
   isLoading = true;
 
   private currentUserSubscription!: Subscription;
-  private estoqueItemSubscription!: Subscription; // Renomeado para evitar conflito com 'productsSubscription'
+  private estoqueItemSubscription!: Subscription;
   private productsSubscription!: Subscription;
   private currentUserUid: string | null = null;
   private currentUserDisplayName: string | null = null;
@@ -72,7 +72,6 @@ export class EstoqueFormComponent implements OnInit, OnDestroy {
     this.estoqueForm
       .get('produtoUid')
       ?.valueChanges.subscribe((produtoUid: string) => {
-        // Especificar tipo 'string'
         const selectedProduto = this.produtosList.find(
           (p) => p.uid === produtoUid
         );
@@ -96,24 +95,23 @@ export class EstoqueFormComponent implements OnInit, OnDestroy {
     // Verifica se é modo de edição e carrega o item
     this.estoqueItemSubscription = this.route.paramMap
       .pipe(
-        map((params) => params.get('uid')), // Correção: 'map' está importado de 'rxjs/operators'
+        map((params) => params.get('uid')),
         tap((uid) => {
           this.estoqueItemId = uid;
           if (!uid) {
-            // Se não tem UID, é cadastro, já pode parar o loading
             this.isLoading = false;
           }
         }),
-        filter((uid): uid is string => !!uid), // Garante que 'uid' é string e não nulo
+        filter((uid): uid is string => !!uid),
         switchMap((uid) =>
           this.estoqueService.getEstoqueItem(uid).pipe(take(1))
-        ) // 'uid' é garantido como string
+        )
       )
       .subscribe({
         next: (item) => {
           if (item) {
             this.currentEstoqueItem = item;
-            this.patchFormForEditMode(); // Chame novamente para garantir que o patch ocorra após carregar o item
+            this.patchFormForEditMode();
           } else {
             this.toastr.error('Item de estoque não encontrado.');
             this.router.navigate(['/estoque']);
@@ -134,7 +132,6 @@ export class EstoqueFormComponent implements OnInit, OnDestroy {
       this.currentUserSubscription.unsubscribe();
     }
     if (this.estoqueItemSubscription) {
-      // Agora usa o nome correto da subscription
       this.estoqueItemSubscription.unsubscribe();
     }
     if (this.productsSubscription) {
@@ -153,8 +150,7 @@ export class EstoqueFormComponent implements OnInit, OnDestroy {
       lote: ['', Validators.required],
       quantidade: ['', [Validators.required, Validators.min(1)]],
       dataValidade: [null],
-      localizacao: ['', Validators.required], // Manteve como obrigatório aqui
-      // Campos de auditoria que serão preenchidos no TS ou no serviço
+      localizacao: ['', Validators.required],
       dataCadastro: [{ value: '', disabled: true }],
       dataUltimaAtualizacao: [{ value: '', disabled: true }],
       usuarioUltimaEdicaoUid: [{ value: '', disabled: true }],
@@ -163,7 +159,6 @@ export class EstoqueFormComponent implements OnInit, OnDestroy {
   }
 
   patchFormForEditMode(): void {
-    // Só tenta preencher se estiver no modo de edição E se os dados necessários já foram carregados
     if (
       this.estoqueItemId &&
       this.currentEstoqueItem &&
@@ -176,8 +171,9 @@ export class EstoqueFormComponent implements OnInit, OnDestroy {
         produtoUid: item.produtoUid,
         nomeProduto: produto?.nome || 'Produto Desconhecido',
         tipoProduto: produto?.tipo || 'N/A',
-        sku: item.sku || produto?.sku || 'N/A',
-        unidadeMedida: item.unidadeMedida || produto?.unidadeMedida || 'N/A',
+        // Garantindo que SKU e UnidadeMedida venham do item de estoque ou do produto, com fallback para string vazia.
+        sku: item.sku || produto?.sku || '',
+        unidadeMedida: item.unidadeMedida || produto?.unidadeMedida || '',
         imageUrl:
           item.imageUrl ||
           produto?.imageUrl ||
@@ -198,10 +194,10 @@ export class EstoqueFormComponent implements OnInit, OnDestroy {
         usuarioUltimaEdicaoNome: item.usuarioUltimaEdicaoNome,
       });
 
-      // Desabilita campos que não devem ser alterados na edição
       this.estoqueForm.get('produtoUid')?.disable();
       this.estoqueForm.get('lote')?.disable();
-      // Não reabilite os campos do produto (nomeProduto, tipoProduto, etc) se estiver em modo de edição
+      // Campos de produto (nomeProduto, tipoProduto, sku, unidadeMedida, imageUrl) já estão desabilitados
+      // pela definição do FormGroup, e não precisam ser habilitados/desabilitados novamente aqui.
     }
   }
 
@@ -247,14 +243,14 @@ export class EstoqueFormComponent implements OnInit, OnDestroy {
           usuarioUltimaEdicaoNome: this.currentUserDisplayName,
         };
 
-        // Adiciona lote e sku apenas se o currentEstoqueItem tiver esses campos definidos e forem diferentes
-        // (eles estão desabilitados no formulário de edição)
-        if (this.currentEstoqueItem.lote !== formValue.lote) {
-          updatedFields.lote = formValue.lote; // Embora desabilitado, getRawValue pega o valor original
-        }
-        if (this.currentEstoqueItem.sku !== formValue.sku) {
-          updatedFields.sku = formValue.sku;
-        }
+        // **** REMOVIDO: Lógica para adicionar lote e sku no updatedFields. ****
+        // **** Esses campos são desabilitados na edição e não devem ser atualizados. ****
+        // if (this.currentEstoqueItem.lote !== formValue.lote) {
+        //   updatedFields.lote = formValue.lote;
+        // }
+        // if (this.currentEstoqueItem.sku !== formValue.sku) {
+        //   updatedFields.sku = formValue.sku;
+        // }
 
         await this.estoqueService.updateEstoqueItem(
           this.estoqueItemId,
@@ -283,7 +279,7 @@ export class EstoqueFormComponent implements OnInit, OnDestroy {
             ? Timestamp.fromDate(new Date(formValue.dataValidade))
             : null,
           localizacao: formValue.localizacao,
-          sku: produto.sku || '',
+          sku: produto.sku || '', // Garante que 'sku' não seja undefined, use '' se null
           unidadeMedida: produto.unidadeMedida || '',
           imageUrl: produto.imageUrl || '',
           dataCadastro: Timestamp.now(),

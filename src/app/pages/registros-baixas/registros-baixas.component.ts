@@ -1,3 +1,4 @@
+// src/app/pages/registros-baixas/registros-baixas.component.ts
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Subscription, Observable, BehaviorSubject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
@@ -24,7 +25,7 @@ export class RegistrosBaixasComponent implements OnInit, OnDestroy {
       .getBaixas()
       .subscribe((baixas) => {
         this.allBaixas = baixas;
-        this.applyFilter();
+        this.applyFilter(); // Chama sem termo, usa this.searchTerm inicial (vazio)
       });
 
     this.searchTerms
@@ -42,6 +43,8 @@ export class RegistrosBaixasComponent implements OnInit, OnDestroy {
     if (this.baixasSubscription) {
       this.baixasSubscription.unsubscribe();
     }
+    // É uma boa prática completar o BehaviorSubject no ngOnDestroy também
+    this.searchTerms.complete();
   }
 
   onSearchTermChange(term: string): void {
@@ -52,14 +55,16 @@ export class RegistrosBaixasComponent implements OnInit, OnDestroy {
     const lowerCaseTerm = term.toLowerCase();
     this.filteredBaixas = this.allBaixas.filter(
       (baixa) =>
-        baixa.nomeProduto.toLowerCase().includes(lowerCaseTerm) ||
-        baixa.loteItemEstoque.toLowerCase().includes(lowerCaseTerm) ||
-        baixa.motivo.toLowerCase().includes(lowerCaseTerm) ||
-        baixa.usuarioResponsavelNome?.toLowerCase().includes(lowerCaseTerm)
+        (baixa.nomeProduto &&
+          baixa.nomeProduto.toLowerCase().includes(lowerCaseTerm)) ||
+        (baixa.loteItemEstoque &&
+          baixa.loteItemEstoque.toLowerCase().includes(lowerCaseTerm)) ||
+        (baixa.motivo && baixa.motivo.toLowerCase().includes(lowerCaseTerm)) ||
+        (baixa.usuarioResponsavelNome &&
+          baixa.usuarioResponsavelNome.toLowerCase().includes(lowerCaseTerm))
     );
   }
 
-  // Redireciona para o componente 'baixas' que agora é o formulário de registro.
   goToRegistrarBaixa(): void {
     this.router.navigate(['/baixas']);
   }

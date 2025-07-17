@@ -3,7 +3,7 @@
     <h1>Gerenciamento de Usuários</h1>
   </div>
 
-  <div class="search-filter-bar mt-4">
+  <div class="search-filter-bar">
     <div class="search-input">
       <i class="fas fa-search search-icon"></i>
       <input
@@ -29,11 +29,11 @@
     </select>
   </div>
 
-  <div *ngIf="filteredUsers.length === 0" class="alert alert-info mt-4">
+  <div *ngIf="filteredUsers.length === 0" class="alert alert-info">
     Nenhum usuário encontrado.
   </div>
 
-  <div *ngIf="filteredUsers.length > 0" class="users-grid mt-4">
+  <div *ngIf="filteredUsers.length > 0" class="users-grid">
     <div class="user-card" *ngFor="let user of filteredUsers">
       <div class="profile-circle">
         <i class="fas fa-user"></i>
@@ -51,8 +51,8 @@
           <span>{{ user.employeeCode }}</span>
         </div>
       </div>
-      <div class="user-info-detail">
-        <label for="role-{{ user.uid }}">Role:</label>
+      <div class="user-info-detail role-select-group">
+        <label for="role-{{ user.uid }}">Tipo de Permissão:</label>
         <select
           id="role-{{ user.uid }}"
           [(ngModel)]="user.role"
@@ -78,7 +78,7 @@
       </div>
       <button
         *ngIf="user.uid !== currentUserId"
-        class="btn btn-sm btn-outline-danger mt-3"
+        class="btn-delete-user"
         (click)="onDeleteUser(user.uid, user.nome)"
       >
         <i class="fas fa-trash-alt"></i> Excluir Usuário
