@@ -1,8 +1,8 @@
 /* src/app/features/auth/cadastro-senha/cadastro-senha.component.scss */
 
 // Importa as variáveis e estilos globais.
-@import "../../../../styles/variables";
-@import "../../../../styles/styles";
+@import "../../../styles/variables";
+@import "../../../styles.scss";
 
 // O componente é renderizado dentro do .auth-left-panel.
 // Este wrapper garante que o conteúdo do formulário tenha a largura e o alinhamento corretos.
