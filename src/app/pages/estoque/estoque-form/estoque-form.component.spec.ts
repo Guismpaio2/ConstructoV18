@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { EdicaoEstoqueComponent } from './edicao-estoque.component';
+import { EstoqueFormComponent } from './estoque-form.component';
 
-describe('EdicaoEstoqueComponent', () => {
-  let component: EdicaoEstoqueComponent;
-  let fixture: ComponentFixture<EdicaoEstoqueComponent>;
+describe('EstoqueFormComponent', () => {
+  let component: EstoqueFormComponent;
+  let fixture: ComponentFixture<EstoqueFormComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [EdicaoEstoqueComponent]
+      declarations: [EstoqueFormComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(EdicaoEstoqueComponent);
+    fixture = TestBed.createComponent(EstoqueFormComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

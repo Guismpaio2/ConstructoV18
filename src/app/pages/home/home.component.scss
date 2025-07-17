@@ -1,92 +1,244 @@
-// src/app/pages/home/home.component.scss
-@import "../../../styles.scss"; // Importe estilos globais para acessar as variáveis.
+@import "../../../styles/variables";
+@import "../../../styles.scss"; // Importe apenas as variáveis aqui. Estilos globais (reset, base) devem estar em src/styles.scss
+// Importe apenas as variáveis aqui. Estilos globais (reset, base) devem estar em src/styles.scss
 
-.home-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 25px;
-  margin-bottom: 25px;
-}
+.main-content-container {
+  // Seletor principal para a página Home
+  padding: $spacing-l; // Espaçamento interno geral
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xl; // Espaço entre as principais seções (cabeçalho, cards, tabelas)
+  background-color: $color-background; // Fundo leve para o conteúdo principal.
 
-.summary-card {
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  padding: 25px;
-  text-align: center;
-  transition: transform 0.2s ease-in-out;
-
-  &:hover {
-    transform: translateY(-5px);
-  }
-
-  h3 {
-    color: #343a40;
-    font-size: 1.8rem;
-    margin-bottom: 15px;
-  }
-
-  p {
-    font-size: 2.5rem;
-    font-weight: bold;
-    color: $color-primary; // Exemplo de uso de variável
-    margin-bottom: 0;
-  }
-}
-
-.home-section {
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  padding: 25px;
-  margin-bottom: 25px;
-
-  h2 {
-    color: #343a40;
-    font-size: 1.8rem;
-    margin-bottom: 20px;
-    border-bottom: 1px solid #e9ecef;
-    padding-bottom: 10px;
-  }
-
-  .table-responsive {
-    overflow-x: auto;
-  }
-
-  .table {
-    width: 100%;
-    border-collapse: collapse;
-
-    th,
-    td {
-      padding: 12px 15px;
-      text-align: left;
-      border-bottom: 1px solid #e9ecef;
-      color: #6c757d;
-      font-size: 0.95rem;
-    }
-
-    th {
-      background-color: #f8f9fa;
-      font-weight: 600;
-      text-transform: uppercase;
-      font-size: 0.85rem;
-      color: #495057;
-    }
-
-    tr:last-child td {
-      border-bottom: none;
-    }
-
-    tbody tr:hover {
-      background-color: #f8f9fa;
+  // Cabeçalho da página (e.g., "Bem-vindo, Guilherme!")
+  .page-header {
+    margin-bottom: $spacing-l; // Espaço abaixo do cabeçalho
+    h1 {
+      color: $color-text-dark;
+      font-size: $font-size-h1; // Tamanho grande para o título
+      font-weight: bold;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.05); // Sombra sutil para o texto
     }
   }
 
-  .no-data-message {
+  // Container dos cards de resumo
+  .home-grid {
+    display: grid;
+    grid-template-columns: repeat(
+      auto-fit,
+      minmax(280px, 1fr)
+    ); // Grid responsivo para os cards
+    gap: $spacing-l; // Espaço entre os cards
+    margin-bottom: $spacing-xl; // Espaço abaixo do grid de cards
+  }
+
+  // Estilo individual dos cards de resumo
+  .summary-card {
+    background-color: $color-background-card; // Fundo branco
+    border-radius: $border-radius-large; // Bordas arredondadas
+    box-shadow: $box-shadow-light; // Sombra inicial sutil
+    padding: $spacing-xl; // Preenchimento interno generoso
     text-align: center;
-    color: #6c757d;
-    font-style: italic;
-    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    transition: transform $transition-speed ease-in-out,
+      box-shadow $transition-speed ease-in-out; // Transição suave para hover
+    cursor: pointer; // Indica interatividade
+
+    &:hover {
+      transform: translateY(-5px); // Efeito de "levantar" no hover
+      box-shadow: $box-shadow-medium; // Sombra mais proeminente no hover
+    }
+
+    h3 {
+      font-size: $font-size-h3; // Título do card
+      color: $color-text-dark;
+      margin-bottom: $spacing-xs; // Espaço entre título e valor
+    }
+
+    .summary-value {
+      font-size: $font-size-h1; // Valor numérico grande e proeminente
+      font-weight: bold;
+      color: $color-text-dark;
+
+      // -webkit-background-clip: text;
+      // -webkit-text-fill-color: transparent;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1); // Sombra leve para o texto
+    }
+  }
+
+  // Estilo para as seções de tabela (Últimas Baixas, Materiais em Falta)
+  .home-section {
+    background-color: $color-background-card; // Fundo branco para as seções
+    border-radius: $border-radius-large; // Bordas arredondadas consistentes
+    box-shadow: $box-shadow-light; // Sombra consistente
+    padding: $spacing-xl;
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-m; // Espaço entre elementos dentro da seção
+
+    h2 {
+      font-size: $font-size-h2; // Título da seção
+      color: $color-text-dark;
+      margin-bottom: $spacing-s; // Espaço abaixo do título
+      border-bottom: 2px solid $color-secondary-darker; // Separador sutil
+      padding-bottom: $spacing-xs; // Preenchimento acima do separador
+    }
+
+    .no-data-message {
+      text-align: center;
+      color: $color-text-dark;
+      font-style: italic;
+      padding: $spacing-m;
+      font-size: $font-size-base;
+    }
+
+    .table-responsive {
+      overflow-x: auto; // Garante que a tabela seja scrollável horizontalmente em telas pequenas
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse; // Remove espaçamento entre células
+      font-size: $font-size-base;
+
+      thead {
+        th {
+          text-align: left;
+          padding: $spacing-s $spacing-m;
+          background-color: $color-primary-base; // Cabeçalho da tabela com cor primária
+          color: $color-text-light;
+          font-weight: 600; // Semi-bold para os títulos das colunas
+          white-space: nowrap; // Evita quebra de linha nos títulos
+
+          &:first-child {
+            border-top-left-radius: $border-radius-small;
+          }
+          &:last-child {
+            border-top-right-radius: $border-radius-small;
+          }
+        }
+      }
+
+      tbody {
+        tr {
+          border-bottom: 1px solid $color-border; // Linhas separadoras
+          &:last-child {
+            border-bottom: none; // Sem borda na última linha
+          }
+          &:hover {
+            background-color: lighten(
+              $color-secondary-base,
+              10%
+            ); // Fundo leve no hover da linha
+          }
+        }
+
+        td {
+          padding: $spacing-s $spacing-m;
+          color: $color-text-dark;
+          white-space: nowrap; // Evita quebra de linha no conteúdo da célula
+
+          // Estilos para o botão "Detalhes" ou similar na tabela (se você tiver)
+          .btn-details {
+            background-color: $color-brand-base;
+            color: $color-text-light;
+            border: none;
+            padding: $spacing-xxs $spacing-s;
+            border-radius: $border-radius-small;
+            cursor: pointer;
+            transition: background-color $transition-speed;
+
+            &:hover {
+              background-color: darken($color-brand-base, 10%);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Estilo específico para a seção "Materiais em Falta/Atenção"
+  .attention-section {
+    .no-data-message {
+      color: $color-alert; // Cor de alerta (vermelho) para a mensagem de falta
+      font-weight: 500;
+    }
+  }
+
+  // --- Animações de Carregamento (Modernidade) ---
+  @keyframes fadeInScale {
+    from {
+      opacity: 0;
+      transform: scale(0.95) translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  // Aplicar animação aos cards de resumo
+  .home-grid .summary-card {
+    animation: fadeInScale 0.5s ease-out forwards;
+    opacity: 0; // Começa invisível
+    @for $i from 1 through 3 {
+      // Animação escalonada para os 3 cards
+      &:nth-child(#{$i}) {
+        animation-delay: $i * 0.1s;
+      }
+    }
+  }
+
+  // Aplicar animação às seções de tabela
+  .home-section {
+    animation: fadeInScale 0.6s ease-out forwards;
+    opacity: 0; // Começa invisível
+    animation-delay: 0.4s; // Atraso após os cards
+  }
+
+  // --- Ajustes Responsivos ---
+  @media (max-width: 768px) {
+    padding: $spacing-m; // Menor preenchimento em telas menores
+    gap: $spacing-l; // Menor espaço entre seções
+
+    .page-header {
+      h1 {
+        font-size: $font-size-h2; // Título menor em mobile
+        margin-bottom: $spacing-m;
+      }
+    }
+
+    .home-grid {
+      grid-template-columns: 1fr; // Cards empilhados verticalmente
+      gap: $spacing-m;
+      margin-bottom: $spacing-l;
+    }
+
+    .summary-card {
+      padding: $spacing-l; // Menor preenchimento interno nos cards
+      h3 {
+        font-size: $font-size-large;
+      }
+      .summary-value {
+        font-size: $font-size-h2;
+      }
+    }
+
+    .home-section {
+      padding: $spacing-l;
+      h2 {
+        font-size: $font-size-h3;
+      }
+      .table {
+        font-size: $font-size-small; // Fonte menor na tabela para mobile
+        thead th,
+        tbody td {
+          padding: $spacing-xs $spacing-s; // Menor padding nas células da tabela
+        }
+      }
+    }
   }
 }

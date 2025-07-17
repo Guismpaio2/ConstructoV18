@@ -56,12 +56,12 @@ export class ProdutosComponent implements OnInit, OnDestroy {
         const lowerCaseRole = role ? role.toLowerCase() : null;
         const hasPermission =
           lowerCaseRole === 'administrador' || lowerCaseRole === 'estoquista';
-        console.log(
-          'Permissão canAddEditDelete:',
-          hasPermission,
-          'Role:',
-          role
-        ); // Manter o log para depuração
+        // console.log(
+        //   'Permissão canAddEditDelete:',
+        //   hasPermission,
+        //   'Role:',
+        //   role
+        // ); // Manter o log para depuração
         return hasPermission;
       }),
       startWith(false),

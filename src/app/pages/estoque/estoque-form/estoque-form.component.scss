@@ -1,0 +1,57 @@
+// src/app/pages/estoque/estoque-form/estoque-form.component.scss
+@import "../../../../styles/variables"; // Seus variáveis globais
+@import "../../../../styles.scss"; // Seus estilos globais (incluindo .form-control, .btn, .main-page-content, .form-grid, etc.)
+
+// Estilos específicos para este formulário se necessário.
+// Ex: Se o `form-grid` precisar de ajustes específicos aqui.
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(280px, 1fr)
+  ); // Ajuste conforme necessário
+  gap: 1.5rem; // Espaçamento entre os campos
+
+  .full-width {
+    grid-column: 1 / -1; // Ocupa todas as colunas
+  }
+}
+
+.form-group {
+  margin-bottom: 0; // Remova a margem inferior padrão para usar o gap do grid
+}
+
+// Estilo para o campo readonly, se desejar diferenciá-lo
+input[readonly].form-control,
+select[disabled].form-control {
+  background-color: $tertiary-color-light; // Cor mais clara para campos desabilitados
+  cursor: not-allowed;
+}
+
+.required {
+  color: $danger-color; // Cor para indicar campos obrigatórios
+  margin-left: 0.25rem;
+}
+
+.invalid-feedback {
+  color: $danger-color;
+  font-size: 0.875em;
+  margin-top: 0.25rem;
+}
+
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  .spinner-border {
+    width: 3rem;
+    height: 3rem;
+  }
+}

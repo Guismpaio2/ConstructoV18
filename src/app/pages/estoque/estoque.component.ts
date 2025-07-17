@@ -12,7 +12,7 @@ import {
   BehaviorSubject,
   ReplaySubject,
 } from 'rxjs';
-import { map, startWith, takeUntil } from 'rxjs/operators';
+import { map, startWith, takeUntil, tap } from 'rxjs/operators'; // Adicionado 'tap'
 import { Timestamp } from '@angular/fire/firestore';
 import { UserRole } from '../../models/user.model';
 import { Router } from '@angular/router';
@@ -27,7 +27,7 @@ export class EstoqueComponent implements OnInit, OnDestroy {
 
   allEstoqueItems$!: Observable<EstoqueItem[]>;
   filteredEstoque: EstoqueItem[] = [];
-  produtos: Produto[] = [];
+  produtos: Produto[] = []; // Este array é para uso interno e preenchimento de tipos
   productTypesForFilter: string[] = [];
 
   searchTerm: string = '';
@@ -38,12 +38,8 @@ export class EstoqueComponent implements OnInit, OnDestroy {
   isEstoquista$!: Observable<boolean>;
   canAddEditDeleteRegisterBaixa$!: Observable<boolean>;
 
-  // DECLARAÇÃO DAS PROPRIEDADES QUE ESTAVAM FALTANDO
-  isLoading: boolean = true; // Adicionado
-  private estoqueSubscription: Subscription = new Subscription(); // Adicionado e inicializado
-  // A propriedade produtosSubscription já existe, mas é melhor ter uma para cada "main" subscription,
-  // ou usar takeUntil(this.destroy$) em todas. Já estamos usando takeUntil, então ok.
-
+  isLoading: boolean = true; // Gerencia o estado de carregamento
+  private estoqueDataSubscription: Subscription = new Subscription(); // Subscription para o combineLatest principal
   private filterTrigger = new BehaviorSubject<void>(undefined);
 
   constructor(
@@ -59,16 +55,27 @@ export class EstoqueComponent implements OnInit, OnDestroy {
       .isEstoquista()
       .pipe(takeUntil(this.destroy$));
 
-    // Correção: Chame loadEstoqueData aqui para iniciar o carregamento dos produtos e itens de estoque
+    this.canAddEditDeleteRegisterBaixa$ = combineLatest([
+      this.isAdmin$,
+      this.isEstoquista$,
+    ]).pipe(
+      map(([isAdmin, isEstoquista]) => isAdmin || isEstoquista),
+      takeUntil(this.destroy$)
+    );
+
+    // Carrega os dados iniciais do estoque e produtos
     this.loadEstoqueData();
 
-    // Este combineLatest agora depende de 'allEstoqueItems$' que é populado em 'loadEstoqueData'
-    // E 'filterTrigger'
-    this.estoqueSubscription = combineLatest([
-      this.allEstoqueItems$, // Este Observable agora virá da loadEstoqueData
+    // Este combineLatest agora reage a mudanças nos itens de estoque (via loadEstoqueData) e no filtro/sort
+    this.estoqueDataSubscription = combineLatest([
+      this.allEstoqueItems$, // Este Observable será emitido do loadEstoqueData
       this.filterTrigger.asObservable().pipe(startWith(undefined)),
     ])
       .pipe(
+        tap(() => {
+          // Opcional: Você pode colocar this.isLoading = true; aqui se quiser mostrar o spinner a cada filtro/ordenação
+          // Para evitar piscar, mantenha o isLoading principalmente para o carregamento inicial.
+        }),
         map(([items, _]) => {
           let tempItems = [...items];
 
@@ -133,26 +140,18 @@ export class EstoqueComponent implements OnInit, OnDestroy {
       .subscribe(
         (filteredAndSortedItems) => {
           this.filteredEstoque = filteredAndSortedItems;
-          this.isLoading = false; // Define isLoading para false aqui, após o processamento
+          this.isLoading = false; // Define isLoading para false aqui, após o processamento e primeira exibição
         },
         (error) => {
           console.error('Erro ao filtrar/ordenar estoque:', error);
-          this.isLoading = false;
+          this.isLoading = false; // Garante que o spinner seja ocultado em caso de erro
         }
       );
-
-    this.canAddEditDeleteRegisterBaixa$ = combineLatest([
-      this.isAdmin$,
-      this.isEstoquista$,
-    ]).pipe(
-      map(([isAdmin, isEstoquista]) => isAdmin || isEstoquista),
-      takeUntil(this.destroy$)
-    );
   }
 
   ngOnDestroy(): void {
-    if (this.estoqueSubscription) {
-      this.estoqueSubscription.unsubscribe();
+    if (this.estoqueDataSubscription) {
+      this.estoqueDataSubscription.unsubscribe();
     }
     this.destroy$.next();
     this.destroy$.complete();
@@ -169,11 +168,16 @@ export class EstoqueComponent implements OnInit, OnDestroy {
       )
     ) {
       try {
+        this.isLoading = true; // Inicia o spinner
         await this.estoqueService.deleteEstoqueItem(uid);
         alert('Item de estoque excluído com sucesso!');
+        // O `allEstoqueItems$` será atualizado automaticamente pelo serviço
+        // e o combineLatest re-executará, atualizando `filteredEstoque`.
       } catch (error) {
         console.error('Erro ao excluir item de estoque:', error);
         alert('Erro ao excluir item de estoque. Tente novamente.');
+      } finally {
+        this.isLoading = false; // Garante que o spinner seja ocultado
       }
     }
   }
@@ -186,7 +190,6 @@ export class EstoqueComponent implements OnInit, OnDestroy {
   }
 
   isExpired(item: EstoqueItem): boolean {
-    // Certifique-se de que item.dataValidade é um Timestamp antes de chamar toMillis()
     if (!item.dataValidade || !(item.dataValidade instanceof Timestamp))
       return false;
     return item.dataValidade.toMillis() < Date.now();
@@ -199,18 +202,26 @@ export class EstoqueComponent implements OnInit, OnDestroy {
       this.isExpired(item)
     )
       return false;
-    const oneMonthFromNow = new Date();
-    oneMonthFromNow.setMonth(oneMonthFromNow.getMonth() + 1);
+    const now = new Date();
+    const oneMonthFromNow = new Date(
+      now.getFullYear(),
+      now.getMonth() + 1,
+      now.getDate()
+    );
+
+    // Compara a data de validade com a data daqui a um mês
     return item.dataValidade.toDate().getTime() <= oneMonthFromNow.getTime();
   }
 
   goToAddEstoqueItem(): void {
-    this.router.navigate(['/cadastro-estoque']);
+    // Redireciona para a rota do formulário sem UID (modo de cadastro)
+    this.router.navigate(['/estoque/cadastro']);
   }
 
   goToEditEstoqueItem(uid: string | undefined): void {
     if (uid) {
-      this.router.navigate(['/edicao-estoque', uid]);
+      // Redireciona para a rota do formulário com UID (modo de edição)
+      this.router.navigate(['/estoque/edicao', uid]);
     } else {
       console.warn('UID do item de estoque não fornecido para edição.');
     }
@@ -226,7 +237,7 @@ export class EstoqueComponent implements OnInit, OnDestroy {
     }
   }
 
-  // FUNÇÃO loadEstoqueData() IMPLEMENTADA
+  // FUNÇÃO loadEstoqueData()
   loadEstoqueData(): void {
     this.isLoading = true; // Inicia o estado de carregamento
 
@@ -250,15 +261,20 @@ export class EstoqueComponent implements OnInit, OnDestroy {
             unidadeMedida: produto?.unidadeMedida || 'N/A',
             tipoProduto: produto?.tipo || 'N/A',
             sku: item.sku || produto?.sku || 'N/A',
+            imageUrl: produto?.imageUrl || 'assets/images/default-product.png', // Garante uma imagem padrão se não houver
           };
         });
+      }),
+      // O `tap` aqui pode ser usado para depuração ou para definir `isLoading = false`
+      // depois que os dados foram mapeados e estão prontos para serem emitidos pelo Observable.
+      tap(() => {
+        // Isso será executado toda vez que um novo valor for emitido por allEstoqueItems$
+        // this.isLoading = false; // Comentei aqui porque o subscribe principal já faz isso.
       }),
       takeUntil(this.destroy$) // Garante que a subscription seja cancelada
     );
 
-    // Como loadEstoqueData vai disparar a atualização de allEstoqueItems$,
-    // e o `combineLatest` principal do ngOnInit já observa allEstoqueItems$,
-    // não precisamos de uma subscribe extra aqui dentro.
-    // Apenas garantimos que isLoading será falso quando os dados chegarem ao combineLatest principal.
+    // Nota: O `isLoading = false` no subscribe principal é mais adequado para o carregamento inicial,
+    // pois ele é executado depois que os dados são filtrados e ordenados e estão prontos para exibição.
   }
 }

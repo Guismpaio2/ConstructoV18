@@ -1,0 +1,256 @@
+<div class="main-page-content">
+  <div class="page-header">
+    <h1>
+      {{
+        estoqueItemId
+          ? "Editar Item de Estoque"
+          : "Adicionar Novo Item de Estoque"
+      }}
+    </h1>
+    <div class="header-actions">
+      <button class="btn secondary" (click)="goBack()" [disabled]="isLoading">
+        <i class="fas fa-arrow-left"></i> Voltar
+      </button>
+    </div>
+  </div>
+
+  <div class="loading-overlay" *ngIf="isLoading">
+    <div class="spinner-border text-primary" role="status">
+      <span class="sr-only">Carregando...</span>
+    </div>
+  </div>
+
+  <div class="form-container mt-4" *ngIf="!isLoading">
+    <form [formGroup]="estoqueForm" (ngSubmit)="onSubmit()">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="produtoUid"
+            >Produto <span class="required">*</span></label
+          >
+          <select
+            id="produtoUid"
+            formControlName="produtoUid"
+            class="form-control"
+            [ngClass]="{
+              'is-invalid':
+                estoqueForm.get('produtoUid')?.invalid &&
+                (estoqueForm.get('produtoUid')?.dirty ||
+                  estoqueForm.get('produtoUid')?.touched)
+            }"
+          >
+            <option value="">Selecione um produto</option>
+            <option
+              *ngFor="let produto of produtos$ | async"
+              [value]="produto.uid"
+            >
+              {{ produto.nome }} ({{ produto.marca }})
+            </option>
+          </select>
+          <div
+            *ngIf="
+              estoqueForm.get('produtoUid')?.invalid &&
+              (estoqueForm.get('produtoUid')?.dirty ||
+                estoqueForm.get('produtoUid')?.touched)
+            "
+            class="invalid-feedback"
+          >
+            Produto é obrigatório.
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="nomeProduto">Nome do Produto Selecionado:</label>
+          <input
+            id="nomeProduto"
+            type="text"
+            formControlName="nomeProduto"
+            class="form-control"
+            readonly
+            placeholder="Será preenchido automaticamente"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="tipoProduto">Tipo do Produto:</label>
+          <input
+            id="tipoProduto"
+            type="text"
+            formControlName="tipoProduto"
+            class="form-control"
+            readonly
+            placeholder="Será preenchido automaticamente"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="sku">SKU:</label>
+          <input
+            id="sku"
+            type="text"
+            formControlName="sku"
+            class="form-control"
+            readonly
+            placeholder="Será preenchido automaticamente"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="unidadeMedida">Unidade de Medida:</label>
+          <input
+            id="unidadeMedida"
+            type="text"
+            formControlName="unidadeMedida"
+            class="form-control"
+            readonly
+            placeholder="Será preenchido automaticamente"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="lote">Lote <span class="required">*</span></label>
+          <input
+            type="text"
+            id="lote"
+            formControlName="lote"
+            class="form-control"
+            [ngClass]="{
+              'is-invalid':
+                estoqueForm.get('lote')?.invalid &&
+                (estoqueForm.get('lote')?.dirty ||
+                  estoqueForm.get('lote')?.touched)
+            }"
+          />
+          <div
+            *ngIf="
+              estoqueForm.get('lote')?.invalid &&
+              (estoqueForm.get('lote')?.dirty ||
+                estoqueForm.get('lote')?.touched)
+            "
+            class="invalid-feedback"
+          >
+            Lote é obrigatório.
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="quantidade"
+            >Quantidade <span class="required">*</span></label
+          >
+          <input
+            type="number"
+            id="quantidade"
+            formControlName="quantidade"
+            class="form-control"
+            [ngClass]="{
+              'is-invalid':
+                estoqueForm.get('quantidade')?.invalid &&
+                (estoqueForm.get('quantidade')?.dirty ||
+                  estoqueForm.get('quantidade')?.touched)
+            }"
+          />
+          <div
+            *ngIf="
+              estoqueForm.get('quantidade')?.invalid &&
+              (estoqueForm.get('quantidade')?.dirty ||
+                estoqueForm.get('quantidade')?.touched)
+            "
+            class="invalid-feedback"
+          >
+            <div *ngIf="estoqueForm.get('quantidade')?.errors?.['required']">
+              Quantidade é obrigatória.
+            </div>
+            <div *ngIf="estoqueForm.get('quantidade')?.errors?.['min']">
+              Quantidade deve ser no mínimo 1.
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="dataValidade">Data de Validade (opcional):</label>
+          <input
+            type="date"
+            id="dataValidade"
+            formControlName="dataValidade"
+            class="form-control"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="localizacao">Localização no Estoque:</label>
+          <input
+            type="text"
+            id="localizacao"
+            formControlName="localizacao"
+            class="form-control"
+            placeholder="Ex: Corredor A, Prateleira 3"
+            [ngClass]="{
+              'is-invalid':
+                estoqueForm.get('localizacao')?.invalid &&
+                (estoqueForm.get('localizacao')?.dirty ||
+                  estoqueForm.get('localizacao')?.touched)
+            }"
+          />
+          <div
+            *ngIf="
+              estoqueForm.get('localizacao')?.invalid &&
+              (estoqueForm.get('localizacao')?.dirty ||
+                estoqueForm.get('localizacao')?.touched)
+            "
+            class="invalid-feedback"
+          >
+            Localização é obrigatória.
+          </div>
+        </div>
+
+        <ng-container *ngIf="estoqueItemId">
+          <div class="form-group">
+            <label>Data de Cadastro:</label>
+            <input
+              type="date"
+              formControlName="dataCadastro"
+              class="form-control"
+              readonly
+            />
+          </div>
+          <div class="form-group">
+            <label>Última Atualização:</label>
+            <input
+              type="date"
+              formControlName="dataUltimaAtualizacao"
+              class="form-control"
+              readonly
+            />
+          </div>
+          <div class="form-group">
+            <label>Atualizado Por:</label>
+            <input
+              type="text"
+              formControlName="usuarioUltimaEdicaoNome"
+              class="form-control"
+              readonly
+            />
+          </div>
+        </ng-container>
+      </div>
+
+      <div class="form-actions mt-4">
+        <button
+          type="submit"
+          class="btn primary"
+          [disabled]="estoqueForm.invalid || isLoading"
+        >
+          <i class="fas fa-save" *ngIf="!isLoading"></i>
+          {{ estoqueItemId ? "Atualizar Estoque" : "Adicionar ao Estoque" }}
+        </button>
+        <button
+          type="button"
+          class="btn secondary ms-3"
+          (click)="goBack()"
+          [disabled]="isLoading"
+        >
+          <i class="fas fa-times"></i> Cancelar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

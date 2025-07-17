@@ -1,3 +1,4 @@
+// src/app/app-routing.module.ts
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
@@ -17,14 +18,13 @@ import { DashboardLayoutComponent } from './shared/layout/dashboard-layout/dashb
 import { HomeComponent } from './pages/home/home.component';
 import { ProdutosComponent } from './pages/produtos/produtos.component';
 import { EstoqueComponent } from './pages/estoque/estoque.component';
-import { RegistrosBaixasComponent } from './pages/registros-baixas/registros-baixas.component'; // Lista de baixas
+import { RegistrosBaixasComponent } from './pages/registros-baixas/registros-baixas.component';
 import { UsuariosComponent } from './pages/usuarios/usuarios.component';
 import { PerfilComponent } from './pages/perfil/perfil.component';
 
 // Novas importações para os componentes de cadastro/edição/baixa
-import { CadastroEstoqueComponent } from './pages/estoque/cadastro-estoque/cadastro-estoque.component';
-import { EdicaoEstoqueComponent } from './pages/estoque/edicao-estoque/edicao-estoque.component';
-import { BaixasComponent } from './pages/baixas/baixas.component'; // Agora é o FORMULÁRIO DE REGISTRO DE BAIXA
+import { BaixasComponent } from './pages/baixas/baixas.component'; // Formulário de registro de baixa
+import { EstoqueFormComponent } from './pages/estoque/estoque-form/estoque-form.component'; // IMPORTANTE: O NOVO COMPONENTE
 
 // Importe seu AuthGuard
 import { AuthGuard } from './auth/auth.guard';
@@ -97,8 +97,25 @@ const routes: Routes = [
           roles: ['Administrador', 'Estoquista', 'Leitor'] as UserRole[],
         },
       },
+      // NOVAS ROTAS PARA O FORMULÁRIO DE ESTOQUE UNIFICADO
       {
-        path: 'registros-baixas', // Esta é a LISTA de baixas (Screenshot_11.png)
+        path: 'estoque/cadastro', // Rota para adicionar um novo item de estoque
+        component: EstoqueFormComponent,
+        data: {
+          title: 'Adicionar Item ao Estoque',
+          roles: ['Administrador', 'Estoquista'] as UserRole[],
+        },
+      },
+      {
+        path: 'estoque/edicao/:uid', // Rota para editar um item de estoque existente
+        component: EstoqueFormComponent,
+        data: {
+          title: 'Editar Item de Estoque',
+          roles: ['Administrador', 'Estoquista'] as UserRole[],
+        },
+      },
+      {
+        path: 'registros-baixas',
         component: RegistrosBaixasComponent,
         data: {
           title: 'Registros de Baixas',
@@ -106,11 +123,19 @@ const routes: Routes = [
         },
       },
       {
-        path: 'baixas', // Esta é o FORMULÁRIO de REGISTRO de baixa (Screenshot_14.png)
+        path: 'baixas', // Formulário de REGISTRO de baixa
         component: BaixasComponent,
         data: {
           title: 'Registrar Baixa',
-          roles: ['Administrador', 'Estoquista'] as UserRole[], // Somente quem pode registrar
+          roles: ['Administrador', 'Estoquista'] as UserRole[],
+        },
+      },
+      {
+        path: 'registrar-baixa/:uid', // Rota para registrar baixa de um item específico
+        component: BaixasComponent, // Assumindo que BaixasComponent é o formulário de registro de baixa
+        data: {
+          title: 'Registrar Baixa',
+          roles: ['Administrador', 'Estoquista'] as UserRole[],
         },
       },
       {
@@ -129,27 +154,8 @@ const routes: Routes = [
           roles: ['Administrador'] as UserRole[],
         },
       },
-      {
-        path: 'cadastro-estoque',
-        component: CadastroEstoqueComponent,
-        data: {
-          title: 'Cadastrar Item no Estoque',
-          roles: ['Administrador', 'Estoquista'] as UserRole[],
-        },
-      },
-      {
-        path: 'edicao-estoque/:id',
-        component: EdicaoEstoqueComponent,
-        data: {
-          title: 'Editar Item no Estoque',
-          roles: ['Administrador', 'Estoquista'] as UserRole[],
-        },
-      },
-      // Removida a rota 'registrar-baixa/:id' pois agora 'baixas' é o formulário.
-      // E a rota de 'registros-baixas' é para a lista.
     ],
   },
-  // Rota wildcard para qualquer caminho não encontrado, redireciona para 'starter'
   { path: '**', redirectTo: 'starter' },
 ];
 

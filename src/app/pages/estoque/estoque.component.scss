@@ -1,148 +1,300 @@
-// src/app/pages/estoque/estoque.component.scss
-@import "../../../styles.scss"; // Importe estilos globais para acessar as variáveis.
+/* src/app/pages/estoque/estoque.component.scss */
+@import "../../../../src/styles/variables";
+@import "../../../../src/styles/styles"; // Contém .btn, .form-control, etc.
+
+.main-content-container {
+  padding: $spacing-xl; // Padding geral para o conteúdo principal
+  background-color: $color-background-light; // Fundo do container
+  border-radius: $border-radius-large; // Bordas arredondadas no container
+  box-shadow: $box-shadow-light; // Sombra suave
+  margin: $spacing-xl; // Margem para afastar das bordas do layout geral
+  min-height: calc(
+    100vh - (#{$spacing-xl} * 2 + #{$spacing-xl} * 2)
+  ); // Ajusta a altura mínima (considerando padding e margens do layout)
+  display: flex;
+  flex-direction: column;
+}
 
 .page-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 25px;
+  margin-bottom: $spacing-xl;
+  padding-bottom: $spacing-m;
+  border-bottom: 1px solid $color-border; // Linha divisória suave
+
   h1 {
-    color: #343a40;
-    font-size: 2.2rem;
-    font-weight: 600;
+    font-size: $font-size-h2; // Título da página
+    color: $color-text-dark;
+    margin: 0;
+    font-weight: 600; // Semi-bold
   }
 
-  .btn-primary {
-    padding: 10px 20px;
-    font-size: 1rem;
-    border-radius: 5px;
+  .header-actions {
+    display: flex;
+    gap: $spacing-s; // Espaçamento entre os botões
+    .btn.primary {
+      @extend .primary; // Estilos do botão primário global
+      padding: $spacing-s $spacing-l; // Padding ajustado
+      font-size: $font-size-base;
+      i {
+        margin-right: $spacing-xs;
+      }
+    }
   }
 }
 
 .search-filter-bar {
   display: flex;
-  gap: 15px;
-  margin-bottom: 25px;
+  gap: $spacing-m; // Espaçamento entre os elementos da barra
+  margin-bottom: $spacing-xl;
+  flex-wrap: wrap; // Permite que os itens quebrem a linha em telas menores
   align-items: center;
 
   .search-input {
+    flex-grow: 1; // Ocupa o máximo de espaço possível
     position: relative;
-    flex-grow: 1;
+    max-width: 400px; // Largura máxima para o campo de busca
 
-    input {
-      width: 100%;
-      padding: 10px 10px 10px 40px; /* Left padding for icon */
-      border: 1px solid #ced4da;
-      border-radius: 5px;
-      font-size: 1rem;
-      color: #495057;
-      &:focus {
-        border-color: #80bdff;
-        outline: 0;
-        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-      }
+    .form-control {
+      padding-left: $spacing-xl; // Espaço para o ícone de busca
+      border-radius: $border-radius-medium; // Bordas mais arredondadas
+      border: 1px solid $color-border;
+      height: $font-size-base; // Altura padrão definida nas variáveis
     }
 
     .search-icon {
       position: absolute;
-      left: 15px;
+      left: $spacing-s;
       top: 50%;
       transform: translateY(-50%);
-      color: #6c757d;
+      color: $color-text-dark;
+      font-size: $font-size-base;
     }
   }
 
-  select {
-    padding: 10px 15px;
-    border: 1px solid #ced4da;
-    border-radius: 5px;
-    background-color: #fff;
-    color: #495057;
-    cursor: pointer;
-    &:focus {
-      border-color: #80bdff;
-      outline: 0;
-      box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-    }
+  .form-control {
+    // Para os selects
+    width: auto; // Ajusta a largura ao conteúdo
+    min-width: 150px; // Largura mínima
+    border-radius: $border-radius-medium;
+    border: 1px solid $color-border;
+    height: $font-size-base;
+    font-size: $font-size-base;
+    color: $color-text-dark;
+    background-color: $color-background; // Cor de fundo para selects
+    appearance: none; /* Remove o estilo padrão do SO */
+    background-image: url('data:image/svg+xml;utf8,<svg fill="%23222" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>'); /* Seta customizada */
+    background-repeat: no-repeat;
+    background-position: right $spacing-s center;
+    background-size: $font-size-large;
+    padding-right: $spacing-xl; // Espaço para a seta
   }
 }
 
 .table-responsive {
-  overflow-x: auto;
-  margin-bottom: 20px;
+  overflow-x: auto; // Adiciona scroll horizontal se a tabela for muito larga
+  flex-grow: 1; // Permite que a tabela ocupe o espaço restante verticalmente
 }
 
-.estoque-table {
+.data-table {
   width: 100%;
-  border-collapse: collapse;
-  background-color: #ffffff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  border-radius: 8px;
-  overflow: hidden; // Ensures rounded corners apply to table content
+  border-collapse: separate; // Para usar border-spacing
+  border-spacing: 0 $spacing-xs; // Espaçamento entre as linhas
+  margin-bottom: $spacing-l; // Margem abaixo da tabela
 
-  th,
-  td {
-    padding: 12px 15px;
-    text-align: left;
-    border-bottom: 1px solid #e9ecef;
-  }
-
-  th {
-    background-color: #f2f2f2;
-    color: #495057;
-    font-weight: 600;
-    text-transform: uppercase;
-    font-size: 0.85rem;
-  }
-
-  td {
-    color: #6c757d;
-    font-size: 0.95rem;
-
-    .btn-action {
-      margin-right: 8px;
-      padding: 6px 10px;
-      font-size: 0.8rem;
-
-      i {
-        margin-right: 5px;
+  thead {
+    background-color: $color-primary-dark; // Azul escuro para o cabeçalho
+    th {
+      color: $color-text-light; // Texto branco
+      padding: $spacing-s $spacing-m; // Padding nas células do cabeçalho
+      text-align: left;
+      font-weight: 600; // Semi-bold
+      font-size: $font-size-small;
+      text-transform: uppercase; // Texto em maiúsculas
+      &:first-child {
+        border-top-left-radius: $border-radius-small;
+        border-bottom-left-radius: $border-radius-small;
+      }
+      &:last-child {
+        border-top-right-radius: $border-radius-small;
+        border-bottom-right-radius: $border-radius-small;
       }
     }
   }
 
-  tr:last-child td {
-    border-bottom: none;
-  }
+  tbody {
+    tr {
+      background-color: $color-background-card; // Fundo branco para as linhas
+      border-radius: $border-radius-small; // Bordas arredondadas para cada linha
+      transition: box-shadow $transition-speed ease;
 
-  tbody tr:hover {
-    background-color: #f8f9fa;
+      &:hover {
+        box-shadow: $box-shadow-medium; // Sombra ao passar o mouse na linha
+        transform: translateY(-2px); // Leve levantamento
+      }
+
+      td {
+        padding: $spacing-s $spacing-m;
+        vertical-align: middle; // Alinha o conteúdo verticalmente no meio
+        font-size: $font-size-base;
+        color: $color-text-dark;
+        white-space: nowrap; // Evita quebra de linha em células
+      }
+
+      // Estilo para a célula de informações do produto (imagem + nome)
+      .product-info-cell {
+        display: flex;
+        align-items: center;
+        gap: $spacing-s;
+
+        .product-image {
+          width: 40px;
+          height: 40px;
+          border-radius: $border-radius-small;
+          object-fit: cover;
+          border: 1px solid $color-border;
+        }
+      }
+
+      // Estilos para linhas expiradas e próximas do vencimento
+      &.expired-row {
+        background-color: $color-alert-light; // Vermelho claro para itens vencidos
+        color: $color-alert-dark; // Texto vermelho escuro
+        .expired-icon {
+          color: $color-alert-dark;
+          margin-left: $spacing-xxs;
+        }
+      }
+
+      &.near-expiry-row {
+        background-color: $color-warning; // Amarelo claro para itens próximos
+        color: $color-warning; // Texto amarelo escuro
+        .near-expiry-icon {
+          color: $color-warning;
+          margin-left: $spacing-xxs;
+        }
+      }
+
+      // Estilos para os botões de ação na tabela
+      .btn.info.small {
+        @extend .info;
+        padding: $spacing-xxs $spacing-xs; // Botões menores
+        font-size: $font-size-small;
+        border-radius: $border-radius-small;
+      }
+      .btn.secondary.small {
+        @extend .secondary;
+        padding: $spacing-xxs $spacing-xs;
+        font-size: $font-size-small;
+        border-radius: $border-radius-small;
+      }
+      .btn.danger.small {
+        @extend .danger;
+        padding: $spacing-xxs $spacing-xs;
+        font-size: $font-size-small;
+        border-radius: $border-radius-small;
+      }
+    }
   }
 }
 
-.pagination-controls {
+.text-center {
+  text-align: center;
+}
+
+// Estilo para o estado de carregamento
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(
+    $color-secondary,
+    0.7
+  ); // Fundo escuro semitransparente
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 20px;
+  z-index: 1000;
+  color: $color-text-light;
+  font-size: $font-size-large;
+}
 
-  button {
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    margin: 0 5px;
-
-    &:disabled {
-      background-color: #cccccc;
-      cursor: not-allowed;
+// Media Queries para responsividade
+@media (max-width: 992px) {
+  .main-content-container {
+    margin: $spacing-m;
+    padding: $spacing-l $spacing-m;
+  }
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    h1 {
+      margin-bottom: $spacing-s;
+      font-size: $font-size-h3;
+    }
+    .header-actions {
+      width: 100%;
+      justify-content: flex-end;
+    }
+  }
+  .search-filter-bar {
+    flex-direction: column;
+    gap: $spacing-s;
+    .search-input {
+      max-width: 100%;
+      width: 100%;
+    }
+    .form-control {
+      width: 100%;
+      min-width: unset;
     }
   }
 
-  span {
-    font-size: 1rem;
-    color: #343a40;
+  .data-table {
+    thead th,
+    tbody td {
+      padding: $spacing-s;
+      font-size: $font-size-small;
+    }
+    .product-info-cell {
+      .product-image {
+        width: 30px;
+        height: 30px;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content-container {
+    margin: $spacing-s;
+    padding: $spacing-m $spacing-s;
+  }
+  .page-header h1 {
+    font-size: $font-size-h4;
+  }
+  .data-table {
+    thead th,
+    tbody td {
+      font-size: $font-size-large; // Fonte ainda menor em telas muito pequenas
+      padding: $spacing-xxs $spacing-s;
+    }
+    .product-info-cell {
+      flex-direction: column; // Coloca a imagem e o nome em duas linhas
+      align-items: flex-start;
+      .product-image {
+        margin-bottom: $spacing-xxs;
+      }
+    }
+    // Esconder algumas colunas em mobile para melhor visualização
+    th:nth-child(5), td:nth-child(5), /* Localização */
+    th:nth-child(6), td:nth-child(6), /* Última Atualização */
+    th:nth-child(7), td:nth-child(7) {
+      /* Atualizado Por */
+      display: none;
+    }
   }
 }

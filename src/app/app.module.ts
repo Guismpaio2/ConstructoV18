@@ -1,10 +1,13 @@
+// src/app/app.module.ts
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { FormsModule } from '@angular/forms'; // Já estava aqui
-import { ReactiveFormsModule } from '@angular/forms'; // Já estava aqui
-import { CommonModule } from '@angular/common'; // <--- ADICIONAR ESTE PARA PIPES E NGLIKE
-import { RouterModule } from '@angular/router'; // <--- ADICIONAR ESTE PARA ROUTER-OUTLET
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+
+// Adicione estas importações para ngx-toastr
+import { ToastrModule } from 'ngx-toastr';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -15,9 +18,6 @@ import { AngularFireAuthModule } from '@angular/fire/compat/auth';
 import { AngularFirestoreModule } from '@angular/fire/compat/firestore';
 import { AngularFireStorageModule } from '@angular/fire/compat/storage';
 
-// Caminho para o environment
-// VERIFIQUE SE O CAMINHO E O NOME DA PASTA 'enviroments' ESTÃO CORRETOS.
-// Geralmente é './environments/environment' (com "s" no final)
 import { environment } from './enviroments/enviroment';
 
 // Components de Login
@@ -35,16 +35,12 @@ import { EstoqueComponent } from './pages/estoque/estoque.component';
 import { RegistrosBaixasComponent } from './pages/registros-baixas/registros-baixas.component';
 import { UsuariosComponent } from './pages/usuarios/usuarios.component';
 import { PerfilComponent } from './pages/perfil/perfil.component';
-import { CadastroEstoqueComponent } from './pages/estoque/cadastro-estoque/cadastro-estoque.component';
-import { EdicaoEstoqueComponent } from './pages/estoque/edicao-estoque/edicao-estoque.component';
 import { BaixasComponent } from './pages/baixas/baixas.component';
 
-// ATENÇÃO: Verifique este caminho! O erro "Could not resolve" aponta para ele.
-// Se product-form-modal.component.ts estiver em './pages/produtos/produto-form-modal/', o caminho está correto.
-// Se não, ajuste.// Importação correta (verifique o caminho)
-
-// O ProdutoFormComponent que você declarou também
 import { ProdutoFormComponent } from './pages/produtos/produto-form/produto-form.component';
+
+// O NOVO componente unificado de formulário de estoque
+import { EstoqueFormComponent } from './pages/estoque/estoque-form/estoque-form.component';
 
 // SharedModule para layouts e outros componentes/módulos compartilhados
 import { SharedModule } from './shared/shared.module';
@@ -64,10 +60,9 @@ import { SharedModule } from './shared/shared.module';
     RegistrosBaixasComponent,
     UsuariosComponent,
     PerfilComponent,
-    CadastroEstoqueComponent,
-    EdicaoEstoqueComponent,
     BaixasComponent,
-    ProdutoFormComponent, // Confirme que este componente é o que você quer declarar
+    ProdutoFormComponent,
+    EstoqueFormComponent, // O NOVO componente está declarado aqui
   ],
   imports: [
     BrowserModule,
@@ -75,16 +70,24 @@ import { SharedModule } from './shared/shared.module';
     AppRoutingModule,
     FormsModule,
     ReactiveFormsModule,
-    CommonModule, // <--- ADICIONADO AQUI
-    RouterModule, // <--- ADICIONADO AQUI PARA ROUTER-OUTLET
+    CommonModule,
+    RouterModule,
 
-    SharedModule, // SharedModule já está importado e deve exportar ModalWrapperComponent
+    SharedModule,
 
     // Inicialização do Firebase
     AngularFireModule.initializeApp(environment.firebase),
     AngularFireAuthModule,
     AngularFirestoreModule,
     AngularFireStorageModule,
+
+    // Configuração do ToastrModule
+    ToastrModule.forRoot({
+      timeOut: 3000,
+      positionClass: 'toast-top-right',
+      preventDuplicates: true,
+      progressBar: true,
+    }),
   ],
   providers: [],
   bootstrap: [AppComponent],

@@ -17,7 +17,7 @@ $color-brand-darker: darken(
 $color-primary: #1e3a9f; // Exemplo
 $color-secondary-base: #f2f2f2; // Certifique-se que está definida!
 $color-accent: #ffc107; // Exemplo
-
+$color-border: #e0e0e0; // Cor para bordas e separadores
 $color-secondary-lighter: #f9f9f9;
 $color-secondary-darker: #e0e0e0; // Variação mais escura da cor secundária
 
@@ -37,6 +37,8 @@ $color-text-light: #dffbf5; // Cor para textos claros (em fundos escuros)
 
 $color-success: #00f01d; // Verde para sucesso/confirmação
 $color-alert: #f00000; // Vermelho para erro/alerta
+$color-alert-light: #ffcccc;
+$color-alert-dark: #b00000; // Vermelho escuro para alertas mais críticos
 $color-warning: #ffbf00; // Amarelo para avisos (inferido, não explícito no Figma mas comum para near-expiry)
 $color-info: #17a2b8; // Azul padrão para informações (inferido, Bootstrap default) - pode ser ajustado
 

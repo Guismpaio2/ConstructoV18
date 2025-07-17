@@ -1,308 +1,347 @@
-// src/app/pages/produtos/produtos.component.scss
-@import "../../../styles.scss"; // Importe estilos globais para acessar as variáveis.
+/* src/app/pages/produtos/produtos.component.scss */
+@import "../../../../src/styles/variables"; // Ajuste o caminho conforme a estrutura
+@import "../../../../src/styles/styles"; // Ajuste o caminho conforme a estrutura
 
+.main-content-container {
+  padding: $spacing-l;
+  background-color: $color-background-light; // Fundo geral da página
+  min-height: calc(
+    100vh - #{$spacing-xl}
+  ); // Ajuste para ocupar a altura da tela, considerando um possível header/footer
 
-.header-container {
-  // Corrigido para corresponder ao HTML
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 25px;
   h2 {
-    // Alterado de h1 para h2 para corresponder ao HTML
-    color: #343a40;
-    font-size: 2.2rem;
-    font-weight: 600;
-  }
-
-  .btn-primary {
-    padding: 10px 20px;
-    font-size: 1rem;
-    border-radius: 5px;
+    color: $color-text-dark;
+    margin-bottom: $spacing-l;
+    font-size: $font-size-h2; // Definido em _styles.scss
   }
 }
 
-.filter-sort-container {
-  // Corrigido para corresponder ao HTML
+.header-container {
   display: flex;
-  gap: 15px;
-  margin-bottom: 25px;
+  justify-content: space-between;
   align-items: center;
+  margin-bottom: $spacing-xl; // Aumentar espaçamento para separar do filtro
+}
+
+.btn-primary {
+  // Já definido em _styles.scss, mas ajuste aqui se precisar de algo específico
+  // para o botão de adicionar produto.
+  // Exemplo:
+  padding: $spacing-s $spacing-l;
+  font-weight: bold;
+}
+
+.filter-sort-container {
+  display: flex;
+  flex-wrap: wrap; // Permite quebrar em linha em telas menores
+  gap: $spacing-m; // Espaçamento entre os elementos da barra de filtro
+  margin-bottom: $spacing-xl; // Espaçamento entre a barra de filtro e os cards de produtos
+  background-color: $color-background-card; // Fundo branco como no exemplo
+  padding: $spacing-m;
+  border-radius: $border-radius-medium;
+  box-shadow: $box-shadow-light; // Sombra suave
 
   .search-box {
-    // Corrigido para corresponder ao HTML
-    position: relative;
-    flex-grow: 1;
+    flex: 1 1 300px; // Cresce, encolhe e tem base de 300px
+    position: relative; // Para o ícone de lupa
 
     input {
       width: 100%;
-      padding: 10px 10px 10px 40px; /* Left padding for icon */
-      border: 1px solid #ced4da;
-      border-radius: 5px;
-      font-size: 1rem;
-      color: #495057;
+      padding-left: $spacing-l; // Espaço para o ícone
+      border: 1px solid lighten($color-text-dark, 60%); // Borda mais clara
+      border-radius: $border-radius-small;
+      height: 40px; // Altura fixa para alinhar com selects
+      background-color: $color-background-card; // Fundo branco
+      color: $color-text-dark;
+
       &:focus {
-        border-color: #80bdff;
-        outline: 0;
-        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        border-color: $color-brand-base;
+        box-shadow: 0 0 0 2px rgba($color-brand-base, 0.2);
       }
     }
 
-    .search-icon {
-      // Você pode adicionar um ícone de busca aqui se desejar
+    &::before {
+      content: "\f002"; // Código do ícone de lupa do Font Awesome
+      font-family: "Font Awesome 5 Free"; // Certifique-se que o Font Awesome está importado
+      font-weight: 900; // Para ícones sólidos
       position: absolute;
-      left: 15px;
+      left: $spacing-xs;
       top: 50%;
       transform: translateY(-50%);
-      color: #6c757d;
+      color: #999;
+      font-size: $font-size-base;
     }
   }
 
   .filter-sort-group {
-    // Novo seletor para agrupar filtros e ordenação
     display: flex;
-    gap: 15px;
-    align-items: center;
-  }
+    gap: $spacing-m; // Espaçamento entre os selects
+    flex-wrap: wrap; // Permite quebrar em linha
 
-  select {
-    padding: 10px 15px;
-    border: 1px solid #ced4da;
-    border-radius: 5px;
-    background-color: #fff;
-    color: #495057;
-    cursor: pointer;
-    &:focus {
-      border-color: #80bdff;
-      outline: 0;
-      box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    .form-group {
+      margin-bottom: 0; // Remove margin-bottom padrão de form-group
+      flex: 1 1 auto; // Permite que selects cresçam/encolham
+
+      label {
+        display: none; // Esconder labels para selects, como no layout
+      }
+
+      select {
+        height: 40px; // Altura fixa para alinhar com input de busca
+        border: 1px solid lighten($color-text-dark, 60%);
+        border-radius: $border-radius-small;
+        background-color: $color-background-card;
+        color: $color-text-dark;
+        min-width: 150px; // Largura mínima para selects
+        appearance: none; // Remove o estilo padrão do select em alguns navegadores
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-image: url('data:image/svg+xml;utf8,<svg fill="%23333333" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path d="M7 10l5 5 5-5z"/></svg>');
+        background-repeat: no-repeat;
+        background-position: right 8px center;
+        background-size: 16px;
+        padding-right: 30px; // Espaço para o ícone customizado
+      }
     }
   }
 }
 
 .produtos-list {
   display: grid;
-  gap: 20px;
   grid-template-columns: repeat(
     auto-fill,
     minmax(300px, 1fr)
-  ); // Exemplo de grid para cards
+  ); // Grid responsivo
+  gap: $spacing-m; // Espaçamento entre os cards
 }
 
 .produto-card {
-  background-color: #ffffff;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-  padding: 20px;
+  background-color: $color-background-card;
+  border-radius: $border-radius-medium;
+  box-shadow: $box-shadow-light;
+  padding: $spacing-m;
   display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  flex-direction: column; // Conteúdo empilhado
+  position: relative; // Para posicionar os botões
+  overflow: hidden; // Para esconder o overflow dos botões flutuantes
 
-  .produto-info {
-    h3 {
-      color: #343a40;
-      font-size: 1.5rem;
-      margin-bottom: 10px;
-    }
-    p {
-      color: #6c757d;
-      font-size: 0.9rem;
-      margin-bottom: 5px;
-      strong {
-        color: #495057;
-      }
+  h3 {
+    font-size: $font-size-large; // Ajustar tamanho do nome do produto
+    margin-bottom: $spacing-xs;
+    color: $color-primary-base; // Ou $color-text-dark
+  }
+
+  p {
+    font-size: $font-size-small;
+    color: lighten($color-text-dark, 20%);
+    margin-bottom: $spacing-xxs; // Espaçamento menor entre parágrafos de info
+    line-height: 1.4; // Melhorar legibilidade
+
+    strong {
+      color: $color-text-dark;
+      font-weight: 600;
     }
   }
 
   .produto-actions {
-    margin-top: 15px;
     display: flex;
-    justify-content: flex-end; // Alinha os botões à direita
+    gap: $spacing-xs; // Espaçamento entre os botões
+    margin-top: $spacing-m; // Espaço acima dos botões
+    justify-content: flex-end; // Alinha os botões à direita (como no layout de lista)
 
     .btn-edit,
     .btn-delete {
-      padding: 8px 15px;
-      border-radius: 5px;
-      font-size: 0.9rem;
-      cursor: pointer;
-      transition: background-color 0.2s ease;
-    }
+      padding: $spacing-xxs $spacing-s;
+      font-size: $font-size-small;
+      border-radius: $border-radius-small;
+      font-weight: 500; // Medium
 
-    .btn-edit {
-      background-color: #007bff;
-      color: #fff;
-      border: 1px solid #007bff;
-      &:hover {
-        background-color: #0056b3;
+      &.btn-edit {
+        background-color: $color-secondary; // Azul mais escuro para editar
+        color: $color-text-light;
+        &:hover {
+          background-color: darken($color-secondary, 10%);
+        }
       }
-    }
 
-    .btn-delete {
-      background-color: #dc3545;
-      color: #fff;
-      border: 1px solid #dc3545;
-      &:hover {
-        background-color: #c82333;
+      &.btn-delete {
+        background-color: $color-danger; // Vermelho para excluir
+        color: $color-text-light;
+        &:hover {
+          background-color: darken($color-danger, 10%);
+        }
       }
-    }
-
-    .ml-2 {
-      // Classe de margem para espaçamento entre botões
-      margin-left: 0.5rem !important;
     }
   }
+}
+
+.loading-spinner,
+.alert {
+  text-align: center;
+  padding: $spacing-m;
+  margin-top: $spacing-l;
+  font-size: $font-size-base;
+  color: $color-text-dark;
 }
 
 .alert-info {
-  background-color: #e0f7fa;
-  color: #007bb6;
-  border: 1px solid #b3e5fc;
-  padding: 15px;
-  border-radius: 5px;
-  margin-top: 20px;
-  text-align: center;
+  background-color: lighten($color-info, 30%);
+  border: 1px solid lighten($color-info, 10%);
+  color: darken($color-info, 20%);
+  border-radius: $border-radius-medium;
 }
 
-.loading-spinner {
-  text-align: center;
-  padding: 20px;
-  color: #6c757d;
-  font-size: 1.1rem;
-}
-
-/* Estilos para os modais */
-.modal-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 1040;
-}
-
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 1050;
-  display: none;
-  width: 100%;
-  height: 100%;
-  overflow-x: hidden;
-  overflow-y: auto;
-  outline: 0;
+/* Estilos de Modal - ajuste para seu próprio estilo se não estiver usando um framework */
+.modal-backdrop.show {
+  opacity: 0.5; // Ajuste a opacidade do backdrop
+  background-color: #000;
 }
 
 .modal.show {
-  display: block;
+  display: block; // Garante que o modal seja exibido
+  background-color: rgba(0, 0, 0, 0.5); // Fundo escuro atrás do modal
 }
 
 .modal-dialog {
-  position: relative;
-  width: auto;
-  margin: 1.75rem auto;
-  pointer-events: none;
-}
-
-.modal-dialog-centered {
-  display: flex;
-  align-items: center;
-  min-height: calc(100% - 3.5rem);
-}
-
-.modal-lg {
-  max-width: 800px;
+  max-width: 800px; // Largura do modal
 }
 
 .modal-content {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  pointer-events: auto;
-  background-color: #fff;
-  background-clip: padding-box;
-  border: 1px solid rgba(0, 0, 0, 0.2);
-  border-radius: 0.3rem;
-  outline: 0;
+  border-radius: $border-radius-medium;
+  box-shadow: $box-shadow-heavy;
+  background-color: $color-background-card;
+  color: $color-text-dark;
 }
 
 .modal-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  padding: 1rem 1rem;
-  border-bottom: 1px solid #e9ecef;
-  border-top-left-radius: 0.3rem;
-  border-top-right-radius: 0.3rem;
-
-  .modal-title {
-    margin-bottom: 0;
-    line-height: 1.5;
-    color: #343a40;
-    font-size: 1.25rem;
+  border-bottom: 1px solid $color-secondary-lighter; // Linha divisória
+  padding: $spacing-m;
+  h5 {
+    font-size: $font-size-h5;
+    color: $color-primary-base;
   }
-
   .close {
-    padding: 1rem 1rem;
-    margin: -1rem -1rem -1rem auto;
-    background-color: transparent;
-    border: 0;
-    font-size: 1.5rem;
-    font-weight: 700;
-    line-height: 1;
-    color: #000;
-    text-shadow: 0 1px 0 #fff;
-    opacity: 0.5;
+    background: none;
+    border: none;
+    font-size: $font-size-h4;
+    color: $color-text-dark;
     cursor: pointer;
     &:hover {
-      opacity: 0.75;
+      color: $color-brand-base;
     }
   }
 }
 
 .modal-body {
-  position: relative;
-  flex: 1 1 auto;
-  padding: 1rem;
+  padding: $spacing-m;
 }
 
 .modal-footer {
+  border-top: 1px solid $color-secondary-lighter;
+  padding: $spacing-m;
   display: flex;
-  align-items: center;
   justify-content: flex-end;
-  padding: 1rem;
-  border-top: 1px solid #e9ecef;
-  border-bottom-right-radius: 0.3rem;
-  border-bottom-left-radius: 0.3rem;
+  gap: $spacing-s; // Espaçamento entre botões no footer
+}
 
-  .btn {
-    padding: 0.375rem 0.75rem;
-    font-size: 1rem;
-    line-height: 1.5;
-    border-radius: 0.25rem;
-    cursor: pointer;
+/* Estilos específicos para o produto-form dentro do modal */
+app-produto-form {
+  .form-group {
+    margin-bottom: $spacing-m; // Mais espaço entre os grupos de formulário
+    label {
+      font-size: $font-size-base;
+      font-weight: 500;
+      margin-bottom: $spacing-xxs;
+      color: $color-text-dark;
+    }
+    input[type="text"],
+    textarea,
+    select {
+      padding: $spacing-xs;
+      border: 1px solid lighten($color-text-dark, 60%);
+      border-radius: $border-radius-small;
+      background-color: $color-background-card;
+      color: $color-text-dark;
+      &:focus {
+        border-color: $color-brand-base;
+        box-shadow: 0 0 0 2px rgba($color-brand-base, 0.2);
+      }
+    }
+    textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+  }
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: $spacing-s;
+    margin-top: $spacing-xl;
+  }
+}
+
+// Media Queries para responsividade
+@media (max-width: 768px) {
+  .main-content-container {
+    padding: $spacing-m;
   }
 
-  .btn-secondary {
-    color: #fff;
-    background-color: #6c757d;
-    border-color: #6c757d;
-    &:hover {
-      background-color: #5a6268;
-      border-color: #545b62;
+  .header-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: $spacing-s;
+    margin-bottom: $spacing-m;
+
+    h2 {
+      margin-bottom: 0;
+    }
+
+    button {
+      width: 100%; // Botão de adicionar ocupa toda largura
     }
   }
 
-  .btn-danger {
-    color: #fff;
-    background-color: #dc3545;
-    border-color: #dc3545;
-    &:hover {
-      background-color: #c82333;
-      border-color: #bd2130;
+  .filter-sort-container {
+    flex-direction: column;
+    gap: $spacing-s; // Reduzir gap em telas pequenas
+    padding: $spacing-s;
+
+    .search-box {
+      order: 1; // Coloca a busca primeiro
+    }
+
+    .filter-sort-group {
+      flex-direction: column;
+      gap: $spacing-s; // Reduzir gap entre selects
+      width: 100%; // Ocupa toda a largura
+      .form-group {
+        width: 100%; // Selects ocupam toda a largura
+      }
     }
   }
+
+  .produtos-list {
+    grid-template-columns: 1fr; // Uma coluna em telas menores
+  }
+
+  .produto-card {
+    .produto-actions {
+      flex-direction: column; // Botões empilhados em telas pequenas
+      gap: $spacing-xs;
+      .btn-edit,
+      .btn-delete {
+        width: 100%; // Botões ocupam toda a largura
+      }
+    }
+  }
+
+  .modal-dialog {
+    margin: $spacing-s;
+  }
+}
+
+// Estilos para o ícone de 'required'
+.required {
+  color: $color-danger; // Usa a cor de perigo para o asterisco
+  margin-left: 4px; // Espaçamento pequeno após o label
 }
