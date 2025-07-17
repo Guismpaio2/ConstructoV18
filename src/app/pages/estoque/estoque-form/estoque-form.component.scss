@@ -24,17 +24,17 @@
 // Estilo para o campo readonly, se desejar diferenciá-lo
 input[readonly].form-control,
 select[disabled].form-control {
-  background-color: $tertiary-color-light; // Cor mais clara para campos desabilitados
+  background-color: $color-secondary; // Cor mais clara para campos desabilitados
   cursor: not-allowed;
 }
 
 .required {
-  color: $danger-color; // Cor para indicar campos obrigatórios
+  color: $color-alert-dark; // Cor para indicar campos obrigatórios
   margin-left: 0.25rem;
 }
 
 .invalid-feedback {
-  color: $danger-color;
+  color: $color-alert-dark;
   font-size: 0.875em;
   margin-top: 0.25rem;
 }

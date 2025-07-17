@@ -1,46 +1,45 @@
 @import "../../../../styles/variables";
 @import "../../../../styles.scss";
- // Corrija o caminho se necessário. Apenas variáveis são geralmente necessárias aqui.
 
 .dashboard-container {
   display: flex;
   min-height: 100vh;
-  background-color: $color-background; // Light background for the main content area
+  background-color: $color-background;
 }
 
 .sidebar {
-  width: 250px; // Adjust based on your design, around 200-250px
-  background-color: $color-primary-base; // Dark blue from your Figma
+  width: 250px;
+  background-color: $color-primary-base;
   color: $color-text-light;
   display: flex;
   flex-direction: column;
   padding: $spacing-l 0;
-  box-shadow: $box-shadow-medium; // Subtle shadow for depth
-  position: fixed; // Keep sidebar fixed
+  box-shadow: $box-shadow-medium;
+  position: fixed;
   height: 100%;
   left: 0;
   top: 0;
-  z-index: 100; // Ensure it's above other content
-  overflow-y: auto; // Add scroll if content is too long
+  z-index: 100;
+  overflow-y: auto;
 
   .logo {
     text-align: center;
-    margin-bottom: $spacing-xl; // Space below the logo
+    margin-bottom: $spacing-xl;
     img {
-      width: 80px; // Adjust logo size as needed
+      width: 80px;
       height: auto;
     }
   }
 
   .nav-menu {
-    flex-grow: 1; // Allows the nav menu to take up available space
+    flex-grow: 1;
     ul {
       padding: 0;
       margin: 0;
     }
 
     li {
-      margin-bottom: $spacing-xxs; // Small space between menu items
+      margin-bottom: $spacing-xxs;
       a {
         display: flex;
         align-items: center;
@@ -51,19 +50,19 @@
 
         i {
           margin-right: $spacing-s;
-          font-size: $font-size-large; // Adjust icon size
+          font-size: $font-size-large;
         }
 
         &:hover {
-          background-color: $color-primary-light; // Lighter blue on hover
+          background-color: $color-primary-light;
           text-decoration: none;
         }
 
         &.active-link {
-          background-color: $color-brand-base; // Orange for active link
-          font-weight: 600; // Semi-bold for active link
-          border-left: 5px solid $color-brand-base; // Accent line for active link
-          padding-left: $spacing-l - 5px; // Adjust padding due to border
+          background-color: $color-brand-base;
+          font-weight: 600;
+          border-left: 5px solid $color-brand-base;
+          padding-left: $spacing-l - 5px;
         }
       }
     }
@@ -73,21 +72,18 @@
     padding: $spacing-s $spacing-l;
     .btn {
       width: 100%;
-      background-color: $color-secondary-base; // Gray background for the logout button
-      color: $color-text-dark; // Dark text for the logout button
+      background-color: $color-secondary-base;
+      color: $color-text-dark;
       border-radius: $border-radius-small;
       padding: $spacing-xs $spacing-s;
       font-size: $font-size-base;
-      font-weight: 500; // Medium weight
+      font-weight: 500;
       border: none;
       cursor: pointer;
       transition: background-color $transition-speed;
 
       &:hover {
-        background-color: darken(
-          $color-secondary-base,
-          10%
-        ); // Slightly darker on hover
+        background-color: darken($color-secondary-base, 10%);
       }
     }
   }
@@ -96,33 +92,42 @@
 .main-content {
   flex-grow: 1;
   margin-left: 250px; // Offset by sidebar width
-  // No padding here, padding will be handled by the specific component loaded in router-outlet
-  background-color: $color-background; // Light gray background for the main content
+  background-color: $color-background;
   display: flex;
   flex-direction: column;
+
+  // Adicione um padding-top ao main-content para deixar espaço para a top-bar fixa
+  padding-top: calc(
+    $spacing-l + 60px + $spacing-m * 2
+  ); // Altura da top-bar + suas margens/padding.
+  // Ajuste "60px" para a altura real da sua top-bar.
+  padding-left: $spacing-xl; // Adicione padding horizontal para o conteúdo principal
+  padding-right: $spacing-xl;
+  padding-bottom: $spacing-xl; // Um pouco de padding na parte inferior
 }
 
 .top-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: $spacing-l; // This margin will push content down
-  padding: $spacing-m $spacing-xl; // Add some padding
-  background-color: $color-background-card; // White background for the top bar
+  // REMOVA margin-bottom AQUI
+  padding: $spacing-m $spacing-xl;
+  background-color: $color-background-card;
   border-radius: $border-radius-medium;
-  box-shadow: $box-shadow-light; // Subtle shadow
+  box-shadow: $box-shadow-light;
   width: calc(
-    100% - 250px - #{$spacing-l * 2}
-  ); // Adjust width considering sidebar and main-content padding
+    100% - 250px - (#{$spacing-xl} * 2)
+      // Ajuste para considerar o padding do main-content
+  );
   position: fixed;
-  top: $spacing-l; // Position from the top
+  top: $spacing-l; // Distância do topo da tela
   left: calc(
-    250px + #{$spacing-l}
-  ); // Position after sidebar + main-content left padding
+    250px + #{$spacing-xl}
+  ); // Posição após a sidebar + padding esquerdo do main-content
   z-index: 50;
 
   .page-title {
-    font-size: $font-size-h2; // Matches the "Bem-vindo, Guilherme!" title size
+    font-size: $font-size-h2;
     color: $color-text-dark;
     font-weight: bold;
   }
@@ -141,7 +146,7 @@
     .profile-picture {
       width: 40px;
       height: 40px;
-      background-color: $color-brand-base; // Orange background
+      background-color: $color-brand-base;
       border-radius: 50%;
       display: flex;
       justify-content: center;
@@ -153,49 +158,48 @@
   }
 }
 
-// Adjust router-outlet to start below the fixed top-bar
-router-outlet + * {
-  // Selects the element directly after router-outlet (your loaded component)
-  margin-top: calc(
-    $spacing-l + 60px + $spacing-m * 2
-  ); // Top-bar's top margin + its approximate height + its internal vertical padding. Adjust 60px if your top-bar height changes.
-}
+// REMOVA ESTE SELETOR, POIS O PADDING SERÁ APLICADO AO .main-content
+// router-outlet + * {
+//   // Selects the element directly after router-outlet (your loaded component)
+//   margin-top: calc(
+//     $spacing-l + 60px + $spacing-m * 2
+//   );
+// }
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .sidebar {
-    width: 60px; // Collapse sidebar
+    width: 60px;
     .logo {
       img {
-        width: 40px; // Smaller logo
+        width: 40px;
       }
     }
     .nav-menu {
       li {
         a {
-          justify-content: center; // Center icons
+          justify-content: center;
           span {
-            display: none; // Hide text
+            display: none;
           }
         }
         &.active-link {
-          border-left: none; // Remove left border
-          border-bottom: 5px solid $color-brand-base; // Add bottom border
-          padding-left: $spacing-s; // Reset padding
+          border-left: none;
+          border-bottom: 5px solid $color-brand-base;
+          padding-left: $spacing-s;
         }
       }
     }
     .sidebar-footer {
-      padding: $spacing-s $spacing-xs; // Reduce footer padding
+      padding: $spacing-s $spacing-xs;
       .btn {
-        width: auto; // Allow button to shrink
-        font-size: 0; // Hide text
-        padding: $spacing-xs; // Adjust padding for icon-only button
-        overflow: hidden; // Hide overflowed text
-        position: relative; // For potential tooltip later
+        width: auto;
+        font-size: 0;
+        padding: $spacing-xs;
+        overflow: hidden;
+        position: relative;
         &::before {
-          // Create an icon or use Font Awesome directly on the button
-          content: "\f011"; // Font Awesome logout icon unicode
+          content: "\f011";
           font-family: "Font Awesome 5 Free";
           font-weight: 900;
           font-size: $font-size-large;
@@ -206,24 +210,29 @@ router-outlet + * {
   }
 
   .main-content {
-    margin-left: 60px; // Adjust offset
+    margin-left: 60px;
+    // Ajuste o padding-top também para mobile, se a top-bar for menor
+    padding-top: calc(
+      $spacing-s + 50px + $spacing-m * 2
+    ); // Ajuste 50px para a altura da top-bar mobile
   }
 
   .top-bar {
     left: calc(
-      60px + #{$spacing-s}
-    ); // Adjust left position with smaller padding for mobile
+      60px + #{$spacing-m}
+    ); // Ajuste left para mobile (sidebar width + padding)
     width: calc(
-      100% - 60px - #{$spacing-s * 2}
-    ); // Adjust width for mobile sidebar and padding
-    padding: $spacing-s $spacing-m; // Smaller padding for top bar
-    top: $spacing-s; // Smaller top margin for mobile
+      100% - 60px - (#{$spacing-m} * 2)
+        // Ajuste width para mobile (total width - sidebar width - padding do main-content)
+    );
+    padding: $spacing-s $spacing-m;
+    top: $spacing-s;
 
     .page-title {
       font-size: $font-size-h3;
     }
     .username {
-      display: none; // Hide username on smaller screens
+      display: none;
     }
     .profile-picture {
       width: 35px;
@@ -232,10 +241,10 @@ router-outlet + * {
     }
   }
 
-  router-outlet + * {
-    // Adjust top margin for smaller top-bar on mobile
-    margin-top: calc(
-      $spacing-s + 50px + $spacing-m * 2
-    ); // Top-bar's top margin + its approximate height + its internal vertical padding for mobile.
-  }
+  // REMOVA ESTE SELETOR TAMBÉM NO MEDIA QUERY
+  // router-outlet + * {
+  //   margin-top: calc(
+  //     $spacing-s + 50px + $spacing-m * 2
+  //   );
+  // }
 }
