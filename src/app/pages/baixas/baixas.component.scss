@@ -1,132 +1,130 @@
 /* src/app/pages/baixas/baixas.component.scss */
 
-@import "../../../styles.scss"; // Certifique-se que este caminho está correto para suas variáveis globais
+@import "../../../styles/_variables.scss"; // Ajuste o caminho conforme a localização real
+@import "../../../styles/_styles.scss"; // Ajuste o caminho conforme a localização real
+
+// O .page-container deve ser definido no seu layout principal (app.component.scss ou similar)
+// para gerenciar a largura total, sidebar e topbar.
+// Aqui, vamos focar no conteúdo interno da página e no "main-content-area".
 
 .main-content-area {
-  flex-grow: 1;
-  padding: 25px 30px; // Padding ao redor do conteúdo da página
-  background-color: var(--color-background-app); // Fundo cinza claro
-  width: 100%;
-  max-width: 900px; // Largura máxima do conteúdo central
-  margin: 0 auto; // Centraliza o conteúdo
+  flex-grow: 1; // Permite que esta área ocupe o espaço restante no flex container
+  padding: $spacing-l $spacing-xl; // Padding ao redor do conteúdo da página, como nos seus outros prints
+  background-color: $color-background; // Fundo cinza claro da sua app
+  width: 100%; // Ocupa a largura disponível do container pai
+  max-width: 900px; // Largura máxima para o conteúdo principal, ajustando conforme seus outros prints
+  margin: 0 auto; // Centraliza o conteúdo dentro do page-container se houver espaço
+  box-sizing: border-box; // Garante que padding e border sejam incluídos na largura/altura
 }
 
 .page-header {
-  margin-bottom: 25px;
-  h2 {
-    font-size: 1.8rem;
-    color: var(--color-text-dark);
+  margin-bottom: $spacing-l; // Espaço abaixo do título da página
+  h1 {
+    font-size: $font-size-h2; // Um pouco menor que H1 global, para ser título de página interna
     font-weight: 600;
+    color: $color-text-dark;
+    margin-bottom: $spacing-xs; // Espaço entre título e subtítulo
+  }
+
+  .subtitle {
+    font-size: $font-size-base;
+    color: $color-secondary-base; // Use uma cor de texto mais suave para o subtítulo
+    margin-bottom: 0;
   }
 }
 
-.baixa-form-card {
-  background-color: var(--color-white);
-  padding: 30px 40px;
-  border-radius: 8px;
-  box-shadow: var(--shadow-light); // Sombra do card
-  width: 100%;
+.form-card-container {
+  background-color: $color-background-card; // Fundo branco para o "card" do formulário
+  padding: $spacing-xl; // Padding interno do card
+  border-radius: $border-radius-medium; // Cantos arredondados
+  box-shadow: $box-shadow-light; // Sombra sutil para o card
+  width: 100%; // Ocupa a largura disponível dentro do main-content-area
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: $spacing-l; // Espaçamento entre os grupos de formulário
 }
 
-.section-title {
-  margin-bottom: 10px;
-  h3 {
-    font-size: 1.1rem;
-    color: var(--color-text-dark);
-    font-weight: 500;
-    border-bottom: 1px solid var(--color-border-input);
-    padding-bottom: 10px;
-  }
-}
-
+// O .form-group e .form-control já estão definidos no _styles.scss
+// Apenas sobrescreva ou adicione especificidades se necessário aqui
 .form-group {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 15px; // Espaçamento entre grupos de campos
-
+  // Sobrescrever margin-bottom se precisar de mais espaço que o default do _styles.scss
+  margin-bottom: $spacing-m; // Exemplo: um pouco mais de espaço
   label {
+    font-size: $font-size-base; // Labels um pouco maiores
     font-weight: 500;
-    margin-bottom: 8px;
-    color: var(--color-text-dark);
-    font-size: 0.95rem;
+    margin-bottom: $spacing-xs; // Espaço entre label e input
   }
-
   .form-control {
-    width: 100%;
-    padding: 12px 15px;
-    border: 1px solid var(--color-border-input);
-    border-radius: 5px;
-    font-size: 1rem;
-    color: var(--color-text-dark);
-    background-color: var(--color-white);
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-
+    padding: $spacing-s; // Aumentar padding para inputs para melhor toque
+    border-radius: $border-radius-medium; // Inputs com cantos mais arredondados
     &:focus {
-      border-color: var(--color-primary);
-      outline: 0;
-      box-shadow: 0 0 0 0.2rem rgba(var(--color-primary-rgb), 0.25);
-    }
-
-    &::placeholder {
-      color: var(--color-text-placeholder);
+      box-shadow: 0 0 0 3px rgba(adjust-hue($color-primary, 0), 0.2); // Sombra de foco com cor primária
     }
   }
-
   textarea.form-control {
-    min-height: 80px;
+    min-height: 120px; // Altura mínima maior para textareas
     resize: vertical;
-  }
-
-  .error-message {
-    color: var(--color-danger);
-    font-size: 0.85rem;
-    margin-top: 5px;
   }
 }
 
 .form-actions {
   display: flex;
-  justify-content: flex-end;
-  gap: 15px;
-  margin-top: 20px;
+  justify-content: flex-end; // Alinha os botões à direita
+  gap: $spacing-m; // Espaçamento entre os botões
+  margin-top: $spacing-m; // Espaço acima dos botões, dentro do form-card-container
+  padding-top: $spacing-s; // Pequeno padding acima da linha
+  border-top: 1px solid $color-border; // Linha fina de separação
+}
 
+// As classes .btn.primary e .btn.secondary já estão definidas no _styles.scss
+// Se precisar de ajustes específicos para os botões desta página:
+.form-actions {
   .btn {
-    padding: 10px 20px;
-    border-radius: 5px;
-    font-size: 0.95rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background-color 0.2s ease, color 0.2s ease,
-      border-color 0.2s ease;
+    padding: $spacing-s $spacing-l; // Padding ajustado para os botões aqui
+    border-radius: $border-radius-medium; // Bordas mais arredondadas para botões
+  }
+  .btn.primary {
+    background-color: $color-brand-base; // Usando seu laranja CTA como botão principal
+    color: $color-text-light;
+    &:hover {
+      background-color: $color-brand-light;
+    }
+  }
+  .btn.secondary {
+    background-color: transparent;
+    color: $color-brand-base; // Usando o laranja CTA para o texto e borda do secundário
+    border: 1px solid $color-brand-base;
+    &:hover {
+      background-color: lighten($color-brand-base, 40%);
+      color: $color-brand-dark;
+    }
+  }
+}
 
-    &:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
+/* Estilos responsivos básicos */
+@media (max-width: 768px) {
+  .main-content-area {
+    padding: $spacing-l $spacing-m; // Ajusta padding em telas menores
+  }
+
+  .form-card-container {
+    padding: $spacing-l; // Reduz padding do card em telas menores
+  }
+
+  .page-header {
+    h1 {
+      font-size: $font-size-h3; // Ajusta tamanho do título em telas menores
+    }
+    .subtitle {
+      font-size: $font-size-small;
     }
   }
 
-  .primary-btn {
-    background-color: var(--color-primary);
-    color: var(--color-white);
-    border: 1px solid var(--color-primary);
-
-    &:hover:not(:disabled) {
-      background-color: var(--color-primary-dark);
-      border-color: var(--color-primary-dark);
-    }
-  }
-
-  .secondary-btn {
-    background-color: var(--color-white);
-    color: var(--color-primary);
-    border: 1px solid var(--color-primary);
-
-    &:hover:not(:disabled) {
-      background-color: var(--color-primary-light);
-      color: var(--color-primary-dark);
+  .form-actions {
+    flex-direction: column; // Botões empilhados em telas menores
+    gap: $spacing-s;
+    .btn {
+      width: 100%; // Botões com largura total
     }
   }
 }

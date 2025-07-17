@@ -1,26 +1,25 @@
 <div class="page-container">
   <div class="main-content-area">
     <div class="page-header">
-      <h2>Registrar Nova Baixa de Estoque</h2>
+      <h1>Registrar Nova Baixa de Estoque</h1>
+      <p class="subtitle">
+        Preencha os detalhes para registrar a baixa de um item do seu estoque.
+      </p>
     </div>
 
     <form
       [formGroup]="baixaForm"
       (ngSubmit)="onSubmit()"
-      class="baixa-form-card"
+      class="form-card-container"
     >
-      <div class="section-title">
-        <h3>Item de Estoque</h3>
-      </div>
-
       <div class="form-group">
-        <label for="itemEstoqueUid">Item de Estoque:</label>
+        <label for="itemEstoqueUid">Item de Estoque</label>
         <select
           id="itemEstoqueUid"
           formControlName="itemEstoqueUid"
           class="form-control"
         >
-          <option [ngValue]="null" disabled>Selecione um item</option>
+          <option [ngValue]="null" disabled selected>Selecione um item</option>
           <ng-container
             *ngIf="itensEstoque$ | async as items; else loadingItems"
           >
@@ -45,13 +44,13 @@
       </div>
 
       <div class="form-group">
-        <label for="quantidadeBaixada">Quantidade a Baixar:</label>
+        <label for="quantidadeBaixada">Quantidade a Baixar</label>
         <input
           type="number"
           id="quantidadeBaixada"
           formControlName="quantidadeBaixada"
           class="form-control"
-          placeholder="Quantidade (Disponível: {{ selectedItemStockQuantity }})"
+          placeholder="Ex: 10 (Disponível: {{ selectedItemStockQuantity }})"
           [min]="1"
           [max]="selectedItemStockQuantity"
         />
@@ -71,7 +70,9 @@
             A quantidade deve ser no mínimo 1.
           </span>
           <span
-            *ngIf="baixaForm.get('quantidadeBaixada')?.errors?.['exceedsStock']"
+            *ngIf="
+              baixaForm.get('quantidadeBaixada')?.errors?.['exceedsStock']
+            "
           >
             A quantidade excede o estoque disponível ({{
               selectedItemStockQuantity
@@ -81,12 +82,13 @@
       </div>
 
       <div class="form-group">
-        <label for="motivo">Motivo da Baixa:</label>
+        <label for="motivo">Motivo da Baixa</label>
         <input
           type="text"
           id="motivo"
           formControlName="motivo"
           class="form-control"
+          placeholder="Ex: Item danificado, Venda, Perda"
         />
         <div
           *ngIf="
@@ -99,25 +101,26 @@
       </div>
 
       <div class="form-group">
-        <label for="observacoes">Observações (Opcional):</label>
+        <label for="observacoes">Observações (Opcional)</label>
         <textarea
           id="observacoes"
           formControlName="observacoes"
           class="form-control"
+          placeholder="Detalhes adicionais sobre a baixa..."
         ></textarea>
       </div>
 
       <div class="form-actions">
         <button
           type="button"
-          class="btn secondary-btn"
+          class="btn secondary"
           (click)="goToRegistrosBaixas()"
         >
           Ver Registros de Baixas
         </button>
         <button
           type="submit"
-          class="btn primary-btn"
+          class="btn primary"
           [disabled]="baixaForm.invalid"
         >
           Registrar Baixa
