@@ -1,72 +1,60 @@
-/* src/app/LoginComponents/starter/starter.component.scss */
+/* src/app/features/auth/starter/starter.component.scss */
 
+// Importa as variáveis e estilos globais para consistência.
 @import "../../../styles/variables";
-@import "../../../styles/styles";
+@import "../../../styles.scss";
 
+// O HTML deste componente é renderizado dentro do .auth-left-panel do layout pai.
+// Portanto, este SCSS foca apenas em estilizar o conteúdo interno.
+
+// O wrapper para o conteúdo da página inicial.
 .starter-content-wrapper {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100%;
   width: 100%;
-  max-width: 320px;
+  max-width: 380px; // Define uma largura máxima para o conteúdo central.
   text-align: center;
 
+  // Container do logo.
   .logo-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-bottom: $spacing-xl;
+    margin-bottom: $spacing-xxl; // Aumenta o espaço entre o logo e os botões, conforme a imagem.
 
     img {
-      width: 200px;
+      // Ajuste o tamanho do seu logo SVG conforme necessário para corresponder à imagem.
+      width: 100%;
+      max-width: 280px;
       height: auto;
-      margin-bottom: $spacing-s;
-    }
-
-    h1 {
-      font-size: $font-size-h1;
-      color: $color-text-dark;
-      font-weight: bold;
     }
   }
 
+  // Grupo de botões de ação.
   .buttons-group {
     display: flex;
-    flex-direction: row;
-    gap: $spacing-s;
-    width: 100%;
+    gap: $spacing-m; // Adiciona um espaço entre os botões.
+    width: 100%; // O grupo ocupa toda a largura do wrapper.
 
+    // Estilo para os botões.
     .btn {
-      flex: 1;
-      padding: $spacing-s $spacing-m;
-      font-size: $font-size-large;
-      border-radius: $border-radius-medium;
-      white-space: nowrap;
+      flex: 1; // Faz com que ambos os botões dividam o espaço igualmente.
+      padding: $spacing-s; // Padding generoso para uma boa área de clique.
+      font-weight: 500;
     }
 
-    .btn.primary {
-      background-color: $color-brand-base;
-      color: $color-text-light;
-      &:hover {
-        background-color: $color-brand-lighter; // Usando a nova variável
-      }
-      &:active {
-        background-color: $color-brand-darker; // Usando a nova variável
-      }
-    }
+    // Nenhuma sobreposição de cor é necessária aqui.
+    // As classes que você já tem no HTML (.btn-cta e .primary)
+    // são aplicadas corretamente a partir do seu arquivo _styles.scss:
+    // .btn-cta -> Laranja (Entrar)
+    // .primary -> Azul Escuro (Cadastrar)
+  }
+}
 
-    .btn.secondary {
-      background-color: transparent;
-      color: $color-brand-base;
-      border: 1px solid $color-brand-base;
-      &:hover {
-        background-color: lighten($color-brand-base, 40%);
-      }
-      &:active {
-        background-color: lighten($color-brand-base, 30%);
-      }
+// Para telas muito pequenas, os botões podem ficar um abaixo do outro para melhor usabilidade.
+@media (max-width: 420px) {
+  .starter-content-wrapper {
+    .buttons-group {
+      flex-direction: column;
     }
   }
 }

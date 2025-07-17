@@ -10,9 +10,9 @@ import {
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { Produto } from '../../../models/produto.model';
+import { Produto } from '../../../models/produto.model'; // Mantenha este import
 import { ProdutoService } from '../../../services/produto.service';
-import { format } from 'date-fns';
+import { format } from 'date-fns'; // Mantenha este import, já que você o instalou
 
 @Component({
   selector: 'app-edicao-produto',
@@ -20,8 +20,8 @@ import { format } from 'date-fns';
   styleUrls: ['./edicao-produto.component.scss'],
 })
 export class EdicaoProdutoComponent implements OnInit, OnDestroy {
-  @Input() produto: Produto | null = null; // Produto vindo do componente pai (ProdutosComponent)
-  @Output() productSaved = new EventEmitter<void>(); // Evento para notificar o pai que salvou
+  @Input() produto: Produto | null = null;
+  @Output() productSaved = new EventEmitter<void>();
 
   produtoUid: string | null = null;
   produtoAtual: Produto | null = null;
@@ -50,27 +50,22 @@ export class EdicaoProdutoComponent implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private produtoService: ProdutoService,
-    private route: ActivatedRoute, // Para obter o UID da rota se for uma página separada
+    private route: ActivatedRoute,
     private router: Router
   ) {}
 
   ngOnInit(): void {
     this.initForm();
 
-    // Se o componente for usado como rota independente (ex: /produtos/editar/:uid)
     this.route.paramMap.subscribe((params) => {
       this.produtoUid = params.get('uid');
       if (this.produtoUid) {
         this.loadProduto(this.produtoUid);
       } else if (this.produto) {
-        // Se o produto for passado via @Input (modal)
         this.produtoAtual = this.produto;
         this.populateForm(this.produtoAtual);
       }
     });
-
-    // Se o componente for usado como um modal, o @Input 'produto' já estará disponível.
-    // O if (this.produto) acima já lida com isso.
   }
 
   ngOnDestroy(): void {
@@ -82,13 +77,10 @@ export class EdicaoProdutoComponent implements OnInit, OnDestroy {
   initForm(): void {
     this.edicaoProdutoForm = this.fb.group({
       nome: ['', Validators.required],
-      descricao: [''], // Descrição pode ser opcional
+      descricao: [''],
       tipo: ['', Validators.required],
       marca: ['', Validators.required],
       unidadeMedida: ['', Validators.required],
-      // imageUrl: [''], // Se você tiver um campo para URL da imagem
-      // categoria: [''], // Se você tiver categoria
-      // sku: [''], // Se você tiver SKU
     });
   }
 
@@ -100,12 +92,11 @@ export class EdicaoProdutoComponent implements OnInit, OnDestroy {
           this.populateForm(produto);
         } else {
           console.error('Produto não encontrado.');
-          this.router.navigate(['/produtos']); // Redireciona se não encontrar
+          this.router.navigate(['/produtos']);
         }
       },
       error: (err) => {
         console.error('Erro ao carregar produto:', err);
-        // Lidar com erro, talvez exibir mensagem para o usuário
       },
     });
   }
@@ -117,9 +108,6 @@ export class EdicaoProdutoComponent implements OnInit, OnDestroy {
       tipo: produto.tipo,
       marca: produto.marca,
       unidadeMedida: produto.unidadeMedida,
-      // imageUrl: produto.imageUrl,
-      // categoria: produto.categoria,
-      // sku: produto.sku,
     });
   }
 
@@ -127,7 +115,7 @@ export class EdicaoProdutoComponent implements OnInit, OnDestroy {
     if (this.edicaoProdutoForm.valid && this.produtoAtual?.uid) {
       const updatedProduto: Partial<Produto> = {
         ...this.edicaoProdutoForm.value,
-        uid: this.produtoAtual.uid, // Mantém o UID original
+        uid: this.produtoAtual.uid,
       };
 
       try {
@@ -136,9 +124,8 @@ export class EdicaoProdutoComponent implements OnInit, OnDestroy {
           updatedProduto
         );
         alert('Produto atualizado com sucesso!');
-        this.productSaved.emit(); // Emite evento para o componente pai (se for modal)
+        this.productSaved.emit();
         if (this.produtoUid) {
-          // Se for página independente, volta
           this.goBack();
         }
       } catch (error) {
@@ -148,16 +135,14 @@ export class EdicaoProdutoComponent implements OnInit, OnDestroy {
     }
   }
 
-  // --- FUNÇÃO AJUSTADA PARA FORMATAR DATAS ---
   formatTimestamp(date: Date | null | undefined): string {
     if (date) {
-      // Usamos date-fns para formatação, é mais robusto
       return format(date, 'dd/MM/yyyy HH:mm:ss');
     }
     return 'N/A';
   }
 
   goBack(): void {
-    this.router.navigate(['/produtos']); // Ou use this.productSaved.emit() se for um modal
+    this.router.navigate(['/produtos']);
   }
 }

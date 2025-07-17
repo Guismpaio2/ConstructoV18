@@ -1,31 +1,59 @@
-/* src/app/LoginComponents/cadastro-senha/cadastro-senha.component.scss */
+/* src/app/features/auth/cadastro-senha/cadastro-senha.component.scss */
 
-@import "../../../styles/variables"; // Garanta que esta linha esteja no topo
-@import "../../../styles/styles"; // Garanta que esta linha esteja no topo para usar os mixins
+// Importa as variáveis e estilos globais.
+@import "../../../../styles/variables";
+@import "../../../../styles/styles";
 
-.cadastro-container-wrapper {
-  .form-panel {
-    .form-wrapper {
-      .title {
-        text-align: center;
-        margin-bottom: $spacing-xl; // Usando variável de _variables.scss
-      }
+// O componente é renderizado dentro do .auth-left-panel.
+// Este wrapper garante que o conteúdo do formulário tenha a largura e o alinhamento corretos.
+.cadastro-senha-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
 
-      .password-wrapper {
-        .icon-eye {
-          width: 20px; // Ajuste o tamanho do ícone do olho
-          height: 20px;
-        }
-      }
+// Contém todo o formulário, desde o título até os botões.
+.form-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 400px; // Largura máxima consistente com as outras telas.
 
-      .btn {
-        width: 100%;
-        margin-top: $spacing-m; // Usando variável de _variables.scss
-      }
+  h2 {
+    // O estilo do h2 já vem de _styles.scss.
+    // Apenas ajustamos o espaçamento inferior e o alinhamento.
+    text-align: left;
+    margin-bottom: $spacing-xl;
+  }
 
-      .already-account {
-        margin-top: $spacing-s; // Usando variável de _variables.scss
-      }
-    }
+  form {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    // Define um espaçamento consistente entre os form-groups e o button-group.
+    gap: $spacing-m;
   }
 }
+
+// Os estilos para .form-group, label, input e .password-wrapper
+// já são fornecidos pelos seus arquivos globais.
+// Nenhuma estilização adicional é necessária para eles aqui.
+
+// O .error-message também já é estilizado globalmente.
+// Apenas garantimos que ele se alinhe à esquerda.
+.error-message {
+  text-align: left;
+  margin-top: $spacing-xxs;
+}
+
+// Container para os botões de ação.
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-m; // Espaçamento vertical entre os botões.
+  width: 100%;
+  margin-top: $spacing-s; // Espaço extra antes dos botões.
+}
+
+// Os botões .btn.btn-cta e .btn.secondary já estão perfeitamente estilizados
+// pelo seu arquivo global _styles.scss. Não são necessários mais estilos aqui.

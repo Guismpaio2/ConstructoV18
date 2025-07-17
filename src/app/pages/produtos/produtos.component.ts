@@ -80,6 +80,8 @@ export class ProdutosComponent implements OnInit, OnDestroy {
       .isEstoquista()
       .subscribe((isEstoquista) => {
         this.canAddEditDelete = isEstoquista;
+
+      console.log('Permissão canAddEditDelete:', this.canAddEditDelete);
       });
   }
 

@@ -1,24 +1,26 @@
 <div class="cadastro-senha-container">
-  <div class="cadastro-senha-card">
-    <h2>Criar Senha</h2>
-    <p>Defina a senha para sua conta.</p>
+  <div class="form-wrapper">
+    <!-- O título na imagem é "Crie uma Senha" -->
+    <h2>Crie uma Senha</h2>
 
     <form [formGroup]="passwordForm" (ngSubmit)="onSubmit()">
       <div class="form-group">
-        <label for="password">Senha:</label>
-        <div class="password-input-group">
+        <label for="password">Senha</label>
+        <!-- A classe .password-wrapper já é estilizada globalmente -->
+        <div class="password-wrapper">
           <input
             id="password"
             [type]="passwordVisible ? 'text' : 'password'"
             formControlName="password"
-            class="form-control"
-            placeholder="Mínimo 6 caracteres"
+            placeholder="Senha"
+            required
           />
           <span class="password-toggle" (click)="togglePasswordVisibility()">
             <i class="fas fa-eye" *ngIf="!passwordVisible"></i>
             <i class="fas fa-eye-slash" *ngIf="passwordVisible"></i>
           </span>
         </div>
+        <!-- Mensagens de erro -->
         <div
           *ngIf="
             passwordForm.get('password')?.invalid &&
@@ -36,14 +38,14 @@
       </div>
 
       <div class="form-group">
-        <label for="confirmPassword">Confirmar Senha:</label>
-        <div class="password-input-group">
+        <label for="confirmPassword">Confirmar Senha</label>
+        <div class="password-wrapper">
           <input
             id="confirmPassword"
             [type]="confirmPasswordVisible ? 'text' : 'password'"
             formControlName="confirmPassword"
-            class="form-control"
-            placeholder="Confirme sua senha"
+            placeholder="Confirmar Senha"
+            required
           />
           <span
             class="password-toggle"
@@ -53,6 +55,7 @@
             <i class="fas fa-eye-slash" *ngIf="confirmPasswordVisible"></i>
           </span>
         </div>
+        <!-- Mensagens de erro -->
         <div
           *ngIf="
             passwordForm.get('confirmPassword')?.invalid &&
@@ -73,21 +76,19 @@
         </div>
       </div>
 
-      <div *ngIf="errorMessage" class="alert alert-danger">
+      <div *ngIf="errorMessage" class="error-message">
         {{ errorMessage }}
       </div>
 
-      <div class="form-actions">
-        <button type="button" class="secondary-button" (click)="goBack()">
-          Voltar
-        </button>
+      <!-- MUDANÇA: Container para os botões -->
+      <div class="button-group">
+        <!-- MUDANÇA: Classes e texto do botão -->
         <button
           type="submit"
-          class="primary-button"
+          class="btn btn-cta"
           [disabled]="passwordForm.invalid || isLoading"
         >
-          <span *ngIf="!isLoading">Criar Conta</span>
-          <span *ngIf="isLoading">Criando...</span>
+          <span *ngIf="!isLoading">Próximo</span>
         </button>
       </div>
     </form>

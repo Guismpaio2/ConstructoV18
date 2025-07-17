@@ -6,8 +6,10 @@ import {
 } from '@angular/fire/compat/firestore';
 import { Observable } from 'rxjs';
 import { map, take } from 'rxjs/operators';
-import { Timestamp } from '@angular/fire/firestore';
+// Remova esta linha, pois não usaremos mais Timestamp diretamente aqui para gravação/leitura
+// import { Timestamp } from '@angular/fire/firestore';
 import { AuthService } from '../auth/auth.service';
+// Verifique se o caminho do modelo está correto
 import { Produto, ProdutoFirestore } from '../models/produto.model';
 
 @Injectable({
@@ -17,26 +19,31 @@ export class ProdutoService {
   private produtosCollection: AngularFirestoreCollection<ProdutoFirestore>;
 
   constructor(private afs: AngularFirestore, private authService: AuthService) {
+    // Isso ainda vai apontar para a coleção 'produtos' na raiz.
+    // Se você tiver duas com o mesmo nome na raiz, o comportamento pode ser imprevisível
+    // e pegar uma delas. A melhor abordagem seria manter apenas uma coleção 'produtos'.
     this.produtosCollection = this.afs.collection<ProdutoFirestore>('produtos');
   }
 
   // --- Funções Auxiliares de Conversão ---
+  // Esta função agora espera strings e as converte para Date
   private convertFirestoreToAppProduto(data: ProdutoFirestore): Produto {
     return {
       ...data,
-      // Converte Timestamp para Date. Se for null/undefined, mantém null.
-      dataCadastro: data.dataCadastro?.toDate() || null,
-      dataUltimaEdicao: data.dataUltimaEdicao?.toDate() || null,
+      // Converte a string ISO para Date. Se for null/undefined ou inválida, mantém null.
+      dataCadastro: data.dataCadastro ? new Date(data.dataCadastro) : null,
+      dataUltimaEdicao: data.dataUltimaEdicao
+        ? new Date(data.dataUltimaEdicao)
+        : null,
     };
   }
 
+  // Esta função agora espera Date e as converte para string ISO para o Firestore
   private convertAppToFirestoreProduto(
-    data: Partial<Produto> // Pode ser um Produto parcial ao atualizar
+    data: Partial<Produto>
   ): Partial<ProdutoFirestore> {
     const firestoreData: Partial<ProdutoFirestore> = {};
 
-    // Mapeia todos os campos existentes de 'data' para 'firestoreData'
-    // exceto as datas, que serão tratadas separadamente.
     for (const key in data) {
       if (
         data.hasOwnProperty(key) &&
@@ -49,17 +56,15 @@ export class ProdutoService {
 
     // Trata dataCadastro: apenas converte se for uma instância de Date
     if (data.dataCadastro instanceof Date) {
-      firestoreData.dataCadastro = Timestamp.fromDate(data.dataCadastro);
+      firestoreData.dataCadastro = data.dataCadastro.toISOString(); // Converte Date para string ISO
     } else if (data.dataCadastro === null) {
-      firestoreData.dataCadastro = null as any; // Firestore aceita null para Timestamps opcionais
+      firestoreData.dataCadastro = null as any; // Firestore aceita null para campos opcionais
     }
     // Trata dataUltimaEdicao: apenas converte se for uma instância de Date
     if (data.dataUltimaEdicao instanceof Date) {
-      firestoreData.dataUltimaEdicao = Timestamp.fromDate(
-        data.dataUltimaEdicao
-      );
+      firestoreData.dataUltimaEdicao = data.dataUltimaEdicao.toISOString(); // Converte Date para string ISO
     } else if (data.dataUltimaEdicao === null) {
-      firestoreData.dataUltimaEdicao = null as any; // Firestore aceita null para Timestamps opcionais
+      firestoreData.dataUltimaEdicao = null as any; // Firestore aceita null para campos opcionais
     }
 
     return firestoreData;
@@ -82,11 +87,12 @@ export class ProdutoService {
     const currentUserDisplayName =
       await this.authService.getCurrentUserDisplayName();
 
+    const now = new Date(); // Objeto Date nativo
     const produtoParaFirestore: ProdutoFirestore = {
       ...produtoApp,
       uid: uid,
-      dataCadastro: Timestamp.now(),
-      dataUltimaEdicao: Timestamp.now(),
+      dataCadastro: now.toISOString(), // Grava como string ISO
+      dataUltimaEdicao: now.toISOString(), // Grava como string ISO
       usuarioUltimaEdicaoUid: currentUserUid || 'unknown',
       usuarioUltimaEdicaoNome: currentUserDisplayName || 'Desconhecido',
     };
@@ -141,8 +147,8 @@ export class ProdutoService {
     const dataToUpdateFirestore: Partial<ProdutoFirestore> =
       this.convertAppToFirestoreProduto(updatedFieldsApp);
 
-    // Sobrescreve as datas de auditoria para garantir que sejam sempre Timestamp.now()
-    dataToUpdateFirestore.dataUltimaEdicao = Timestamp.now();
+    // Sobrescreve as datas de auditoria para garantir que sejam sempre a string ISO atual
+    dataToUpdateFirestore.dataUltimaEdicao = new Date().toISOString();
     dataToUpdateFirestore.usuarioUltimaEdicaoUid = currentUserUid || 'unknown';
     dataToUpdateFirestore.usuarioUltimaEdicaoNome =
       currentUserDisplayName || 'Desconhecido';

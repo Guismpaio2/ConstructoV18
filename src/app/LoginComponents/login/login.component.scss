@@ -1,65 +1,72 @@
-/* src/app/LoginComponents/login/login.component.scss */
+/* src/app/features/auth/login/login.component.scss */
 
+// Importa as variáveis e estilos globais.
 @import "../../../styles/variables";
-@import "../../../styles/styles";
+@import "../../../styles.scss";
 
+// O componente é renderizado dentro do .auth-left-panel.
+// Este wrapper garante que o conteúdo do formulário tenha a largura e o alinhamento corretos.
 .login-page-container {
-  // Remova o mixin se o AuthLayoutComponent já cuida do background
-  // @include two-column-layout("login-background.jpg");
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
 
-  .form-panel {
-    .form-wrapper {
-      .title {
-        color: $color-secondary-base;
-        text-align: center;
-        margin-bottom: $spacing-xl;
-      }
+// Contém todo o formulário, desde o título até os botões.
+.form-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 400px; // Largura máxima consistente com as outras telas.
 
-      .logo-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        margin-bottom: $spacing-l;
-
-        img {
-          width: 80px;
-          height: auto;
-          margin-bottom: $spacing-s;
-        }
-      }
-
-      .password-wrapper {
-        .icon-eye {
-          width: 20px;
-          height: 20px;
-        }
-      }
-
-      .btn {
-        width: 100%;
-        margin-top: $spacing-m;
-      }
-
-      .forgot-password {
-        margin-top: $spacing-s;
-      }
-    }
+  .title {
+    // O estilo do h2 (tamanho, peso) já vem de _styles.scss.
+    // Apenas ajustamos o alinhamento e o espaçamento.
+    text-align: left;
+    margin-bottom: $spacing-xl;
   }
 
-  // Se você removeu o .image-panel do HTML, este bloco não é mais necessário
-  // .image-panel {
-  //   display: none; // Pode esconder em telas menores
-  //   @media (min-width: 992px) {
-  //     display: block;
-  //     flex: 1;
-  //     position: relative;
-  //     overflow: hidden;
-  //
-  //     img {
-  //       width: 100%;
-  //       height: 100%;
-  //       object-fit: cover;
-  //     }
-  //   }
-  // }
+  form {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
 }
+
+// Os estilos para .form-group, label, e input vêm dos arquivos globais.
+// A classe .password-wrapper também já está estilizada globalmente,
+// incluindo o posicionamento do ícone de olho.
+
+// Ajuste fino para o tamanho do ícone de olho, se necessário.
+.icon-eye {
+  width: 22px;
+  height: 22px;
+  // A cor já é tratada pelo .password-toggle em _styles.scss
+}
+
+// Estilo para o link "Esqueceu sua senha?".
+.forgot-password {
+  // A classe .link-text global é centralizada. Criamos um estilo local.
+  color: $color-secondary; // Usa a cor secundária do seu tema.
+  font-size: $font-size-small;
+  text-align: left;
+  margin-top: $spacing-xs; // Espaço após o campo de senha.
+  margin-bottom: $spacing-l; // Espaço antes do primeiro botão.
+  text-decoration: none;
+  width: fit-content; // Garante que a área de clique não ocupe a linha inteira.
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+// Container para os botões de ação.
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-m; // Espaçamento vertical entre os botões.
+  width: 100%;
+}
+
+// Os botões .btn-cta e .btn-secondary já estão perfeitamente estilizados
+// pelo seu arquivo global _styles.scss. Não são necessários mais estilos aqui.

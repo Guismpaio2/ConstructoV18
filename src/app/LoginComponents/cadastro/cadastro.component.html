@@ -1,64 +1,65 @@
 <div class="cadastro-container-wrapper">
-  <div class="form-panel">
-    <div class="form-wrapper">
-      <h2>Cadastrar</h2>
-      <form (ngSubmit)="goToNextStep()">
-        <div class="profile-image-upload">
-          <div class="image-placeholder">
-            <img
-              src="assets/icons/user-placeholder.svg"
-              alt="Adicionar Imagem"
-              class="user-icon"
-            />
-          </div>
-          <button type="button" class="add-image-button btn tertiary small">
-            Adicionar Imagem
-          </button>
-        </div>
-
-        <div class="form-group">
-          <label for="nome">Nome</label>
-          <input
-            type="text"
-            id="nome"
-            placeholder="Nome"
-            [(ngModel)]="nome"
-            name="nome"
-            required
+  <div class="form-wrapper">
+    <h2>Cadastrar</h2>
+    <form (ngSubmit)="goToNextStep()">
+      <div class="profile-image-upload">
+        <div class="image-placeholder">
+          <img
+            src="assets/icons/user-placeholder.svg"
+            alt="Adicionar Imagem"
+            class="user-icon"
           />
         </div>
-        <div class="form-group">
-          <label for="sobrenome">Sobrenome</label>
-          <input
-            type="text"
-            id="sobrenome"
-            placeholder="Sobrenome"
-            [(ngModel)]="sobrenome"
-            name="sobrenome"
-            required
-          />
-        </div>
-        <div class="form-group">
-          <label for="email">E-mail</label>
-          <input
-            type="email"
-            id="email"
-            placeholder="E-mail"
-            [(ngModel)]="email"
-            name="email"
-            required
-          />
-        </div>
+        <button type="button" class="btn tertiary small">
+          Adicionar Imagem
+        </button>
+      </div>
 
-        <div *ngIf="errorMessage" class="error-message">
-          {{ errorMessage }}
-        </div>
+      <div class="form-group">
+        <label for="nome">Nome</label>
+        <input
+          type="text"
+          id="nome"
+          placeholder="Nome"
+          [(ngModel)]="nome"
+          name="nome"
+          required
+        />
+      </div>
+      <div class="form-group">
+        <label for="sobrenome">Sobrenome</label>
+        <input
+          type="text"
+          id="sobrenome"
+          placeholder="Sobrenome"
+          [(ngModel)]="sobrenome"
+          name="sobrenome"
+          required
+        />
+      </div>
+      <div class="form-group">
+        <label for="email">E-mail</label>
+        <input
+          type="email"
+          id="email"
+          placeholder="E-mail"
+          [(ngModel)]="email"
+          name="email"
+          required
+        />
+      </div>
 
-        <button type="submit" class="btn primary">Próximo</button>
-        <a routerLink="/login" class="already-account link-text"
-          >Já Possuo Conta</a
-        >
-      </form>
-    </div>
+      <div *ngIf="errorMessage" class="error-message">
+        {{ errorMessage }}
+      </div>
+
+      <!-- MUDANÇA AQUI: de 'primary' para 'btn-cta' -->
+      <button type="submit" class="btn btn-cta">Próximo</button>
+
+      <!-- MUDANÇA AQUI: de 'a' para 'button' com classe 'secondary' -->
+      <button type="button" class="btn secondary" routerLink="/login">
+        Já Possuo Conta
+      </button>
+    </form>
   </div>
 </div>

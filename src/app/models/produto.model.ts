@@ -1,6 +1,7 @@
 // src/app/models/produto.model.ts
 
-import { Timestamp } from '@angular/fire/firestore';
+// Remova a importação de Timestamp, pois não usaremos mais para ProdutoFirestore
+// import { Timestamp } from '@angular/fire/firestore';
 
 export interface ProdutoFirestore {
   uid?: string;
@@ -10,8 +11,10 @@ export interface ProdutoFirestore {
   marca: string;
   unidadeMedida: string;
   imageUrl?: string;
-  dataCadastro: Timestamp; // No Firestore, é um Timestamp
-  dataUltimaEdicao?: Timestamp; // No Firestore, é um Timestamp
+  // Alterado para string, conforme seus dados no Firestore
+  dataCadastro: string;
+  // Alterado para string, conforme seus dados no Firestore
+  dataUltimaEdicao?: string;
   usuarioUltimaEdicaoUid?: string;
   usuarioUltimaEdicaoNome?: string;
   categoria?: string;
@@ -26,8 +29,10 @@ export interface Produto {
   marca: string;
   unidadeMedida: string;
   imageUrl?: string;
-  dataCadastro: Date | null; // No Angular, queremos Date ou null
-  dataUltimaEdicao: Date | null; // No Angular, queremos Date ou null
+  // No Angular, queremos Date ou null
+  dataCadastro: Date | null;
+  // No Angular, queremos Date ou null
+  dataUltimaEdicao: Date | null;
   usuarioUltimaEdicaoUid?: string;
   usuarioUltimaEdicaoNome?: string;
   categoria?: string;
