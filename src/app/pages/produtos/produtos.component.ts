@@ -1,10 +1,10 @@
 // src/app/pages/produtos/produtos.component.ts
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Produto } from '../../models/produto.model';
+import { Produto } from '../../models/produto.model'; // Importe a interface 'Produto' (com Date | null)
 import { ProdutoService } from '../../services/produto.service';
 import { AuthService } from '../../auth/auth.service';
 import { Subscription } from 'rxjs';
-import { map } from 'rxjs/operators'; // Importe o operador map
+import { map } from 'rxjs/operators'; // Não precisa mais do map para converter Timestamp aqui
 
 @Component({
   selector: 'app-produtos',
@@ -12,23 +12,21 @@ import { map } from 'rxjs/operators'; // Importe o operador map
   styleUrls: ['./produtos.component.scss'],
 })
 export class ProdutosComponent implements OnInit, OnDestroy {
-  produtos: Produto[] = []; // Todos os produtos carregados
-  filteredProducts: Produto[] = []; // Produtos após filtro e ordenação
+  produtos: Produto[] = [];
+  filteredProducts: Produto[] = [];
   isLoading: boolean = true;
   errorMessage: string = '';
   canAddEditDelete: boolean = false;
   private authSubscription!: Subscription;
-  private productsSubscription!: Subscription; // Para gerenciar a inscrição dos produtos
+  private productsSubscription!: Subscription;
 
-  // Variáveis para o modal
   isModalOpen: boolean = false;
-  selectedProduct: Produto | null = null; // Produto selecionado para edição (null para novo)
+  selectedProduct: Produto | null = null;
 
-  // Variáveis para busca, filtro e ordenação
   searchTerm: string = '';
   selectedTypeFilter: string = 'todos';
-  availableTypes: string[] = []; // Será populado dinamicamente
-  selectedSort: string = 'nomeProdutoAsc'; // 'nomeProdutoAsc', 'nomeProdutoDesc', 'dataCadastroDesc', etc.
+  availableTypes: string[] = [];
+  selectedSort: string = 'nomeProdutoAsc';
 
   constructor(
     private produtoService: ProdutoService,
@@ -37,7 +35,7 @@ export class ProdutosComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.checkUserPermissions();
-    this.loadProducts(); // Carrega produtos e aplica filtros/ordenação
+    this.loadProducts();
   }
 
   ngOnDestroy(): void {
@@ -53,23 +51,19 @@ export class ProdutosComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.productsSubscription = this.produtoService
       .getProdutos()
-      .pipe(
-        map((produtos) => {
-          // Extrai tipos únicos para o filtro, exceto 'todos'
+      // O pipe(map) que estava aqui para converter Timestamp não é mais necessário,
+      // pois o service já retorna Produto[] com Date.
+      .subscribe({
+        next: (data) => {
+          this.produtos = data;
           const types = new Set<string>();
-          produtos.forEach((p) => {
+          this.produtos.forEach((p) => {
             if (p.tipo && p.tipo.trim() !== '') {
               types.add(p.tipo.trim());
             }
           });
-          this.availableTypes = ['todos', ...Array.from(types).sort()]; // Garante 'todos' primeiro e ordena
-          return produtos;
-        })
-      )
-      .subscribe({
-        next: (data) => {
-          this.produtos = data;
-          this.applyFilterAndSort(); // Aplica filtros e ordenação inicial
+          this.availableTypes = ['todos', ...Array.from(types).sort()];
+          this.applyFilterAndSort();
           this.isLoading = false;
         },
         error: (error) => {
@@ -89,15 +83,13 @@ export class ProdutosComponent implements OnInit, OnDestroy {
       });
   }
 
-  // --- Métodos de Busca, Filtro e Ordenação ---
   triggerFilterAndSort(): void {
     this.applyFilterAndSort();
   }
 
   private applyFilterAndSort(): void {
-    let tempProducts = [...this.produtos]; // Cria uma cópia para não modificar o array original
+    let tempProducts = [...this.produtos];
 
-    // 1. Aplicar Busca (searchTerm)
     if (this.searchTerm && this.searchTerm.trim() !== '') {
       const lowerCaseSearchTerm = this.searchTerm.toLowerCase().trim();
       tempProducts = tempProducts.filter(
@@ -109,14 +101,12 @@ export class ProdutosComponent implements OnInit, OnDestroy {
       );
     }
 
-    // 2. Aplicar Filtro por Tipo (selectedTypeFilter)
     if (this.selectedTypeFilter !== 'todos') {
       tempProducts = tempProducts.filter(
         (p) => p.tipo.toLowerCase() === this.selectedTypeFilter.toLowerCase()
       );
     }
 
-    // 3. Aplicar Ordenação (selectedSort)
     tempProducts.sort((a, b) => {
       switch (this.selectedSort) {
         case 'nomeProdutoAsc':
@@ -124,17 +114,15 @@ export class ProdutosComponent implements OnInit, OnDestroy {
         case 'nomeProdutoDesc':
           return b.nome.localeCompare(a.nome);
         case 'dataCadastroDesc':
-          // Convert Timestamp to Date for comparison, assuming Timestamp has toDate() method
+          // Agora dataCadastro é Date | null, então .getTime() funciona
           return (
-            (b.dataCadastro?.toDate()?.getTime() || 0) -
-            (a.dataCadastro?.toDate()?.getTime() || 0)
+            (b.dataCadastro?.getTime() || 0) - (a.dataCadastro?.getTime() || 0)
           );
         case 'dataCadastroAsc':
+          // Agora dataCadastro é Date | null, então .getTime() funciona
           return (
-            (a.dataCadastro?.toDate()?.getTime() || 0) -
-            (b.dataCadastro?.toDate()?.getTime() || 0)
+            (a.dataCadastro?.getTime() || 0) - (b.dataCadastro?.getTime() || 0)
           );
-        // Adicione outras lógicas de ordenação aqui se tiver mais opções
         default:
           return 0;
       }
@@ -143,7 +131,6 @@ export class ProdutosComponent implements OnInit, OnDestroy {
     this.filteredProducts = tempProducts;
   }
 
-  // --- Métodos do Modal ---
   openProductModal(product: Produto | null): void {
     this.selectedProduct = product;
     this.isModalOpen = true;
@@ -152,24 +139,21 @@ export class ProdutosComponent implements OnInit, OnDestroy {
   closeModal(): void {
     this.isModalOpen = false;
     this.selectedProduct = null;
-    this.errorMessage = ''; // Limpa mensagens de erro ao fechar
+    this.errorMessage = '';
   }
 
   onProductSaved(): void {
-    this.closeModal(); // Fecha o modal
-    this.loadProducts(); // Recarrega a lista de produtos (que já vai aplicar os filtros/ordenação)
+    this.closeModal();
+    this.loadProducts(); // Recarrega para ver as mudanças
   }
 
-  // --- Método de Exclusão ---
   async confirmDeleteProduct(product: Produto): Promise<void> {
     if (
-      confirm(
-        `Tem certeza que deseja excluir o produto "${product.nome}"?`
-      )
+      confirm(`Tem certeza que deseja excluir o produto "${product.nome}"?`)
     ) {
       try {
-        await this.produtoService.deleteProduto(product.uid!); // Assume que UID é obrigatório
-        this.loadProducts(); // Recarrega a lista
+        await this.produtoService.deleteProduto(product.uid!);
+        this.loadProducts(); // Recarrega a lista após exclusão
         alert('Produto excluído com sucesso!');
       } catch (error) {
         console.error('Erro ao excluir produto:', error);

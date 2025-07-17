@@ -89,11 +89,3 @@
     </div>
   </div>
 </div>
-
-<app-modal-wrapper [(isOpen)]="isModalOpen" (close)="closeModal()">
-  <app-product-form-modal
-    [currentProduct]="selectedProduct"
-    (productSaved)="onProductSaved()"
-    (cancel)="closeModal()"
-  ></app-product-form-modal>
-</app-modal-wrapper>

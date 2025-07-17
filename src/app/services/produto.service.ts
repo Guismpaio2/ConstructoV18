@@ -8,22 +8,67 @@ import { Observable } from 'rxjs';
 import { map, take } from 'rxjs/operators';
 import { Timestamp } from '@angular/fire/firestore';
 import { AuthService } from '../auth/auth.service';
-import { Produto } from '../models/produto.model';
+import { Produto, ProdutoFirestore } from '../models/produto.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ProdutoService {
-  private produtosCollection: AngularFirestoreCollection<Produto>;
+  private produtosCollection: AngularFirestoreCollection<ProdutoFirestore>;
 
   constructor(private afs: AngularFirestore, private authService: AuthService) {
-    this.produtosCollection = this.afs.collection<Produto>('produtos');
+    this.produtosCollection = this.afs.collection<ProdutoFirestore>('produtos');
   }
 
-  // Omitindo todos os campos de auditoria e uid do parâmetro de entrada,
-  // pois o serviço irá adicioná-los.
+  // --- Funções Auxiliares de Conversão ---
+  private convertFirestoreToAppProduto(data: ProdutoFirestore): Produto {
+    return {
+      ...data,
+      // Converte Timestamp para Date. Se for null/undefined, mantém null.
+      dataCadastro: data.dataCadastro?.toDate() || null,
+      dataUltimaEdicao: data.dataUltimaEdicao?.toDate() || null,
+    };
+  }
+
+  private convertAppToFirestoreProduto(
+    data: Partial<Produto> // Pode ser um Produto parcial ao atualizar
+  ): Partial<ProdutoFirestore> {
+    const firestoreData: Partial<ProdutoFirestore> = {};
+
+    // Mapeia todos os campos existentes de 'data' para 'firestoreData'
+    // exceto as datas, que serão tratadas separadamente.
+    for (const key in data) {
+      if (
+        data.hasOwnProperty(key) &&
+        key !== 'dataCadastro' &&
+        key !== 'dataUltimaEdicao'
+      ) {
+        (firestoreData as any)[key] = (data as any)[key];
+      }
+    }
+
+    // Trata dataCadastro: apenas converte se for uma instância de Date
+    if (data.dataCadastro instanceof Date) {
+      firestoreData.dataCadastro = Timestamp.fromDate(data.dataCadastro);
+    } else if (data.dataCadastro === null) {
+      firestoreData.dataCadastro = null as any; // Firestore aceita null para Timestamps opcionais
+    }
+    // Trata dataUltimaEdicao: apenas converte se for uma instância de Date
+    if (data.dataUltimaEdicao instanceof Date) {
+      firestoreData.dataUltimaEdicao = Timestamp.fromDate(
+        data.dataUltimaEdicao
+      );
+    } else if (data.dataUltimaEdicao === null) {
+      firestoreData.dataUltimaEdicao = null as any; // Firestore aceita null para Timestamps opcionais
+    }
+
+    return firestoreData;
+  }
+
+  // --- Métodos CRUD ---
+
   async addProduto(
-    produto: Omit<
+    produtoApp: Omit<
       Produto,
       | 'uid'
       | 'dataCadastro'
@@ -37,54 +82,72 @@ export class ProdutoService {
     const currentUserDisplayName =
       await this.authService.getCurrentUserDisplayName();
 
-    const produtoComId: Produto = {
-      ...produto,
+    const produtoParaFirestore: ProdutoFirestore = {
+      ...produtoApp,
       uid: uid,
       dataCadastro: Timestamp.now(),
       dataUltimaEdicao: Timestamp.now(),
       usuarioUltimaEdicaoUid: currentUserUid || 'unknown',
       usuarioUltimaEdicaoNome: currentUserDisplayName || 'Desconhecido',
     };
-    return this.produtosCollection.doc(uid).set(produtoComId);
+    return this.produtosCollection.doc(uid).set(produtoParaFirestore);
   }
 
   getProdutos(): Observable<Produto[]> {
-    return this.produtosCollection.valueChanges({ idField: 'uid' });
+    return this.produtosCollection.valueChanges({ idField: 'uid' }).pipe(
+      map((produtosFirestore) => {
+        return produtosFirestore.map(this.convertFirestoreToAppProduto);
+      })
+    );
   }
 
   getProduto(uid: string): Observable<Produto | undefined> {
-    // Retorna um Observable que emite sempre que o documento muda
-    return this.produtosCollection.doc<Produto>(uid).valueChanges();
+    return this.produtosCollection
+      .doc<ProdutoFirestore>(uid)
+      .valueChanges()
+      .pipe(
+        map((produtoFirestore) => {
+          if (!produtoFirestore) return undefined;
+          return this.convertFirestoreToAppProduto(produtoFirestore);
+        })
+      );
   }
 
   getProdutoOnce(uid: string): Observable<Produto | undefined> {
-    // Retorna um Observable que emite o valor uma única vez e depois completa
     return this.produtosCollection
-      .doc<Produto>(uid)
+      .doc<ProdutoFirestore>(uid)
       .valueChanges()
-      .pipe(take(1));
+      .pipe(
+        take(1),
+        map((produtoFirestore) => {
+          if (!produtoFirestore) return undefined;
+          return this.convertFirestoreToAppProduto(produtoFirestore);
+        })
+      );
   }
 
-  // Se precisar gerar UID explicitamente (usado no addProduto acima)
   generateNewUid(): string {
     return this.afs.createId();
   }
-  // Recebe Partial<Produto> para permitir atualização parcial
+
   async updateProduto(
     uid: string,
-    updatedFields: Partial<Produto>
+    updatedFieldsApp: Partial<Produto>
   ): Promise<void> {
     const currentUserUid = await this.authService.getCurrentUserUid();
     const currentUserDisplayName =
       await this.authService.getCurrentUserDisplayName();
 
-    const produtoAtualizado: Partial<Produto> = {
-      ...updatedFields,
-      dataUltimaEdicao: Timestamp.now(),
-      usuarioUltimaEdicaoUid: currentUserUid || 'unknown',
-      usuarioUltimaEdicaoNome: currentUserDisplayName || 'Desconhecido',
-    };
-    return this.produtosCollection.doc(uid).update(produtoAtualizado);
+    const dataToUpdateFirestore: Partial<ProdutoFirestore> =
+      this.convertAppToFirestoreProduto(updatedFieldsApp);
+
+    // Sobrescreve as datas de auditoria para garantir que sejam sempre Timestamp.now()
+    dataToUpdateFirestore.dataUltimaEdicao = Timestamp.now();
+    dataToUpdateFirestore.usuarioUltimaEdicaoUid = currentUserUid || 'unknown';
+    dataToUpdateFirestore.usuarioUltimaEdicaoNome =
+      currentUserDisplayName || 'Desconhecido';
+
+    return this.produtosCollection.doc(uid).update(dataToUpdateFirestore);
   }
 
   deleteProduto(uid: string): Promise<void> {

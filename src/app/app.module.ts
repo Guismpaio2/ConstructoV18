@@ -1,7 +1,11 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormsModule } from '@angular/forms'; // Já estava aqui
+import { ReactiveFormsModule } from '@angular/forms'; // Já estava aqui
+import { CommonModule } from '@angular/common'; // <--- ADICIONAR ESTE PARA PIPES E NGLIKE
+import { RouterModule } from '@angular/router'; // <--- ADICIONAR ESTE PARA ROUTER-OUTLET
+
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 
@@ -12,6 +16,8 @@ import { AngularFirestoreModule } from '@angular/fire/compat/firestore';
 import { AngularFireStorageModule } from '@angular/fire/compat/storage';
 
 // Caminho para o environment
+// VERIFIQUE SE O CAMINHO E O NOME DA PASTA 'enviroments' ESTÃO CORRETOS.
+// Geralmente é './environments/environment' (com "s" no final)
 import { environment } from './enviroments/enviroment';
 
 // Components de Login
@@ -32,13 +38,18 @@ import { PerfilComponent } from './pages/perfil/perfil.component';
 import { CadastroProdutoComponent } from './pages/produtos/cadastro-produto/cadastro-produto.component';
 import { EdicaoProdutoComponent } from './pages/produtos/edicao-produto/edicao-produto.component';
 import { CadastroEstoqueComponent } from './pages/estoque/cadastro-estoque/cadastro-estoque.component';
-import { EdicaoEstoqueComponent } from './pages/estoque/edicao-estoque/edicao-estoque.component';// Importação correta
+import { EdicaoEstoqueComponent } from './pages/estoque/edicao-estoque/edicao-estoque.component';
+import { BaixasComponent } from './pages/baixas/baixas.component';
+
+// ATENÇÃO: Verifique este caminho! O erro "Could not resolve" aponta para ele.
+// Se product-form-modal.component.ts estiver em './pages/produtos/produto-form-modal/', o caminho está correto.
+// Se não, ajuste.// Importação correta (verifique o caminho)
+
+// O ProdutoFormComponent que você declarou também
+import { ProdutoFormComponent } from './pages/produtos/produto-form/produto-form.component';
 
 // SharedModule para layouts e outros componentes/módulos compartilhados
 import { SharedModule } from './shared/shared.module';
-import { BaixasComponent } from './pages/baixas/baixas.component';
-import { ProdutoFormComponent } from './pages/produtos/produto-form/produto-form.component';
-import { ProductFormModalComponent } from './pages/produtos/product-form-modal/product-form-modal.component';
 
 @NgModule({
   declarations: [
@@ -52,18 +63,15 @@ import { ProductFormModalComponent } from './pages/produtos/product-form-modal/p
     HomeComponent,
     ProdutosComponent,
     EstoqueComponent,
-    RegistrosBaixasComponent, 
+    RegistrosBaixasComponent,
     UsuariosComponent,
     PerfilComponent,
     CadastroProdutoComponent,
     EdicaoProdutoComponent,
     CadastroEstoqueComponent,
     EdicaoEstoqueComponent,
-    RegistrosBaixasComponent,
     BaixasComponent,
-    RegistrosBaixasComponent,
-    ProdutoFormComponent,
-    ProductFormModalComponent,  
+    ProdutoFormComponent, // Confirme que este componente é o que você quer declarar
   ],
   imports: [
     BrowserModule,
@@ -71,7 +79,10 @@ import { ProductFormModalComponent } from './pages/produtos/product-form-modal/p
     AppRoutingModule,
     FormsModule,
     ReactiveFormsModule,
-    SharedModule,
+    CommonModule, // <--- ADICIONADO AQUI
+    RouterModule, // <--- ADICIONADO AQUI PARA ROUTER-OUTLET
+
+    SharedModule, // SharedModule já está importado e deve exportar ModalWrapperComponent
 
     // Inicialização do Firebase
     AngularFireModule.initializeApp(environment.firebase),

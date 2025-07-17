@@ -123,15 +123,16 @@
     <div class="product-info mt-3" *ngIf="produtoAtual">
       <p><strong>ID do Produto:</strong> {{ produtoAtual.uid }}</p>
       <p>
-        <strong>Cadastrado em:</strong>
+        <strong>Data de Cadastro:</strong>
         {{ formatTimestamp(produtoAtual.dataCadastro) }}
       </p>
-      <p *ngIf="produtoAtual.dataUltimaEdicao">
+      <p>
         <strong>Última Edição:</strong>
         {{ formatTimestamp(produtoAtual.dataUltimaEdicao) }}
       </p>
-      <p *ngIf="produtoAtual.usuarioUltimaEdicaoNome">
-        <strong>Editado por:</strong> {{ produtoAtual.usuarioUltimaEdicaoNome }}
+      <p>
+        <strong>Editado por:</strong>
+        {{ produtoAtual.usuarioUltimaEdicaoNome }}
       </p>
     </div>
   </div>
