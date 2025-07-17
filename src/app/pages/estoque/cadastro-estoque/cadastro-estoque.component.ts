@@ -37,6 +37,7 @@ export class CadastroEstoqueComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    this.produtos$ = this.produtoService.getAllProdutosSimple();
     this.currentUserSubscription = this.authService.user$.subscribe((user) => {
       this.currentUserUid = user?.uid || null;
       this.currentUserDisplayName = user

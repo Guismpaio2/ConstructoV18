@@ -1,3 +1,4 @@
+// src/app/auth/auth.service.ts
 import { Injectable, NgZone } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import {
@@ -5,17 +6,20 @@ import {
   AngularFirestoreDocument,
 } from '@angular/fire/compat/firestore';
 import { Router } from '@angular/router';
-import { User, UserRole } from '../models/user.model'; // Importe UserRole
-import { Observable, of, from } from 'rxjs';
+import { User, UserRole } from '../models/user.model'; // Importe UserRole (certifique-se que UserRole é um tipo ou enum que inclui 'Administrador', 'Estoquista', 'Leitor')
+import { Observable, of, from, BehaviorSubject } from 'rxjs';
 import { switchMap, take, map } from 'rxjs/operators';
 import firebase from 'firebase/compat/app'; // Mantenha, pois o tipo UserCredential o usa
-import { Timestamp } from '@angular/fire/firestore';
+import { Timestamp } from '@angular/fire/firestore'; // Mantenha se você usa Timestamp.now()
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
   user$: Observable<User | null>;
+
+  private _userRole = new BehaviorSubject<string | null>(null);
+  userRole$: Observable<string | null> = this._userRole.asObservable();
 
   constructor(
     private afAuth: AngularFireAuth,
@@ -25,24 +29,38 @@ export class AuthService {
   ) {
     this.user$ = this.afAuth.authState.pipe(
       switchMap((userAuth) => {
-        console.log('Auth State (userAuth):', userAuth);
         if (userAuth) {
           return this.afs
             .doc<User>(`users/${userAuth.uid}`)
             .valueChanges()
             .pipe(
               map((userDoc) => {
-                console.log(`Raw User Doc for ${userAuth.uid}:`, userDoc); // Log do objeto completo
-                console.log(`User Role from Doc:`, userDoc?.role); // Log específico do campo 'role'
+
+                // ATUALIZAÇÃO PRINCIPAL AQUI: Define o valor do BehaviorSubject _userRole
+                if (userDoc && userDoc.role) {
+                  this._userRole.next(userDoc.role);
+                } else {
+                  this._userRole.next(null);
+                }
                 return userDoc || null;
               })
             );
         } else {
-          console.log('No user authenticated.');
+          this._userRole.next(null); // Limpa o papel se não houver usuário logado
           return of(null);
         }
       })
     );
+
+    // Opcional: Para garantir que _userRole seja atualizado mesmo se o primeiro pipe falhar
+    // ou se o userDoc não tiver a propriedade role inicialmente (embora o map acima já lide com isso)
+    this.user$.pipe(take(1)).subscribe((user) => {
+      if (user && user.role) {
+        this._userRole.next(user.role);
+      } else {
+        this._userRole.next(null);
+      }
+    });
   }
 
   async signIn(
@@ -54,10 +72,12 @@ export class AuthService {
         email,
         password
       );
-      // Opcional: Se quiser atualizar o lastLogin aqui, pode fazê-lo:
-      // if (result.user) {
-      //   await this.updateUserData(result.user.uid, { lastLogin: Timestamp.now() });
-      // }
+      // Ao fazer login, também atualizamos o lastLogin no Firestore, se o usuário existir
+      if (result.user) {
+        await this.updateUserData(result.user.uid, {
+          lastLogin: Timestamp.now() as any,
+        }); // Use as any para Timestamp
+      }
       return result;
     } catch (error) {
       console.error('Erro no login:', error);
@@ -68,7 +88,7 @@ export class AuthService {
   async signUp(
     email: string,
     password: string,
-    nome: string, // Adicione nome e sobrenome aqui para criar o UserData completo
+    nome: string,
     sobrenome: string,
     employeeCode: string,
     role: UserRole // Define a role inicial, por exemplo 'Leitor'
@@ -79,16 +99,15 @@ export class AuthService {
         password
       );
       if (result.user) {
-        // Cria os dados do usuário no Firestore após o cadastro na autenticação
         const newUser: User = {
           uid: result.user.uid,
           email: email,
           nome: nome,
           sobrenome: sobrenome,
           employeeCode: employeeCode,
-          role: role, // Role definida na criação (e.g., 'Leitor')
-          dataCadastro: Timestamp.now(),
-          lastLogin: Timestamp.now(),
+          role: role,
+          dataCadastro: Timestamp.now() as any, // Use as any para Timestamp
+          lastLogin: Timestamp.now() as any, // Use as any para Timestamp
         };
         await this.createOrUpdateUserData(newUser);
       }
@@ -110,8 +129,8 @@ export class AuthService {
       sobrenome: user.sobrenome,
       employeeCode: user.employeeCode,
       role: user.role,
-      dataCadastro: user.dataCadastro || Timestamp.now(), // Garante dataCadastro se não vier
-      lastLogin: Timestamp.now(), // Atualiza lastLogin sempre que dados são salvos/atualizados
+      dataCadastro: user.dataCadastro || (Timestamp.now() as any), // Garante dataCadastro se não vier, e usa as any
+      lastLogin: Timestamp.now() as any, // Atualiza lastLogin sempre que dados são salvos/atualizados, e usa as any
     };
     return userRef.set(data, { merge: true });
   }
@@ -127,47 +146,48 @@ export class AuthService {
 
   async signOut(): Promise<void> {
     await this.afAuth.signOut();
+    this._userRole.next(null); // Limpa o papel ao fazer logout
     this.ngZone.run(() => {
       this.router.navigate(['/starter']);
     });
   }
 
-  // Métodos de verificação de role estão CORRETOS e CLAROS.
+  // Os métodos de verificação de role estão CORRETOS e CLAROS.
   // Eles usam user$ (Observable<User | null>) corretamente,
   // e fazem a verificação da role, incluindo 'Administrador' onde apropriado.
-
   isAdmin(): Observable<boolean> {
-    return this.user$.pipe(map((user) => user?.role === 'Administrador'));
+    return this._userRole
+      .asObservable()
+      .pipe(map((role) => role === 'Administrador'));
   }
 
   isEstoquista(): Observable<boolean> {
-    return this.user$.pipe(
-      map(
-        (user) => user?.role === 'Estoquista' || user?.role === 'Administrador'
-      )
-    );
+    return this._userRole
+      .asObservable()
+      .pipe(map((role) => role === 'Estoquista' || role === 'Administrador'));
   }
 
   isLeitor(): Observable<boolean> {
-    return this.user$.pipe(
-      map(
-        (user) =>
-          user?.role === 'Leitor' ||
-          user?.role === 'Estoquista' ||
-          user?.role === 'Administrador'
-      )
-    );
+    return this._userRole
+      .asObservable()
+      .pipe(
+        map(
+          (role) =>
+            role === 'Leitor' ||
+            role === 'Estoquista' ||
+            role === 'Administrador'
+        )
+      );
   }
 
   async updateUserData(uid: string, data: Partial<User>): Promise<void> {
-    // CORRIGIDO: Use this.afs (AngularFirestore) em vez de this.firestore
     return this.afs.collection('users').doc(uid).update(data);
   }
 
   hasRole(requiredRoles: UserRole[]): Observable<boolean> {
     return this.user$.pipe(
       map((user) => {
-        if (!user) {
+        if (!user || !user.role) {
           return false;
         }
         return requiredRoles.includes(user.role);
@@ -175,23 +195,15 @@ export class AuthService {
     );
   }
 
-  // getCurrentUserUid e getCurrentUserDisplayName
-  // Estes métodos funcionam, mas se você já tem `user$` observando o Firestore,
-  // pode ser mais eficiente buscar o `uid` e `displayName` (nome, sobrenome)
-  // diretamente do `user$` para evitar chamadas extras ao `afAuth.currentUser`
-  // se o `user$` já estiver populado. No entanto, para casos isolados, eles são válidos.
   async getCurrentUserUid(): Promise<string | null> {
     const user = await this.afAuth.currentUser;
     return user ? user.uid : null;
   }
 
   async getCurrentUserDisplayName(): Promise<string | null> {
-    // Depende se o `displayName` é preenchido pelo Firebase Auth.
-    // Se o nome vem do Firestore (user.nome), é melhor usar user$.pipe(map(u => u?.nome)).
-    // Assumindo que você quer o nome que está no seu Firestore User model
     return new Promise((resolve) => {
       this.user$.pipe(take(1)).subscribe((user) => {
-        resolve(user?.nome || null); // Retorna o 'nome' do seu modelo User
+        resolve(user?.nome || null);
       });
     });
   }
@@ -205,9 +217,6 @@ export class AuthService {
   }
 
   deleteUser(uid: string): Promise<void> {
-    // Isso apaga o documento do Firestore.
-    // Para apagar o usuário da Autenticação do Firebase,
-    // você precisaria de uma Cloud Function ou SDK Admin em um ambiente seguro.
     return this.afs.doc(`users/${uid}`).delete();
   }
 }

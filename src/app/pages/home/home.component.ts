@@ -41,6 +41,12 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.totalProdutosCadastrados$ = this.produtoService
+      .getAllProdutosSimple()
+      .pipe(
+        // <-- MUDANÇA AQUI
+        map((produtos) => produtos.length)
+      );
     // Estas atribuições agora sobrescreverão os `of([])` iniciais.
     this.ultimasBaixas$ = this.afs
       .collection<BaixaEstoque>('baixas', (ref) =>

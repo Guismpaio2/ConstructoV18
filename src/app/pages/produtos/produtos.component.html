@@ -1,119 +1,191 @@
-<div class="page-header">
-  <h2>Gerenciamento de Produtos</h2>
-  <button
-    *ngIf="canAddEditDelete"
-    class="btn btn-primary"
-    (click)="openProductModal(null)"
-  >
-    <i class="fas fa-plus"></i> Adicionar Produto
-  </button>
-</div>
-
-<div class="filters-section">
-  <input
-    type="text"
-    placeholder="Buscar por nome, descrição, marca, tipo..."
-    [(ngModel)]="searchTerm"
-    (input)="triggerFilterAndSort()"
-    class="form-control mb-3"
-  />
-
-  <div class="form-group">
-    <label for="typeFilter">Filtrar por Tipo:</label>
-    <select
-      id="typeFilter"
-      [(ngModel)]="selectedTypeFilter"
-      (change)="triggerFilterAndSort()"
-      class="form-control"
+<div class="main-content-container">
+  <div class="header-container">
+    <h2>Gerenciamento de Produtos</h2>
+    <button
+      *ngIf="canAddEditDelete$ | async"
+      class="btn btn-primary ml-auto"
+      (click)="openAddProdutoModal()"
     >
-      <option value="todos">Todos os Tipos</option>
-      <option *ngFor="let type of availableTypes" [value]="type">
-        {{ type }}
-      </option>
-    </select>
+      + Adicionar Produto
+    </button>
   </div>
 
-  <div class="form-group">
-    <label for="sortOrder">Ordenar por:</label>
-    <select
-      id="sortOrder"
-      [(ngModel)]="selectedSort"
-      (change)="triggerFilterAndSort()"
-      class="form-control"
-    >
-      <option value="nomeProdutoAsc">Nome (A-Z)</option>
-      <option value="nomeProdutoDesc">Nome (Z-A)</option>
-      <option value="dataCadastroDesc">Mais Recente</option>
-      <option value="dataCadastroAsc">Mais Antigo</option>
-    </select>
+  <div class="filter-sort-container mb-3">
+    <div class="search-box">
+      <input
+        type="text"
+        placeholder="Buscar por nome, descrição, marca, tipo..."
+        [(ngModel)]="searchTerm"
+        (input)="applyFilters()"
+        class="form-control"
+      />
+    </div>
+
+    <div class="filter-sort-group">
+      <div class="form-group mb-0">
+        <label for="filterType" class="sr-only">Filtrar por Tipo</label>
+        <select
+          id="filterType"
+          [(ngModel)]="selectedType"
+          (change)="applyFilters()"
+          class="form-control custom-select"
+        >
+          <option value="">Todos os Tipos</option>
+          <option *ngFor="let type of allProductTypes" [value]="type">
+            {{ type }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group mb-0 ml-2">
+        <label for="orderBy" class="sr-only">Ordenar por</label>
+        <select
+          id="orderBy"
+          [(ngModel)]="orderBy"
+          (change)="applyFilters()"
+          class="form-control custom-select"
+        >
+          <option value="nomeAsc">Nome (A-Z)</option>
+          <option value="nomeDesc">Nome (Z-A)</option>
+          <option value="dataCadastroDesc">Mais Recente</option>
+          <option value="dataCadastroAsc">Mais Antigo</option>
+        </select>
+      </div>
+    </div>
   </div>
-</div>
 
-<div class="product-list-container">
-  <div
-    *ngIf="filteredProducts.length === 0 && !isLoading"
-    class="no-products-message alert alert-info"
-  >
-    Nenhum produto encontrado com os critérios de busca/filtro.
+  <div *ngIf="produtos.length === 0 && !isLoading" class="alert alert-info">
+    Nenhum produto encontrado.
   </div>
 
-  <div *ngIf="isLoading" class="loading-message">Carregando produtos...</div>
+  <div *ngIf="isLoading" class="loading-spinner">Carregando produtos...</div>
 
-  <div *ngIf="filteredProducts.length > 0" class="products-grid mt-3">
-    <div *ngFor="let produto of filteredProducts" class="product-card">
-      <div class="product-info">
+  <div class="produtos-list">
+    <div *ngFor="let produto of produtos" class="produto-card">
+      <div class="produto-info">
         <h3>{{ produto.nome }}</h3>
-        <p>Tipo: {{ produto.tipo }}</p>
-        <p>Marca: {{ produto.marca }}</p>
-        <p *ngIf="produto.descricao">Descrição: {{ produto.descricao }}</p>
-        <small
-          >Cadastrado em:
-          {{ produto.dataCadastro | date : "dd/MM/yyyy HH:mm" }}</small
-        >
-        <small *ngIf="produto.dataUltimaEdicao"
-          >Última edição:
-          {{ produto.dataUltimaEdicao | date : "dd/MM/yyyy HH:mm" }}</small
-        >
-        <small *ngIf="produto.usuarioUltimaEdicaoNome"
-          >Por: {{ produto.usuarioUltimaEdicaoNome }}</small
-        >
+        <p>
+          <strong>Tipo:</strong> {{ produto.tipo }} | <strong>Marca:</strong>
+          {{ produto.marca || "N/A" }}
+        </p>
+        <p>
+          <strong>Descrição:</strong>
+          {{ produto.descricao || "N/A" }}
+        </p>
+        <p>
+          <strong>Cadastrado em:</strong>
+          {{ produto.dataCadastro | date : "dd/MM/yyyy HH:mm" }}
+        </p>
+        <p *ngIf="produto.dataUltimaEdicao">
+          <strong>Última Edição:</strong>
+          {{ produto.dataUltimaEdicao | date : "dd/MM/yyyy HH:mm" }} por
+          {{ produto.usuarioUltimaEdicaoNome || "Usuário Desconhecido" }}
+        </p>
       </div>
-      <div class="product-actions" *ngIf="canAddEditDelete">
-        <button class="btn btn-secondary" (click)="openProductModal(produto)">
-          <i class="fas fa-edit"></i> Editar
+      <div class="produto-actions" *ngIf="canAddEditDelete$ | async">
+        <button
+          class="btn btn-sm btn-edit"
+          (click)="openEditProdutoModal(produto.uid!)"
+        >
+          Editar
         </button>
-        <button class="btn btn-danger" (click)="confirmDeleteProduct(produto)">
-          <i class="fas fa-trash-alt"></i> Excluir
+        <button
+          class="btn btn-sm btn-delete ml-2"
+          (click)="confirmDelete(produto.uid!)"
+        >
+          Excluir
         </button>
       </div>
     </div>
   </div>
-
-  <div class="modal" [class.show]="isModalOpen" *ngIf="isModalOpen">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">
-            {{ selectedProduct ? "Editar Produto" : "Adicionar Novo Produto" }}
-          </h5>
-          <button type="button" class="close" (click)="closeModal()">
-            <span>&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <app-produto-form
-            [produtoUid]="selectedProduct?.uid || null"
-            (formSubmitted)="onProductSaved()"
-            (formCancelled)="closeModal()"
-          ></app-produto-form>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div
-    class="modal-backdrop fade"
-    [class.show]="isModalOpen"
-    *ngIf="isModalOpen"
-  ></div>
 </div>
+
+<div
+  class="modal fade"
+  [ngClass]="{ show: showModal }"
+  [ngStyle]="{ display: showModal ? 'block' : 'none' }"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="produtoModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="produtoModalLabel">
+          {{ selectedProdutoUid ? "Editar Produto" : "Cadastrar Novo Produto" }}
+        </h5>
+        <button
+          type="button"
+          class="close"
+          aria-label="Fechar"
+          (click)="closeProdutoModal()"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <app-produto-form
+          [produtoUid]="selectedProdutoUid"
+          (formSubmitted)="onFormSubmitted()"
+          (formCancelled)="onFormCancelled()"
+        ></app-produto-form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div
+  *ngIf="showModal"
+  class="modal-backdrop fade"
+  [ngClass]="{ show: showModal }"
+></div>
+
+<div
+  class="modal fade"
+  [ngClass]="{ show: showDeleteConfirmModal }"
+  [ngStyle]="{ display: showDeleteConfirmModal ? 'block' : 'none' }"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="deleteConfirmModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteConfirmModalLabel">
+          Confirmar Exclusão
+        </h5>
+        <button
+          type="button"
+          class="close"
+          aria-label="Fechar"
+          (click)="cancelDelete()"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        Tem certeza que deseja excluir este produto? Esta ação não pode ser
+        desfeita.
+      </div>
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="cancelDelete()"
+        >
+          Cancelar
+        </button>
+        <button type="button" class="btn btn-danger" (click)="deleteProduto()">
+          Excluir
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div
+  *ngIf="showDeleteConfirmModal"
+  class="modal-backdrop fade"
+  [ngClass]="{ show: showDeleteConfirmModal }"
+></div>

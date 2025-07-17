@@ -1,0 +1,122 @@
+/* src/app/pages/produtos/produtos.component.scss */
+
+// Adicione ou verifique se estas regras estão presentes e não estão sendo sobrescritas
+
+.modal {
+  display: none; /* Escondido por padrão */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  outline: 0;
+  z-index: 1050; // Certifique-se de que este z-index seja alto
+  &.show {
+    display: block; // Mostra o modal quando a classe 'show' é aplicada
+  }
+}
+
+.modal-dialog {
+  position: relative;
+  width: auto;
+  margin: 1.75rem auto;
+  pointer-events: none; // Permite que cliques passem para o backdrop se o modal não for interativo
+  z-index: 1051; // Opcional, para garantir que o dialog esteja acima do backdrop
+  transform: translate(0, -50px);
+  transition: transform 0.3s ease-out;
+
+  &.modal-dialog-centered {
+    display: flex;
+    align-items: center;
+    min-height: calc(100% - 3.5rem);
+  }
+  &.modal-lg {
+    max-width: 800px; /* Ou o tamanho que preferir para o modal grande */
+  }
+  &.show {
+    transform: none; /* Volta à posição normal quando show */
+  }
+}
+
+.modal-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  pointer-events: auto;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 0.3rem;
+  outline: 0;
+}
+
+.modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 1rem 1rem;
+  border-bottom: 1px solid #dee2e6;
+  border-top-left-radius: calc(0.3rem - 1px);
+  border-top-right-radius: calc(0.3rem - 1px);
+
+  .close {
+    padding: 1rem 1rem;
+    margin: -1rem -1rem -1rem auto;
+    background-color: transparent;
+    border: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+    color: #000;
+    text-shadow: 0 1px 0 #fff;
+    opacity: 0.5;
+    &:hover {
+      opacity: 0.75;
+      text-decoration: none;
+    }
+  }
+}
+
+.modal-body {
+  position: relative;
+  flex: 1 1 auto;
+  padding: 1rem;
+}
+
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1040; // Menor que o modal
+  width: 100vw;
+  height: 100vh;
+  background-color: #000;
+  opacity: 0; /* Escondido por padrão */
+  &.fade {
+    transition: opacity 0.15s linear;
+  }
+  &.show {
+    opacity: 0.5; /* Opacidade quando 'show' */
+  }
+}
+
+/* Opcional: Estilo para o container do formulário dentro do modal */
+.produto-form-content {
+  padding: 10px; // Adiciona um pouco de padding ao redor do formulário
+}
+
+/* src/app/pages/produtos/produto-form/produto-form.component.scss */
+.form-group {
+  margin-bottom: 1rem;
+}
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+.required {
+  color: red;
+  margin-left: 2px;
+}

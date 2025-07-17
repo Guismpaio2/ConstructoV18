@@ -29,7 +29,6 @@ export class CadastroSenhaComponent implements OnInit {
     const storedData = localStorage.getItem('tempUserData');
     if (storedData) {
       this.tempUserData = JSON.parse(storedData);
-      console.log('Dados recuperados do localStorage:', this.tempUserData);
     } else {
       this.router.navigate(['/cadastro']);
       return;

@@ -1,10 +1,10 @@
 // src/app/pages/produtos/produtos.component.ts
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Produto } from '../../models/produto.model';
 import { ProdutoService } from '../../services/produto.service';
+import { Produto } from '../../models/produto.model';
+import { Subscription, Observable, of } from 'rxjs'; // Importar Observable e of
 import { AuthService } from '../../auth/auth.service';
-import { Subscription } from 'rxjs';
-import { delay, take } from 'rxjs/operators'; // Não precisa mais do map para converter Timestamp aqui
+import { map, catchError, startWith } from 'rxjs/operators'; // Adicionar startWith
 
 @Component({
   selector: 'app-produtos',
@@ -13,20 +13,21 @@ import { delay, take } from 'rxjs/operators'; // Não precisa mais do map para c
 })
 export class ProdutosComponent implements OnInit, OnDestroy {
   produtos: Produto[] = [];
-  filteredProducts: Produto[] = [];
   isLoading: boolean = true;
-  errorMessage: string = '';
-  canAddEditDelete: boolean = false;
-  private authSubscription!: Subscription;
-  private productsSubscription!: Subscription;
-
-  isModalOpen: boolean = false;
-  selectedProduct: Produto | null = null; // Este é o produto que será passado para o modal (ou null para adicionar)
+  private produtosSubscription: Subscription = new Subscription();
+  private authSubscription: Subscription = new Subscription();
+  canAddEditDelete$: Observable<boolean> = of(false); // Agora é um Observable
 
   searchTerm: string = '';
-  selectedTypeFilter: string = 'todos';
-  availableTypes: string[] = [];
-  selectedSort: string = 'nomeProdutoAsc';
+  selectedType: string = '';
+  orderBy: string = 'nomeAsc'; // Default sorting
+  allProductTypes: string[] = []; // Para popular o dropdown de tipos
+
+  showModal: boolean = false;
+  selectedProdutoUid: string | null = null;
+
+  showDeleteConfirmModal: boolean = false;
+  produtoToDeleteUid: string | null = null;
 
   constructor(
     private produtoService: ProdutoService,
@@ -34,145 +35,126 @@ export class ProdutosComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.loadProducts();
-    this.checkUserPermissions(); // Renomeado para melhor clareza na função
-
-    // O delay aqui pode ser removido se a verificação de permissões estiver funcionando de forma síncrona ou mais robusta.
-    // Mantive-o por enquanto, mas ele pode ser um ponto a otimizar.
-    // this.authService
-    //   .isEstoquista()
-    //   .pipe(delay(500))
-    //   .subscribe((isEstoquista) => {
-    //     this.canAddEditDelete = isEstoquista;
-    //     console.log('Permissão canAddEditDelete após delay:', this.canAddEditDelete);
-    //   });
+    this.setupPermissions(); // Renomeado e modificado
+    this.loadProdutos();
+    this.loadAllProductTypes();
   }
 
   ngOnDestroy(): void {
+    if (this.produtosSubscription) {
+      this.produtosSubscription.unsubscribe();
+    }
     if (this.authSubscription) {
       this.authSubscription.unsubscribe();
     }
-    if (this.productsSubscription) {
-      this.productsSubscription.unsubscribe();
-    }
   }
 
-  loadProducts(): void {
-    this.isLoading = true;
-    this.productsSubscription = this.produtoService.getProdutos().subscribe({
-      next: (data) => {
-        this.produtos = data;
-        const types = new Set<string>();
-        this.produtos.forEach((p) => {
-          if (p.tipo && p.tipo.trim() !== '') {
-            types.add(p.tipo.trim());
-          }
-        });
-        this.availableTypes = ['todos', ...Array.from(types).sort()];
-        this.applyFilterAndSort();
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Erro ao carregar produtos:', error);
-        this.errorMessage =
-          'Erro ao carregar produtos. Tente novamente mais tarde.';
-        this.isLoading = false;
-      },
-    });
-  }
-
-  checkUserPermissions(): void {
-    this.authSubscription = this.authService
-      .isEstoquista()
-      .pipe(
-        // Adicionando take(1) para evitar múltiplos subscriptions e memory leaks
-        take(1),
-        delay(500) // Mantendo o delay por precaução, mas pode ser removido se o auth for síncrono
-      )
-      .subscribe((isEstoquista) => {
-        this.canAddEditDelete = isEstoquista;
+  setupPermissions(): void {
+    // Usando Observable diretamente
+    this.canAddEditDelete$ = this.authService.userRole$.pipe(
+      map((role: string | null) => {
+        const hasPermission = role === 'administrador' || role === 'estoquista';
         console.log(
-          'Permissão canAddEditDelete após delay:',
-          this.canAddEditDelete
+          'Permissão canAddEditDelete:',
+          hasPermission,
+          'Role:',
+          role
         );
-        // Não é mais necessário logar o user$ aqui, pois o isEstoquista já indica o status.
-        // Se precisar depurar o user, faça isso diretamente no AuthService ou em um componente de login.
-      });
+        return hasPermission;
+      }),
+      // Adiciona um valor inicial de 'false' para que o *ngIf funcione corretamente na primeira renderização
+      // Isso evita que os botões pisquem ou não apareçam se a permissão demorar para ser carregada.
+      startWith(false),
+      // Adiciona tratamento de erro caso o Observable falhe
+      catchError((error) => {
+        console.error('Erro ao verificar permissão do usuário:', error);
+        return of(false); // Retorna false em caso de erro
+      })
+    );
   }
 
-  triggerFilterAndSort(): void {
-    this.applyFilterAndSort();
+  loadProdutos(): void {
+    this.isLoading = true;
+    if (this.produtosSubscription) {
+      this.produtosSubscription.unsubscribe();
+    }
+
+    this.produtosSubscription = this.produtoService
+      .getProdutos(this.searchTerm, this.selectedType, this.orderBy)
+      .subscribe(
+        (data: Produto[]) => {
+          this.produtos = data;
+          this.isLoading = false;
+        },
+        (error: any) => {
+          console.error('Erro ao carregar produtos:', error);
+          this.isLoading = false;
+        }
+      );
   }
 
-  private applyFilterAndSort(): void {
-    let tempProducts = [...this.produtos];
-
-    if (this.searchTerm && this.searchTerm.trim() !== '') {
-      const lowerCaseSearchTerm = this.searchTerm.toLowerCase().trim();
-      tempProducts = tempProducts.filter(
-        (p) =>
-          p.nome.toLowerCase().includes(lowerCaseSearchTerm) ||
-          p.descricao?.toLowerCase().includes(lowerCaseSearchTerm) ||
-          p.marca.toLowerCase().includes(lowerCaseSearchTerm) ||
-          p.tipo.toLowerCase().includes(lowerCaseSearchTerm)
-      );
-    }
-
-    if (this.selectedTypeFilter !== 'todos') {
-      tempProducts = tempProducts.filter(
-        (p) => p.tipo.toLowerCase() === this.selectedTypeFilter.toLowerCase()
-      );
-    }
-
-    tempProducts.sort((a, b) => {
-      switch (this.selectedSort) {
-        case 'nomeProdutoAsc':
-          return a.nome.localeCompare(b.nome);
-        case 'nomeProdutoDesc':
-          return b.nome.localeCompare(a.nome);
-        case 'dataCadastroDesc':
-          return (
-            (b.dataCadastro?.getTime() || 0) - (a.dataCadastro?.getTime() || 0)
-          );
-        case 'dataCadastroAsc':
-          return (
-            (a.dataCadastro?.getTime() || 0) - (b.dataCadastro?.getTime() || 0)
-          );
-        default:
-          return 0;
+  loadAllProductTypes(): void {
+    this.produtoService.getAllProductTypes().subscribe(
+      (types: string[]) => {
+        this.allProductTypes = types;
+      },
+      (error: any) => {
+        console.error('Erro ao carregar tipos de produtos:', error);
       }
-    });
-
-    this.filteredProducts = tempProducts;
+    );
   }
 
-  openProductModal(product: Produto | null): void {
-    this.selectedProduct = product;
-    this.isModalOpen = true;
+  applyFilters(): void {
+    this.loadProdutos();
   }
 
-  closeModal(): void {
-    this.isModalOpen = false;
-    this.selectedProduct = null; // Garante que o selectedProduct seja limpo ao fechar
-    this.errorMessage = '';
+  // Métodos open/close Modal não precisam da verificação de permissão aqui,
+  // pois o *ngIf no HTML já controla a visibilidade do botão.
+  // A verificação de permissão ainda é boa para validação adicional ou se a função for chamada de outro lugar.
+  openAddProdutoModal(): void {
+    this.selectedProdutoUid = null;
+    this.showModal = true;
   }
 
-  onProductSaved(): void {
-    this.closeModal(); // Fechar o modal após salvar
-    this.loadProducts(); // Recarrega para ver as mudanças
+  openEditProdutoModal(uid: string): void {
+    this.selectedProdutoUid = uid;
+    this.showModal = true;
   }
 
-  async confirmDeleteProduct(product: Produto): Promise<void> {
-    if (
-      confirm(`Tem certeza que deseja excluir o produto "${product.nome}"?`)
-    ) {
+  closeProdutoModal(): void {
+    this.showModal = false;
+    this.selectedProdutoUid = null;
+    this.loadProdutos(); // Recarrega os produtos após fechar o modal
+  }
+
+  onFormSubmitted(): void {
+    this.closeProdutoModal();
+  }
+
+  onFormCancelled(): void {
+    this.closeProdutoModal();
+  }
+
+  confirmDelete(uid: string): void {
+    this.produtoToDeleteUid = uid;
+    this.showDeleteConfirmModal = true;
+  }
+
+  cancelDelete(): void {
+    this.showDeleteConfirmModal = false;
+    this.produtoToDeleteUid = null;
+  }
+
+  async deleteProduto(): Promise<void> {
+    if (this.produtoToDeleteUid) {
       try {
-        await this.produtoService.deleteProduto(product.uid!);
-        this.loadProducts(); // Recarrega a lista após exclusão
-        alert('Produto excluído com sucesso!');
+        await this.produtoService.deleteProduto(this.produtoToDeleteUid);
+        console.log('Produto excluído com sucesso!');
+        this.loadProdutos(); // Recarrega os produtos após a exclusão
+        this.cancelDelete();
       } catch (error) {
         console.error('Erro ao excluir produto:', error);
-        alert('Ocorreu um erro ao excluir o produto.');
+        alert('Erro ao excluir produto. Verifique o console.');
       }
     }
   }

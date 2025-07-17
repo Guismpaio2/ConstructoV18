@@ -11,11 +11,11 @@ import {
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ProdutoService } from '../../../services/produto.service';
 import { Produto } from '../../../models/produto.model';
-import { Timestamp } from '@angular/fire/firestore';
 import { take } from 'rxjs/operators';
 
 @Component({
   selector: 'app-produto-form',
+  // CORREÇÃO: Apontar para os próprios arquivos HTML e SCSS
   templateUrl: './produto-form.component.html',
   styleUrls: ['./produto-form.component.scss'],
 })
@@ -56,7 +56,7 @@ export class ProdutoFormComponent implements OnInit, OnChanges {
 
   constructor(
     private fb: FormBuilder,
-    private produtoService: ProdutoService
+    private produtoService: ProdutoService // Somente ProdutoService
   ) {}
 
   ngOnInit(): void {
@@ -72,10 +72,8 @@ export class ProdutoFormComponent implements OnInit, OnChanges {
       if (this.isEditing) {
         this.loadProdutoForEdit();
       } else {
-        // Se não está editando (produtoUid é null), reseta o formulário para um novo cadastro
         this.produtoForm.reset();
         this.clearFormMessages();
-        // Opcional: Definir valores padrão para selects vazios se necessário
         this.produtoForm.get('tipo')?.setValue('');
         this.produtoForm.get('unidadeMedida')?.setValue('');
       }
@@ -98,37 +96,40 @@ export class ProdutoFormComponent implements OnInit, OnChanges {
   async loadProdutoForEdit(): Promise<void> {
     if (this.produtoUid) {
       this.isLoading = true;
-      this.produtoService.getProdutoOnce(this.produtoUid).subscribe(
-        (produto: Produto | undefined) => {
-          if (produto) {
-            // AQUI É ONDE O PATCHVALUE ESTAVA COMENTADO. Precisa preencher todos os campos.
-            this.produtoForm.patchValue({
-              nome: produto.nome,
-              descricao: produto.descricao,
-              tipo: produto.tipo,
-              marca: produto.marca,
-              unidadeMedida: produto.unidadeMedida,
-              categoria: produto.categoria, // Adicionado
-              sku: produto.sku, // Adicionado
-              imageUrl: produto.imageUrl, // Adicionado
-            });
-            this.produtoForm.markAsPristine(); // Reseta o estado para "não modificado"
-            this.produtoForm.markAsUntouched(); // Reseta o estado para "não tocado"
-          } else {
-            this.message = 'Produto não encontrado para edição.';
+      this.produtoService
+        .getProdutoOnce(this.produtoUid)
+        .pipe(take(1))
+        .subscribe(
+          (produto: Produto | undefined) => {
+            if (produto) {
+              this.produtoForm.patchValue({
+                nome: produto.nome,
+                descricao: produto.descricao,
+                tipo: produto.tipo,
+                marca: produto.marca,
+                unidadeMedida: produto.unidadeMedida,
+                categoria: produto.categoria,
+                sku: produto.sku,
+                imageUrl: produto.imageUrl,
+              });
+              this.produtoForm.markAsPristine();
+              this.produtoForm.markAsUntouched();
+            } else {
+              this.message = 'Produto não encontrado para edição.';
+              this.isSuccess = false;
+              this.formCancelled.emit();
+            }
+            this.isLoading = false;
+          },
+          (error: any) => {
+            // Adicionado tipo 'any' para 'error'
+            console.error('Erro ao carregar produto para edição:', error);
+            this.message = 'Erro ao carregar produto para edição.';
             this.isSuccess = false;
-            this.formCancelled.emit(); // Emite cancelamento se produto não for encontrado
+            this.isLoading = false;
+            this.formCancelled.emit();
           }
-          this.isLoading = false;
-        },
-        (error) => {
-          console.error('Erro ao carregar produto para edição:', error);
-          this.message = 'Erro ao carregar produto para edição.';
-          this.isSuccess = false;
-          this.isLoading = false;
-          this.formCancelled.emit(); // Emite cancelamento em caso de erro
-        }
-      );
+        );
     }
   }
 
@@ -165,7 +166,7 @@ export class ProdutoFormComponent implements OnInit, OnChanges {
           this.message = 'Produto cadastrado com sucesso!';
         }
         this.isSuccess = true;
-        this.formSubmitted.emit(); // Emite evento de sucesso
+        this.formSubmitted.emit();
       } catch (error) {
         console.error('Erro ao salvar produto:', error);
         this.message = 'Erro ao salvar produto. Verifique o console.';
@@ -185,10 +186,9 @@ export class ProdutoFormComponent implements OnInit, OnChanges {
   onCancel(): void {
     this.produtoForm.reset();
     this.clearFormMessages();
-    // Opcional: Definir valores padrão para selects vazios se necessário
     this.produtoForm.get('tipo')?.setValue('');
     this.produtoForm.get('unidadeMedida')?.setValue('');
-    this.formCancelled.emit(); // Emite evento de cancelamento
+    this.formCancelled.emit();
   }
 
   clearFormMessages(): void {

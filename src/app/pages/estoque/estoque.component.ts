@@ -11,11 +11,11 @@ import {
   combineLatest,
   BehaviorSubject,
   ReplaySubject,
-} from 'rxjs'; // Adicionado ReplaySubject
-import { map, startWith, takeUntil } from 'rxjs/operators'; // Adicionado takeUntil
+} from 'rxjs';
+import { map, startWith, takeUntil } from 'rxjs/operators';
 import { Timestamp } from '@angular/fire/firestore';
-import { UserRole } from '../../models/user.model'; // Importar UserRole
-import { Router } from '@angular/router'; // Importar Router
+import { UserRole } from '../../models/user.model';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-estoque',
@@ -23,70 +23,54 @@ import { Router } from '@angular/router'; // Importar Router
   styleUrls: ['./estoque.component.scss'],
 })
 export class EstoqueComponent implements OnInit, OnDestroy {
-  // Alterado para ReplaySubject para garantir que os itens sejam emitidos para novos inscritos
-  private destroy$ = new ReplaySubject<void>(1); // Adicionado para gerenciar a desinscrição de forma limpa
+  private destroy$ = new ReplaySubject<void>(1);
 
   allEstoqueItems$!: Observable<EstoqueItem[]>;
-  filteredEstoque: EstoqueItem[] = []; // Usaremos esta array para exibir os dados filtrados e ordenados
-  produtos: Produto[] = []; // Para mapear produtoUid para nome
-  productTypesForFilter: string[] = []; // Adicionado para popular o filtro de tipo de produto
+  filteredEstoque: EstoqueItem[] = [];
+  produtos: Produto[] = [];
+  productTypesForFilter: string[] = [];
 
   searchTerm: string = '';
-  selectedTypeFilter: string = ''; // Corrigido para ser o filtro de tipo
+  selectedTypeFilter: string = '';
   selectedSort: string = 'nomeProduto_asc';
 
   isAdmin$!: Observable<boolean>;
   isEstoquista$!: Observable<boolean>;
-  canAddEditDeleteRegisterBaixa$!: Observable<boolean>; // Observable para controle de permissões
+  canAddEditDeleteRegisterBaixa$!: Observable<boolean>;
 
-  private estoqueSubscription!: Subscription; // Mantido para a subscription principal
+  // DECLARAÇÃO DAS PROPRIEDADES QUE ESTAVAM FALTANDO
+  isLoading: boolean = true; // Adicionado
+  private estoqueSubscription: Subscription = new Subscription(); // Adicionado e inicializado
+  // A propriedade produtosSubscription já existe, mas é melhor ter uma para cada "main" subscription,
+  // ou usar takeUntil(this.destroy$) em todas. Já estamos usando takeUntil, então ok.
+
   private filterTrigger = new BehaviorSubject<void>(undefined);
 
   constructor(
     private estoqueService: EstoqueService,
     private produtoService: ProdutoService,
     private authService: AuthService,
-    private router: Router // Injetar Router
+    private router: Router
   ) {}
 
   ngOnInit(): void {
-    this.isAdmin$ = this.authService.isAdmin().pipe(takeUntil(this.destroy$)); // Gerenciar subscrição
+    this.isAdmin$ = this.authService.isAdmin().pipe(takeUntil(this.destroy$));
     this.isEstoquista$ = this.authService
       .isEstoquista()
-      .pipe(takeUntil(this.destroy$)); // Gerenciar subscrição // Combina os produtos e itens de estoque
+      .pipe(takeUntil(this.destroy$));
 
-    this.allEstoqueItems$ = combineLatest([
-      this.produtoService.getProdutos(),
-      this.estoqueService.getEstoqueItems(),
-    ]).pipe(
-      map(([produtos, estoqueItems]) => {
-        this.produtos = produtos; // Armazena produtos para uso futuro // Popula productTypesForFilter com tipos únicos de produtos
+    // Correção: Chame loadEstoqueData aqui para iniciar o carregamento dos produtos e itens de estoque
+    this.loadEstoqueData();
 
-        this.productTypesForFilter = [
-          ...new Set(produtos.map((p) => p.tipo)),
-        ].sort();
-
-        return estoqueItems.map((item) => {
-          const produto = produtos.find((p) => p.uid === item.produtoUid);
-          return {
-            ...item,
-            nomeProduto: produto?.nome || 'Produto Desconhecido',
-            unidadeMedida: produto?.unidadeMedida || 'N/A',
-            tipoProduto: produto?.tipo || 'N/A',
-            sku: item.sku || produto?.sku || 'N/A',
-          };
-        });
-      }),
-      takeUntil(this.destroy$) // Gerenciar subscrição
-    ); // Combina o observable principal de estoque com o gatilho de filtro/ordenação
-
+    // Este combineLatest agora depende de 'allEstoqueItems$' que é populado em 'loadEstoqueData'
+    // E 'filterTrigger'
     this.estoqueSubscription = combineLatest([
-      this.allEstoqueItems$,
+      this.allEstoqueItems$, // Este Observable agora virá da loadEstoqueData
       this.filterTrigger.asObservable().pipe(startWith(undefined)),
     ])
       .pipe(
         map(([items, _]) => {
-          let tempItems = [...items]; // 1. Aplicar filtro de busca (searchTerm)
+          let tempItems = [...items];
 
           if (this.searchTerm) {
             const lowerSearchTerm = this.searchTerm.toLowerCase();
@@ -95,19 +79,19 @@ export class EstoqueComponent implements OnInit, OnDestroy {
                 (item.nomeProduto || '')
                   .toLowerCase()
                   .includes(lowerSearchTerm) ||
-                (item.lote || '').toLowerCase().includes(lowerSearchTerm) || // Adicionado filtro por lote
+                (item.lote || '').toLowerCase().includes(lowerSearchTerm) ||
                 (item.localizacao || '')
                   .toLowerCase()
                   .includes(lowerSearchTerm) ||
                 (item.sku || '').toLowerCase().includes(lowerSearchTerm)
             );
-          } // 2. Aplicar filtro por Tipo de Produto (selectedTypeFilter)
+          }
 
           if (this.selectedTypeFilter) {
             tempItems = tempItems.filter(
               (item) => item.tipoProduto === this.selectedTypeFilter
             );
-          } // 3. Aplicar ordenação (selectedSort)
+          }
 
           tempItems.sort((a, b) => {
             if (this.selectedSort === 'nomeProduto_asc') {
@@ -115,10 +99,8 @@ export class EstoqueComponent implements OnInit, OnDestroy {
             } else if (this.selectedSort === 'nomeProduto_desc') {
               return (b.nomeProduto || '').localeCompare(a.nomeProduto || '');
             } else if (this.selectedSort === 'lote_asc') {
-              // Adicionado ordenação por lote
               return (a.lote || '').localeCompare(b.lote || '');
             } else if (this.selectedSort === 'lote_desc') {
-              // Adicionado ordenação por lote
               return (b.lote || '').localeCompare(a.lote || '');
             } else if (this.selectedSort === 'quantidade_asc') {
               return a.quantidade - b.quantidade;
@@ -146,11 +128,18 @@ export class EstoqueComponent implements OnInit, OnDestroy {
 
           return tempItems;
         }),
-        takeUntil(this.destroy$) // Gerenciar subscrição
+        takeUntil(this.destroy$)
       )
-      .subscribe((filteredAndSortedItems) => {
-        this.filteredEstoque = filteredAndSortedItems;
-      }); // Define canAddEditDeleteRegisterBaixa$ com base nas roles
+      .subscribe(
+        (filteredAndSortedItems) => {
+          this.filteredEstoque = filteredAndSortedItems;
+          this.isLoading = false; // Define isLoading para false aqui, após o processamento
+        },
+        (error) => {
+          console.error('Erro ao filtrar/ordenar estoque:', error);
+          this.isLoading = false;
+        }
+      );
 
     this.canAddEditDeleteRegisterBaixa$ = combineLatest([
       this.isAdmin$,
@@ -194,19 +183,26 @@ export class EstoqueComponent implements OnInit, OnDestroy {
       return timestamp.toDate().toLocaleDateString('pt-BR');
     }
     return 'N/A';
-  } // Novos métodos para verificação de validade
+  }
 
   isExpired(item: EstoqueItem): boolean {
-    if (!item.dataValidade) return false;
+    // Certifique-se de que item.dataValidade é um Timestamp antes de chamar toMillis()
+    if (!item.dataValidade || !(item.dataValidade instanceof Timestamp))
+      return false;
     return item.dataValidade.toMillis() < Date.now();
   }
 
   isNearExpiry(item: EstoqueItem): boolean {
-    if (!item.dataValidade || this.isExpired(item)) return false;
+    if (
+      !item.dataValidade ||
+      !(item.dataValidade instanceof Timestamp) ||
+      this.isExpired(item)
+    )
+      return false;
     const oneMonthFromNow = new Date();
     oneMonthFromNow.setMonth(oneMonthFromNow.getMonth() + 1);
     return item.dataValidade.toDate().getTime() <= oneMonthFromNow.getTime();
-  } // Métodos de navegação (roteamento)
+  }
 
   goToAddEstoqueItem(): void {
     this.router.navigate(['/cadastro-estoque']);
@@ -228,5 +224,41 @@ export class EstoqueComponent implements OnInit, OnDestroy {
         'UID do item de estoque não fornecido para registro de baixa.'
       );
     }
+  }
+
+  // FUNÇÃO loadEstoqueData() IMPLEMENTADA
+  loadEstoqueData(): void {
+    this.isLoading = true; // Inicia o estado de carregamento
+
+    this.allEstoqueItems$ = combineLatest([
+      this.produtoService.getAllProdutosSimple(),
+      this.estoqueService.getEstoqueItems(),
+    ]).pipe(
+      map(([produtos, estoqueItems]) => {
+        this.produtos = produtos; // Armazena produtos para uso futuro
+
+        // Popula productTypesForFilter com tipos únicos de produtos
+        this.productTypesForFilter = [
+          ...new Set(produtos.map((p) => p.tipo)),
+        ].sort();
+
+        return estoqueItems.map((item) => {
+          const produto = produtos.find((p) => p.uid === item.produtoUid);
+          return {
+            ...item,
+            nomeProduto: produto?.nome || 'Produto Desconhecido',
+            unidadeMedida: produto?.unidadeMedida || 'N/A',
+            tipoProduto: produto?.tipo || 'N/A',
+            sku: item.sku || produto?.sku || 'N/A',
+          };
+        });
+      }),
+      takeUntil(this.destroy$) // Garante que a subscription seja cancelada
+    );
+
+    // Como loadEstoqueData vai disparar a atualização de allEstoqueItems$,
+    // e o `combineLatest` principal do ngOnInit já observa allEstoqueItems$,
+    // não precisamos de uma subscribe extra aqui dentro.
+    // Apenas garantimos que isLoading será falso quando os dados chegarem ao combineLatest principal.
   }
 }

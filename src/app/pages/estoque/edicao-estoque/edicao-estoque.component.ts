@@ -39,6 +39,7 @@ export class EdicaoEstoqueComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    this.produtos$ = this.produtoService.getAllProdutosSimple();
     this.estoqueForm = this.fb.group({
       produtoUid: [{ value: '', disabled: true }, Validators.required], // Desabilitado para edição
       quantidade: [null, [Validators.required, Validators.min(1)]],

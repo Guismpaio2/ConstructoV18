@@ -4,13 +4,13 @@ import {
   AngularFirestore,
   AngularFirestoreCollection,
 } from '@angular/fire/compat/firestore';
-import { Observable } from 'rxjs';
+import { Observable, from, of } from 'rxjs';
 import { map, take } from 'rxjs/operators';
-// Remova esta linha, pois não usaremos mais Timestamp diretamente aqui para gravação/leitura
-// import { Timestamp } from '@angular/fire/firestore';
 import { AuthService } from '../auth/auth.service';
-// Verifique se o caminho do modelo está correto
 import { Produto, ProdutoFirestore } from '../models/produto.model';
+
+// Não precisamos de 'firebase/compat/app' aqui a menos que você o use diretamente para algo mais
+// import firebase from 'firebase/compat/app';
 
 @Injectable({
   providedIn: 'root',
@@ -19,26 +19,29 @@ export class ProdutoService {
   private produtosCollection: AngularFirestoreCollection<ProdutoFirestore>;
 
   constructor(private afs: AngularFirestore, private authService: AuthService) {
-    // Isso ainda vai apontar para a coleção 'produtos' na raiz.
-    // Se você tiver duas com o mesmo nome na raiz, o comportamento pode ser imprevisível
-    // e pegar uma delas. A melhor abordagem seria manter apenas uma coleção 'produtos'.
     this.produtosCollection = this.afs.collection<ProdutoFirestore>('produtos');
   }
 
-  // --- Funções Auxiliares de Conversão ---
-  // Esta função agora espera strings e as converte para Date
   private convertFirestoreToAppProduto(data: ProdutoFirestore): Produto {
     return {
-      ...data,
-      // Converte a string ISO para Date. Se for null/undefined ou inválida, mantém null.
+      uid: data.uid,
+      nome: data.nome,
+      descricao: data.descricao,
+      tipo: data.tipo,
+      marca: data.marca,
+      unidadeMedida: data.unidadeMedida,
+      categoria: data.categoria,
+      sku: data.sku,
+      imageUrl: data.imageUrl,
       dataCadastro: data.dataCadastro ? new Date(data.dataCadastro) : null,
       dataUltimaEdicao: data.dataUltimaEdicao
         ? new Date(data.dataUltimaEdicao)
         : null,
+      usuarioUltimaEdicaoUid: data.usuarioUltimaEdicaoUid,
+      usuarioUltimaEdicaoNome: data.usuarioUltimaEdicaoNome,
     };
   }
 
-  // Esta função agora espera Date e as converte para string ISO para o Firestore
   private convertAppToFirestoreProduto(
     data: Partial<Produto>
   ): Partial<ProdutoFirestore> {
@@ -54,23 +57,19 @@ export class ProdutoService {
       }
     }
 
-    // Trata dataCadastro: apenas converte se for uma instância de Date
     if (data.dataCadastro instanceof Date) {
-      firestoreData.dataCadastro = data.dataCadastro.toISOString(); // Converte Date para string ISO
+      firestoreData.dataCadastro = data.dataCadastro.toISOString();
     } else if (data.dataCadastro === null) {
-      firestoreData.dataCadastro = null as any; // Firestore aceita null para campos opcionais
+      firestoreData.dataCadastro = null as any;
     }
-    // Trata dataUltimaEdicao: apenas converte se for uma instância de Date
     if (data.dataUltimaEdicao instanceof Date) {
-      firestoreData.dataUltimaEdicao = data.dataUltimaEdicao.toISOString(); // Converte Date para string ISO
+      firestoreData.dataUltimaEdicao = data.dataUltimaEdicao.toISOString();
     } else if (data.dataUltimaEdicao === null) {
-      firestoreData.dataUltimaEdicao = null as any; // Firestore aceita null para campos opcionais
+      firestoreData.dataUltimaEdicao = null as any;
     }
 
     return firestoreData;
   }
-
-  // --- Métodos CRUD ---
 
   async addProduto(
     produtoApp: Omit<
@@ -87,24 +86,93 @@ export class ProdutoService {
     const currentUserDisplayName =
       await this.authService.getCurrentUserDisplayName();
 
-    const now = new Date(); // Objeto Date nativo
+    const now = new Date();
     const produtoParaFirestore: ProdutoFirestore = {
       ...produtoApp,
       uid: uid,
-      dataCadastro: now.toISOString(), // Grava como string ISO
-      dataUltimaEdicao: now.toISOString(), // Grava como string ISO
+      dataCadastro: now.toISOString(),
+      dataUltimaEdicao: now.toISOString(),
       usuarioUltimaEdicaoUid: currentUserUid || 'unknown',
       usuarioUltimaEdicaoNome: currentUserDisplayName || 'Desconhecido',
-    };
+    } as ProdutoFirestore;
+
     return this.produtosCollection.doc(uid).set(produtoParaFirestore);
   }
 
-  getProdutos(): Observable<Produto[]> {
-    return this.produtosCollection.valueChanges({ idField: 'uid' }).pipe(
-      map((produtosFirestore) => {
-        return produtosFirestore.map(this.convertFirestoreToAppProduto);
+  getProdutos(
+    searchTerm: string = '',
+    selectedType: string = '',
+    orderBy: string = 'nomeAsc'
+  ): Observable<Produto[]> {
+    return this.afs
+      .collection<ProdutoFirestore>('produtos', (ref) => {
+        // CORREÇÃO: Removido as anotações de tipo explícitas 'firebase.firestore'
+        // TypeScript pode inferir o tipo da 'ref' do 'AngularFirestoreCollection'
+        let query: any = ref; // Use 'any' se a inferência automática não for suficiente, ou importe tipos corretos de @angular/fire/compat/firestore
+
+        if (selectedType) {
+          query = query.where('tipo', '==', selectedType);
+        }
+
+        switch (orderBy) {
+          case 'nomeAsc':
+            query = query.orderBy('nome', 'asc');
+            break;
+          case 'nomeDesc':
+            query = query.orderBy('nome', 'desc');
+            break;
+          case 'dataCadastroDesc':
+            query = query.orderBy('dataCadastro', 'desc');
+            break;
+          case 'dataCadastroAsc':
+            query = query.orderBy('dataCadastro', 'asc');
+            break;
+          default:
+            query = query.orderBy('nome', 'asc');
+            break;
+        }
+
+        return query;
       })
-    );
+      .valueChanges({ idField: 'uid' })
+      .pipe(
+        map((produtosFirestore) => {
+          let produtos: Produto[] = produtosFirestore.map(
+            this.convertFirestoreToAppProduto
+          );
+
+          if (searchTerm) {
+            const lowerSearchTerm = searchTerm.toLowerCase();
+            produtos = produtos.filter(
+              (produto) =>
+                (produto.nome &&
+                  produto.nome.toLowerCase().includes(lowerSearchTerm)) ||
+                (produto.descricao &&
+                  produto.descricao.toLowerCase().includes(lowerSearchTerm)) ||
+                (produto.marca &&
+                  produto.marca.toLowerCase().includes(lowerSearchTerm)) ||
+                (produto.sku &&
+                  produto.sku.toLowerCase().includes(lowerSearchTerm)) ||
+                (produto.categoria &&
+                  produto.categoria.toLowerCase().includes(lowerSearchTerm)) ||
+                (produto.tipo &&
+                  produto.tipo.toLowerCase().includes(lowerSearchTerm))
+            );
+          }
+          return produtos;
+        })
+      );
+  }
+
+  getAllProdutosSimple(): Observable<Produto[]> {
+    return this.afs
+      .collection<ProdutoFirestore>('produtos')
+      .valueChanges({ idField: 'uid' })
+      .pipe(
+        map((produtosFirestore) =>
+          produtosFirestore.map(this.convertFirestoreToAppProduto)
+        )
+      );
   }
 
   getProduto(uid: string): Observable<Produto | undefined> {
@@ -147,7 +215,6 @@ export class ProdutoService {
     const dataToUpdateFirestore: Partial<ProdutoFirestore> =
       this.convertAppToFirestoreProduto(updatedFieldsApp);
 
-    // Sobrescreve as datas de auditoria para garantir que sejam sempre a string ISO atual
     dataToUpdateFirestore.dataUltimaEdicao = new Date().toISOString();
     dataToUpdateFirestore.usuarioUltimaEdicaoUid = currentUserUid || 'unknown';
     dataToUpdateFirestore.usuarioUltimaEdicaoNome =
@@ -158,5 +225,21 @@ export class ProdutoService {
 
   deleteProduto(uid: string): Promise<void> {
     return this.produtosCollection.doc(uid).delete();
+  }
+
+  getAllProductTypes(): Observable<string[]> {
+    const fixedTypes: string[] = [
+      'Ferragem',
+      'Hidráulica',
+      'Elétrica',
+      'Pintura',
+      'Madeira',
+      'Alvenaria',
+      'Revestimento',
+      'Ferramenta',
+      'Material Básico',
+      'Outros',
+    ];
+    return of(fixedTypes);
   }
 }
