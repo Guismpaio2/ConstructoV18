@@ -1,114 +1,67 @@
-// src/app/LoginComponents/recuperar-senha/recuperar-senha.component.scss
-@import "../../../styles.scss";
-@import "../../../styles/variables.scss";
-// Importe estilos globais para acessar as variáveis.
+/* src/app/features/auth/recuperar-senha/recuperar-senha.component.scss */
 
-.forgot-password-container {
+// Importa as variáveis e estilos globais para consistência.
+@import "../../../styles/variables";
+@import "../../../styles.scss";
+
+// O componente é renderizado dentro do .auth-left-panel.
+// A classe .login-page-container é usada para manter a consistência com a tela de login.
+.login-page-container {
   display: flex;
   justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background-color: #f0f2f5; // Cor de fundo para a página de login
-  padding: 20px;
+  width: 100%;
 }
 
-.forgot-password-card {
-  background-color: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  padding: 40px;
+// Contém todo o formulário, desde o título até os botões.
+.form-wrapper {
+  display: flex;
+  flex-direction: column;
   width: 100%;
-  max-width: 400px;
-  text-align: center;
+  max-width: 400px; // Largura máxima consistente com as outras telas.
 
-  h2 {
-    color: #333;
-    margin-bottom: 25px;
-    font-weight: 600;
+  .title {
+    // O estilo do h2 já vem de _styles.scss.
+    // Apenas garantimos o alinhamento e o espaçamento.
+    text-align: left;
+    margin-bottom: $spacing-s; // Espaço menor antes do parágrafo.
   }
 
-  p {
-    color: #666;
-    margin-bottom: 30px;
+  // Estilo para o parágrafo de instrução.
+  .small-text {
+    // A classe .small-text já define o tamanho da fonte.
+    text-align: left;
+    color: $color-text-dark;
+    margin-bottom: $spacing-l; // Espaço maior antes do formulário.
     line-height: 1.5;
   }
 
-  .form-group {
-    margin-bottom: 20px;
-    text-align: left;
-
-    label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: 500;
-      color: #555;
-    }
-
-    input[type="email"] {
-      width: 100%;
-      padding: 12px 15px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      font-size: 1rem;
-      &:focus {
-        border-color: #007bff;
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
-      }
-    }
-  }
-
-  .btn-primary {
+  form {
+    display: flex;
+    flex-direction: column;
     width: 100%;
-    padding: 12px;
-    font-size: 1.1rem;
-    font-weight: 600;
-    border-radius: 5px;
-    background-color: $color-secondary-base; // Usa a variável
-    color: #fff;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-
-    &:hover {
-      background-color: darken($color-secondary-base, 10%);
-    }
-
-    &:disabled {
-      background-color: #cccccc;
-      cursor: not-allowed;
-    }
-  }
-
-  .back-to-login {
-    margin-top: 25px;
-    font-size: 0.9rem;
-    a {
-      color: #007bff;
-      text-decoration: none;
-
-      &:hover {
-        text-decoration: underline;
-      }
-    }
-  }
-
-  .alert {
-    margin-top: 20px;
-    padding: 10px;
-    border-radius: 5px;
-    font-size: 0.9rem;
-
-    &.alert-success {
-      background-color: #d4edda;
-      color: #155724;
-      border-color: #c3e6cb;
-    }
-
-    &.alert-danger {
-      background-color: #f8d7da;
-      color: #721c24;
-      border-color: #f5c6cb;
-    }
   }
 }
+
+// O .form-group, label, e input já são estilizados pelos arquivos globais.
+// Nenhuma estilização adicional é necessária aqui.
+
+// As mensagens de erro e sucesso já são estilizadas globalmente.
+// Apenas garantimos o alinhamento e o espaçamento.
+.error-message,
+.success-message {
+  text-align: left;
+  margin-top: $spacing-s;
+  margin-bottom: $spacing-s;
+}
+
+// Container para os botões de ação.
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-m; // Espaçamento vertical entre os botões.
+  width: 100%;
+  margin-top: $spacing-s; // Espaço antes dos botões.
+}
+
+// Os botões .btn.btn-cta e .btn.btn-secondary já estão perfeitamente estilizados
+// pelo seu arquivo global _styles.scss.

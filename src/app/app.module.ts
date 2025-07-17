@@ -35,8 +35,6 @@ import { EstoqueComponent } from './pages/estoque/estoque.component';
 import { RegistrosBaixasComponent } from './pages/registros-baixas/registros-baixas.component';
 import { UsuariosComponent } from './pages/usuarios/usuarios.component';
 import { PerfilComponent } from './pages/perfil/perfil.component';
-import { CadastroProdutoComponent } from './pages/produtos/cadastro-produto/cadastro-produto.component';
-import { EdicaoProdutoComponent } from './pages/produtos/edicao-produto/edicao-produto.component';
 import { CadastroEstoqueComponent } from './pages/estoque/cadastro-estoque/cadastro-estoque.component';
 import { EdicaoEstoqueComponent } from './pages/estoque/edicao-estoque/edicao-estoque.component';
 import { BaixasComponent } from './pages/baixas/baixas.component';
@@ -66,8 +64,6 @@ import { SharedModule } from './shared/shared.module';
     RegistrosBaixasComponent,
     UsuariosComponent,
     PerfilComponent,
-    CadastroProdutoComponent,
-    EdicaoProdutoComponent,
     CadastroEstoqueComponent,
     EdicaoEstoqueComponent,
     BaixasComponent,

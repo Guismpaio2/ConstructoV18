@@ -22,8 +22,6 @@ import { UsuariosComponent } from './pages/usuarios/usuarios.component';
 import { PerfilComponent } from './pages/perfil/perfil.component';
 
 // Novas importações para os componentes de cadastro/edição/baixa
-import { CadastroProdutoComponent } from './pages/produtos/cadastro-produto/cadastro-produto.component';
-import { EdicaoProdutoComponent } from './pages/produtos/edicao-produto/edicao-produto.component';
 import { CadastroEstoqueComponent } from './pages/estoque/cadastro-estoque/cadastro-estoque.component';
 import { EdicaoEstoqueComponent } from './pages/estoque/edicao-estoque/edicao-estoque.component';
 import { BaixasComponent } from './pages/baixas/baixas.component'; // Agora é o FORMULÁRIO DE REGISTRO DE BAIXA
@@ -129,23 +127,6 @@ const routes: Routes = [
         data: {
           title: 'Gerenciamento de Usuários',
           roles: ['Administrador'] as UserRole[],
-        },
-      },
-      // Rotas para cadastro/edição com roles específicas
-      {
-        path: 'cadastro-produto',
-        component: CadastroProdutoComponent,
-        data: {
-          title: 'Cadastrar Produto',
-          roles: ['Administrador', 'Estoquista'] as UserRole[],
-        },
-      },
-      {
-        path: 'edicao-produto/:id',
-        component: EdicaoProdutoComponent,
-        data: {
-          title: 'Editar Produto',
-          roles: ['Administrador', 'Estoquista'] as UserRole[],
         },
       },
       {

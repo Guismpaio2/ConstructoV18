@@ -1,98 +1,118 @@
-/* src/app/LoginComponents/cadastro-sucesso/cadastro-sucesso.component.scss */
+/* src/app/features/auth/cadastro-sucesso/cadastro-sucesso.component.scss */
 
+// Importa as variáveis e estilos globais.
 @import "../../../styles/variables";
+@import "../../../styles.scss";
 
+// O overlay que escurece o fundo da página.
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.7); /* Fundo semi-transparente */
+  background-color: rgba(0, 0, 0, 0.6); // Fundo escuro semi-transparente.
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000; /* Garante que fique acima de tudo */
+  z-index: 1050; // Z-index alto para ficar sobre outros elementos.
 }
 
+// O card/conteúdo do modal.
 .modal-content {
-  background-color: $color-background-card;
+  background-color: $color-background-card; // Fundo branco para o card.
   border-radius: $border-radius-medium;
   box-shadow: $box-shadow-heavy;
   width: 90%;
-  max-width: 450px;
-  overflow: hidden;
+  max-width: 480px; // Largura máxima do modal.
+  overflow: hidden; // Garante que o conteúdo não vaze das bordas arredondadas.
   text-align: center;
 }
 
 .success-modal {
   .modal-header {
-    background-color: $color-success; /* Verde para o cabeçalho de sucesso */
-    height: 50px;
+    background-color: $color-success; // Cabeçalho verde.
+    height: 60px;
     position: relative;
+    display: flex;
+    align-items: center;
+    padding: 0 $spacing-s;
+
     .close-button {
-      position: absolute;
-      top: $spacing-s;
-      right: $spacing-s;
       background: none;
       border: none;
       cursor: pointer;
+      padding: $spacing-xs; // Aumenta a área de clique.
+      position: absolute;
+      top: 50%;
+      left: $spacing-s;
+      transform: translateY(-50%);
+
       .close-icon {
-        width: 24px;
-        height: 24px;
-        filter: invert(100%); /* Ícone branco */
+        width: 20px;
+        height: 20px;
+        filter: invert(1); // Ícone branco.
       }
     }
   }
 
   .modal-body {
-    padding: $spacing-m;
+    padding: $spacing-l $spacing-xl $spacing-xxl; // Mais padding para um visual espaçoso.
+    position: relative;
 
     .success-icon-wrapper {
       background-color: $color-success;
       border-radius: 50%;
-      width: 80px;
-      height: 80px;
+      width: 90px;
+      height: 90px;
       display: flex;
       justify-content: center;
       align-items: center;
-      margin: -($spacing-xl) auto $spacing-m auto; /* Move para cima do cabeçalho */
-      border: 5px solid $color-background-card; /* Borda branca para destacar */
-      box-shadow: $box-shadow-medium;
+      // Truque para posicionar o ícone sobrepondo o header:
+      margin: -65px auto $spacing-l auto;
+      border: 6px solid $color-background-card; // Borda branca para destacar.
+      position: relative;
+      z-index: 1;
 
       .success-check-icon {
         width: 50px;
         height: 50px;
-        filter: invert(100%);
+        filter: invert(1); // Ícone de check branco.
       }
     }
 
     h2 {
-      font-size: $font-size-large;
-      margin-bottom: $spacing-s;
+      font-size: $font-size-h4;
+      font-weight: 600;
       color: $color-text-dark;
+      margin-bottom: $spacing-l;
+      line-height: 1.4;
     }
 
     p {
-      font-size: $font-size-base;
-      margin-bottom: $spacing-s;
+      font-size: $font-size-large;
+      margin-bottom: $spacing-xs;
       color: $color-text-dark;
     }
 
     .employee-code-display {
       font-size: $font-size-h3;
-      font-weight: bold;
-      color: $color-secondary-base;
-      background-color: lighten($color-secondary-base, 48%);
+      font-weight: 600;
+      color: $color-text-dark;
       padding: $spacing-xs $spacing-s;
-      border-radius: $border-radius-small;
       display: inline-block;
-      margin-bottom: $spacing-l;
+      // Adiciona espaço antes do botão "Ir para o Login".
+      margin-bottom: $spacing-xl;
     }
 
-    .btn {
+    // Estilo para o botão que existe no seu HTML original.
+    .btn.primary {
+      // A classe .btn.primary já define as cores e o estilo base.
+      // Apenas ajustamos o tamanho e o espaçamento.
       width: auto;
-      min-width: 180px;
+      // Adiciona mais padding horizontal para um botão mais largo.
+      padding-left: $spacing-xl;
+      padding-right: $spacing-xl;
     }
   }
 }

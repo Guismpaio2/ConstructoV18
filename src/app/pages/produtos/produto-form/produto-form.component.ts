@@ -1,3 +1,4 @@
+// src/app/pages/produtos/produto-form/produto-form.component.ts
 import {
   Component,
   OnInit,
@@ -11,7 +12,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ProdutoService } from '../../../services/produto.service';
 import { Produto } from '../../../models/produto.model';
 import { Timestamp } from '@angular/fire/firestore';
-import { take } from 'rxjs/operators'; // <--- ADICIONADO: Importe 'take' aqui
+import { take } from 'rxjs/operators';
 
 @Component({
   selector: 'app-produto-form',
@@ -71,8 +72,12 @@ export class ProdutoFormComponent implements OnInit, OnChanges {
       if (this.isEditing) {
         this.loadProdutoForEdit();
       } else {
+        // Se não está editando (produtoUid é null), reseta o formulário para um novo cadastro
         this.produtoForm.reset();
         this.clearFormMessages();
+        // Opcional: Definir valores padrão para selects vazios se necessário
+        this.produtoForm.get('tipo')?.setValue('');
+        this.produtoForm.get('unidadeMedida')?.setValue('');
       }
     }
   }
@@ -91,32 +96,41 @@ export class ProdutoFormComponent implements OnInit, OnChanges {
   }
 
   async loadProdutoForEdit(): Promise<void> {
-  if (this.produtoUid) {
-    this.isLoading = true;
-    // Use o método getProdutoOnce diretamente
-    this.produtoService.getProdutoOnce(this.produtoUid).subscribe( // <--- Mudança aqui
-      (produto: Produto | undefined) => {
-        if (produto) {
-          this.produtoForm.patchValue({
-            // ... (restante do seu patchValue)
-          });
-        } else {
-          this.message = 'Produto não encontrado para edição.';
+    if (this.produtoUid) {
+      this.isLoading = true;
+      this.produtoService.getProdutoOnce(this.produtoUid).subscribe(
+        (produto: Produto | undefined) => {
+          if (produto) {
+            // AQUI É ONDE O PATCHVALUE ESTAVA COMENTADO. Precisa preencher todos os campos.
+            this.produtoForm.patchValue({
+              nome: produto.nome,
+              descricao: produto.descricao,
+              tipo: produto.tipo,
+              marca: produto.marca,
+              unidadeMedida: produto.unidadeMedida,
+              categoria: produto.categoria, // Adicionado
+              sku: produto.sku, // Adicionado
+              imageUrl: produto.imageUrl, // Adicionado
+            });
+            this.produtoForm.markAsPristine(); // Reseta o estado para "não modificado"
+            this.produtoForm.markAsUntouched(); // Reseta o estado para "não tocado"
+          } else {
+            this.message = 'Produto não encontrado para edição.';
+            this.isSuccess = false;
+            this.formCancelled.emit(); // Emite cancelamento se produto não for encontrado
+          }
+          this.isLoading = false;
+        },
+        (error) => {
+          console.error('Erro ao carregar produto para edição:', error);
+          this.message = 'Erro ao carregar produto para edição.';
           this.isSuccess = false;
-          this.formCancelled.emit();
+          this.isLoading = false;
+          this.formCancelled.emit(); // Emite cancelamento em caso de erro
         }
-        this.isLoading = false;
-      },
-      (error) => {
-        console.error('Erro ao carregar produto para edição:', error);
-        this.message = 'Erro ao carregar produto para edição.';
-        this.isSuccess = false;
-        this.isLoading = false;
-        this.formCancelled.emit();
-      }
-    );
+      );
+    }
   }
-}
 
   async onSubmit(): Promise<void> {
     this.message = '';
@@ -151,7 +165,7 @@ export class ProdutoFormComponent implements OnInit, OnChanges {
           this.message = 'Produto cadastrado com sucesso!';
         }
         this.isSuccess = true;
-        this.formSubmitted.emit();
+        this.formSubmitted.emit(); // Emite evento de sucesso
       } catch (error) {
         console.error('Erro ao salvar produto:', error);
         this.message = 'Erro ao salvar produto. Verifique o console.';
@@ -169,8 +183,12 @@ export class ProdutoFormComponent implements OnInit, OnChanges {
   }
 
   onCancel(): void {
-    this.formCancelled.emit();
+    this.produtoForm.reset();
     this.clearFormMessages();
+    // Opcional: Definir valores padrão para selects vazios se necessário
+    this.produtoForm.get('tipo')?.setValue('');
+    this.produtoForm.get('unidadeMedida')?.setValue('');
+    this.formCancelled.emit(); // Emite evento de cancelamento
   }
 
   clearFormMessages(): void {

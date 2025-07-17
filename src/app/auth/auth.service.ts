@@ -25,14 +25,20 @@ export class AuthService {
   ) {
     this.user$ = this.afAuth.authState.pipe(
       switchMap((userAuth) => {
+        console.log('Auth State (userAuth):', userAuth);
         if (userAuth) {
           return this.afs
             .doc<User>(`users/${userAuth.uid}`)
             .valueChanges()
             .pipe(
-              map((userDoc) => userDoc || null) // <--- CORREÇÃO AQUI: Garante que undefined se torne null
+              map((userDoc) => {
+                console.log(`Raw User Doc for ${userAuth.uid}:`, userDoc); // Log do objeto completo
+                console.log(`User Role from Doc:`, userDoc?.role); // Log específico do campo 'role'
+                return userDoc || null;
+              })
             );
         } else {
+          console.log('No user authenticated.');
           return of(null);
         }
       })

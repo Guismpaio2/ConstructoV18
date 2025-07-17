@@ -88,6 +88,7 @@
       </div>
     </div>
   </div>
+
   <div class="modal" [class.show]="isModalOpen" *ngIf="isModalOpen">
     <div class="modal-dialog modal-dialog-centered modal-lg">
       <div class="modal-content">
@@ -100,10 +101,11 @@
           </button>
         </div>
         <div class="modal-body">
-          <app-edicao-produto
-            [produto]="selectedProduct"
-            (productSaved)="onProductSaved()"
-          ></app-edicao-produto>
+          <app-produto-form
+            [produtoUid]="selectedProduct?.uid || null"
+            (formSubmitted)="onProductSaved()"
+            (formCancelled)="closeModal()"
+          ></app-produto-form>
         </div>
       </div>
     </div>

@@ -1,10 +1,10 @@
 // src/app/pages/produtos/produtos.component.ts
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Produto } from '../../models/produto.model'; // Importe a interface 'Produto' (com Date | null)
+import { Produto } from '../../models/produto.model';
 import { ProdutoService } from '../../services/produto.service';
 import { AuthService } from '../../auth/auth.service';
 import { Subscription } from 'rxjs';
-import { map } from 'rxjs/operators'; // Não precisa mais do map para converter Timestamp aqui
+import { delay, take } from 'rxjs/operators'; // Não precisa mais do map para converter Timestamp aqui
 
 @Component({
   selector: 'app-produtos',
@@ -21,7 +21,7 @@ export class ProdutosComponent implements OnInit, OnDestroy {
   private productsSubscription!: Subscription;
 
   isModalOpen: boolean = false;
-  selectedProduct: Produto | null = null;
+  selectedProduct: Produto | null = null; // Este é o produto que será passado para o modal (ou null para adicionar)
 
   searchTerm: string = '';
   selectedTypeFilter: string = 'todos';
@@ -34,8 +34,18 @@ export class ProdutosComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.checkUserPermissions();
     this.loadProducts();
+    this.checkUserPermissions(); // Renomeado para melhor clareza na função
+
+    // O delay aqui pode ser removido se a verificação de permissões estiver funcionando de forma síncrona ou mais robusta.
+    // Mantive-o por enquanto, mas ele pode ser um ponto a otimizar.
+    // this.authService
+    //   .isEstoquista()
+    //   .pipe(delay(500))
+    //   .subscribe((isEstoquista) => {
+    //     this.canAddEditDelete = isEstoquista;
+    //     console.log('Permissão canAddEditDelete após delay:', this.canAddEditDelete);
+    //   });
   }
 
   ngOnDestroy(): void {
@@ -49,39 +59,44 @@ export class ProdutosComponent implements OnInit, OnDestroy {
 
   loadProducts(): void {
     this.isLoading = true;
-    this.productsSubscription = this.produtoService
-      .getProdutos()
-      // O pipe(map) que estava aqui para converter Timestamp não é mais necessário,
-      // pois o service já retorna Produto[] com Date.
-      .subscribe({
-        next: (data) => {
-          this.produtos = data;
-          const types = new Set<string>();
-          this.produtos.forEach((p) => {
-            if (p.tipo && p.tipo.trim() !== '') {
-              types.add(p.tipo.trim());
-            }
-          });
-          this.availableTypes = ['todos', ...Array.from(types).sort()];
-          this.applyFilterAndSort();
-          this.isLoading = false;
-        },
-        error: (error) => {
-          console.error('Erro ao carregar produtos:', error);
-          this.errorMessage =
-            'Erro ao carregar produtos. Tente novamente mais tarde.';
-          this.isLoading = false;
-        },
-      });
+    this.productsSubscription = this.produtoService.getProdutos().subscribe({
+      next: (data) => {
+        this.produtos = data;
+        const types = new Set<string>();
+        this.produtos.forEach((p) => {
+          if (p.tipo && p.tipo.trim() !== '') {
+            types.add(p.tipo.trim());
+          }
+        });
+        this.availableTypes = ['todos', ...Array.from(types).sort()];
+        this.applyFilterAndSort();
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Erro ao carregar produtos:', error);
+        this.errorMessage =
+          'Erro ao carregar produtos. Tente novamente mais tarde.';
+        this.isLoading = false;
+      },
+    });
   }
 
   checkUserPermissions(): void {
     this.authSubscription = this.authService
       .isEstoquista()
+      .pipe(
+        // Adicionando take(1) para evitar múltiplos subscriptions e memory leaks
+        take(1),
+        delay(500) // Mantendo o delay por precaução, mas pode ser removido se o auth for síncrono
+      )
       .subscribe((isEstoquista) => {
         this.canAddEditDelete = isEstoquista;
-
-      console.log('Permissão canAddEditDelete:', this.canAddEditDelete);
+        console.log(
+          'Permissão canAddEditDelete após delay:',
+          this.canAddEditDelete
+        );
+        // Não é mais necessário logar o user$ aqui, pois o isEstoquista já indica o status.
+        // Se precisar depurar o user, faça isso diretamente no AuthService ou em um componente de login.
       });
   }
 
@@ -116,12 +131,10 @@ export class ProdutosComponent implements OnInit, OnDestroy {
         case 'nomeProdutoDesc':
           return b.nome.localeCompare(a.nome);
         case 'dataCadastroDesc':
-          // Agora dataCadastro é Date | null, então .getTime() funciona
           return (
             (b.dataCadastro?.getTime() || 0) - (a.dataCadastro?.getTime() || 0)
           );
         case 'dataCadastroAsc':
-          // Agora dataCadastro é Date | null, então .getTime() funciona
           return (
             (a.dataCadastro?.getTime() || 0) - (b.dataCadastro?.getTime() || 0)
           );
@@ -140,12 +153,12 @@ export class ProdutosComponent implements OnInit, OnDestroy {
 
   closeModal(): void {
     this.isModalOpen = false;
-    this.selectedProduct = null;
+    this.selectedProduct = null; // Garante que o selectedProduct seja limpo ao fechar
     this.errorMessage = '';
   }
 
   onProductSaved(): void {
-    this.closeModal();
+    this.closeModal(); // Fechar o modal após salvar
     this.loadProducts(); // Recarrega para ver as mudanças
   }
 
