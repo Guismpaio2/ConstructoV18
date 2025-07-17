@@ -9,7 +9,7 @@ import {
 import { Observable } from 'rxjs';
 import { AuthService } from './auth.service';
 import { map, take } from 'rxjs/operators';
-import { UserRole } from '../models/user.model';
+import { UserRole } from '../models/user.model'; // Importação de UserRole está correta
 
 @Injectable({
   providedIn: 'root',

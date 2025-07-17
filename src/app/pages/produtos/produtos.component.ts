@@ -1,10 +1,10 @@
+// src/app/pages/produtos/produtos.component.ts
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ProdutoService } from '../../services/produto.service';
 import { Produto } from '../../models/produto.model';
-import { Observable, Subscription } from 'rxjs';
-import { Router } from '@angular/router';
-import { take } from 'rxjs/operators';
-import { AuthService } from '../../auth/auth.service'; // Para controle de acesso via role
+import { ProdutoService } from '../../services/produto.service';
+import { AuthService } from '../../auth/auth.service';
+import { Subscription } from 'rxjs';
+import { map } from 'rxjs/operators'; // Importe o operador map
 
 @Component({
   selector: 'app-produtos',
@@ -12,130 +12,169 @@ import { AuthService } from '../../auth/auth.service'; // Para controle de acess
   styleUrls: ['./produtos.component.scss'],
 })
 export class ProdutosComponent implements OnInit, OnDestroy {
-  allProducts$: Observable<Produto[]>; // Observable que obtém todos os produtos do serviço
-  filteredProducts: Produto[] = []; // Array que armazena os produtos filtrados e ordenados para exibição
-  private productsSubscription!: Subscription;
+  produtos: Produto[] = []; // Todos os produtos carregados
+  filteredProducts: Produto[] = []; // Produtos após filtro e ordenação
+  isLoading: boolean = true;
+  errorMessage: string = '';
+  canAddEditDelete: boolean = false;
+  private authSubscription!: Subscription;
+  private productsSubscription!: Subscription; // Para gerenciar a inscrição dos produtos
 
+  // Variáveis para o modal
+  isModalOpen: boolean = false;
+  selectedProduct: Produto | null = null; // Produto selecionado para edição (null para novo)
+
+  // Variáveis para busca, filtro e ordenação
   searchTerm: string = '';
-  selectedTypeFilter: string = '';
-  selectedSort: string = 'nome_asc';
-
-  canAddEditDelete: boolean = false; // Controle de permissão para adicionar/editar/excluir
+  selectedTypeFilter: string = 'todos';
+  availableTypes: string[] = []; // Será populado dinamicamente
+  selectedSort: string = 'nomeProdutoAsc'; // 'nomeProdutoAsc', 'nomeProdutoDesc', 'dataCadastroDesc', etc.
 
   constructor(
     private produtoService: ProdutoService,
-    private router: Router,
     private authService: AuthService
-  ) {
-    this.allProducts$ = this.produtoService.getProdutos();
-  }
+  ) {}
 
   ngOnInit(): void {
-    // Verifica a permissão do usuário logado para adicionar/editar/excluir produtos
-    this.authService
-      .isEstoquista()
-      .pipe(take(1))
-      .subscribe((isEstoquista) => {
-        this.canAddEditDelete = isEstoquista;
-      });
-
-    this.productsSubscription = this.allProducts$.subscribe((products) => {
-      this.applyFilterAndSort(products);
-    });
+    this.checkUserPermissions();
+    this.loadProducts(); // Carrega produtos e aplica filtros/ordenação
   }
 
   ngOnDestroy(): void {
+    if (this.authSubscription) {
+      this.authSubscription.unsubscribe();
+    }
     if (this.productsSubscription) {
       this.productsSubscription.unsubscribe();
     }
   }
 
-  applyFilterAndSort(products: Produto[]): void {
-    let tempProducts = [...products];
+  loadProducts(): void {
+    this.isLoading = true;
+    this.productsSubscription = this.produtoService
+      .getProdutos()
+      .pipe(
+        map((produtos) => {
+          // Extrai tipos únicos para o filtro, exceto 'todos'
+          const types = new Set<string>();
+          produtos.forEach((p) => {
+            if (p.tipo && p.tipo.trim() !== '') {
+              types.add(p.tipo.trim());
+            }
+          });
+          this.availableTypes = ['todos', ...Array.from(types).sort()]; // Garante 'todos' primeiro e ordena
+          return produtos;
+        })
+      )
+      .subscribe({
+        next: (data) => {
+          this.produtos = data;
+          this.applyFilterAndSort(); // Aplica filtros e ordenação inicial
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Erro ao carregar produtos:', error);
+          this.errorMessage =
+            'Erro ao carregar produtos. Tente novamente mais tarde.';
+          this.isLoading = false;
+        },
+      });
+  }
 
-    // 1. Filtrar
-    if (this.searchTerm) {
-      const lowerCaseSearch = this.searchTerm.toLowerCase();
+  checkUserPermissions(): void {
+    this.authSubscription = this.authService
+      .isEstoquista()
+      .subscribe((isEstoquista) => {
+        this.canAddEditDelete = isEstoquista;
+      });
+  }
+
+  // --- Métodos de Busca, Filtro e Ordenação ---
+  triggerFilterAndSort(): void {
+    this.applyFilterAndSort();
+  }
+
+  private applyFilterAndSort(): void {
+    let tempProducts = [...this.produtos]; // Cria uma cópia para não modificar o array original
+
+    // 1. Aplicar Busca (searchTerm)
+    if (this.searchTerm && this.searchTerm.trim() !== '') {
+      const lowerCaseSearchTerm = this.searchTerm.toLowerCase().trim();
       tempProducts = tempProducts.filter(
-        (product) =>
-          product.nome.toLowerCase().includes(lowerCaseSearch) ||
-          product.descricao.toLowerCase().includes(lowerCaseSearch) ||
-          product.marca.toLowerCase().includes(lowerCaseSearch) ||
-          product.tipo.toLowerCase().includes(lowerCaseSearch)
+        (p) =>
+          p.nome.toLowerCase().includes(lowerCaseSearchTerm) ||
+          p.descricao?.toLowerCase().includes(lowerCaseSearchTerm) ||
+          p.marca.toLowerCase().includes(lowerCaseSearchTerm) ||
+          p.tipo.toLowerCase().includes(lowerCaseSearchTerm)
       );
     }
 
-    if (this.selectedTypeFilter) {
+    // 2. Aplicar Filtro por Tipo (selectedTypeFilter)
+    if (this.selectedTypeFilter !== 'todos') {
       tempProducts = tempProducts.filter(
-        (product) => product.tipo === this.selectedTypeFilter
+        (p) => p.tipo.toLowerCase() === this.selectedTypeFilter.toLowerCase()
       );
     }
 
-    // 2. Ordenar
-    switch (this.selectedSort) {
-      case 'nome_asc':
-        tempProducts.sort((a, b) => a.nome.localeCompare(b.nome));
-        break;
-      case 'nome_desc':
-        tempProducts.sort((a, b) => b.nome.localeCompare(a.nome));
-        break;
-      case 'tipo_asc':
-        tempProducts.sort((a, b) => a.tipo.localeCompare(b.tipo));
-        break;
-      case 'tipo_desc':
-        tempProducts.sort((a, b) => b.tipo.localeCompare(a.tipo));
-        break;
-      case 'marca_asc':
-        tempProducts.sort((a, b) => a.marca.localeCompare(b.marca));
-        break;
-      case 'marca_desc':
-        tempProducts.sort((a, b) => b.marca.localeCompare(a.marca));
-        break;
-      default:
-        break;
-    }
+    // 3. Aplicar Ordenação (selectedSort)
+    tempProducts.sort((a, b) => {
+      switch (this.selectedSort) {
+        case 'nomeProdutoAsc':
+          return a.nome.localeCompare(b.nome);
+        case 'nomeProdutoDesc':
+          return b.nome.localeCompare(a.nome);
+        case 'dataCadastroDesc':
+          // Convert Timestamp to Date for comparison, assuming Timestamp has toDate() method
+          return (
+            (b.dataCadastro?.toDate()?.getTime() || 0) -
+            (a.dataCadastro?.toDate()?.getTime() || 0)
+          );
+        case 'dataCadastroAsc':
+          return (
+            (a.dataCadastro?.toDate()?.getTime() || 0) -
+            (b.dataCadastro?.toDate()?.getTime() || 0)
+          );
+        // Adicione outras lógicas de ordenação aqui se tiver mais opções
+        default:
+          return 0;
+      }
+    });
+
     this.filteredProducts = tempProducts;
   }
 
-  // Método chamado pelo UI para aplicar filtros/ordenação
-  triggerFilterAndSort(): void {
-    this.allProducts$.pipe(take(1)).subscribe((products) => {
-      this.applyFilterAndSort(products);
-    });
+  // --- Métodos do Modal ---
+  openProductModal(product: Produto | null): void {
+    this.selectedProduct = product;
+    this.isModalOpen = true;
   }
 
-  goToAddProduct(): void {
-    this.router.navigate(['/cadastro-produto']);
+  closeModal(): void {
+    this.isModalOpen = false;
+    this.selectedProduct = null;
+    this.errorMessage = ''; // Limpa mensagens de erro ao fechar
   }
 
-  goToEditProduct(uid: string): void {
-    this.router.navigate(['/edicao-produto', uid]);
+  onProductSaved(): void {
+    this.closeModal(); // Fecha o modal
+    this.loadProducts(); // Recarrega a lista de produtos (que já vai aplicar os filtros/ordenação)
   }
 
-  onDeleteProduct(uid: string, productName: string): void {
+  // --- Método de Exclusão ---
+  async confirmDeleteProduct(product: Produto): Promise<void> {
     if (
       confirm(
-        `Tem certeza que deseja excluir o produto "${productName}"? Esta ação é irreversível.`
+        `Tem certeza que deseja excluir o produto "${product.nome}"?`
       )
     ) {
-      this.produtoService
-        .deleteProduto(uid)
-        .then(() => {
-          console.log('Produto excluído com sucesso!');
-          alert('Produto excluído com sucesso!');
-        })
-        .catch((error) => {
-          console.error('Erro ao excluir produto:', error);
-          alert('Erro ao excluir produto. Verifique as permissões.');
-        });
+      try {
+        await this.produtoService.deleteProduto(product.uid!); // Assume que UID é obrigatório
+        this.loadProducts(); // Recarrega a lista
+        alert('Produto excluído com sucesso!');
+      } catch (error) {
+        console.error('Erro ao excluir produto:', error);
+        alert('Ocorreu um erro ao excluir o produto.');
+      }
     }
-  }
-
-  // Função para formatar o Timestamp para exibição
-  formatTimestamp(timestamp: any): string {
-    if (timestamp && timestamp.toDate) {
-      return timestamp.toDate().toLocaleDateString('pt-BR'); // Ex: DD/MM/YYYY
-    }
-    return '';
   }
 }

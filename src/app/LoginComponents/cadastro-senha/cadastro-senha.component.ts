@@ -12,12 +12,12 @@ import { Timestamp } from '@angular/fire/firestore';
 })
 export class CadastroSenhaComponent implements OnInit {
   passwordForm!: FormGroup;
-  tempUserData: any;
+  tempUserData: any; // Mantenha como 'any' ou tipagem mais específica se tiver um modelo temporário
   isLoading: boolean = false;
   errorMessage: string = '';
 
-  passwordVisible: boolean = false; // Adicionado para a visibilidade da senha
-  confirmPasswordVisible: boolean = false; // Adicionado para a visibilidade da senha de confirmação
+  passwordVisible: boolean = false;
+  confirmPasswordVisible: boolean = false;
 
   constructor(
     private fb: FormBuilder,
@@ -51,7 +51,6 @@ export class CadastroSenhaComponent implements OnInit {
   }
 
   async onSubmit(): Promise<void> {
-    // Renomeado de onCreateAccount para onSubmit
     this.isLoading = true;
     this.errorMessage = '';
 
@@ -64,12 +63,24 @@ export class CadastroSenhaComponent implements OnInit {
     const { password } = this.passwordForm.value;
 
     try {
+      // CORREÇÃO AQUI: Passando todos os 6 argumentos para signUp
       const userCredential = await this.authService.signUp(
         this.tempUserData.email,
-        password
+        password,
+        this.tempUserData.nome, // Argumento 3
+        this.tempUserData.sobrenome, // Argumento 4
+        this.tempUserData.employeeCode || '', // Argumento 5 (garantindo string vazia se undefined)
+        this.tempUserData.role || 'Leitor' // Argumento 6 (garantindo 'Leitor' se undefined)
       );
 
+      // NOTA: Se o signUp já cria o usuário no Firestore (como na minha última sugestão),
+      // a chamada subsequente a createOrUpdateUserData pode ser redundante
+      // se você não tiver dados adicionais para salvar APENAS aqui.
+      // Se userCredential.user for suficiente, esta parte pode ser simplificada.
+      // Manterei para não remover funcionalidade existente, mas é um ponto a revisar.
       if (userCredential.user) {
+        // Esta parte pode ser redundante se o signUp no service já cria o UserData completo.
+        // Se você tiver certeza que o signUp já persiste tudo, pode remover este bloco `newUser` e `createOrUpdateUserData`.
         const newUser: User = {
           uid: userCredential.user.uid,
           email: userCredential.user.email,
@@ -77,10 +88,10 @@ export class CadastroSenhaComponent implements OnInit {
           sobrenome: this.tempUserData.sobrenome,
           employeeCode: this.tempUserData.employeeCode || '',
           role: this.tempUserData.role || 'Leitor',
-          dataCadastro: Timestamp.now(),
-          lastLogin: Timestamp.now(),
+          dataCadastro: Timestamp.now(), // Pode ser definida no service
+          lastLogin: Timestamp.now(), // Pode ser definida no service
         };
-        await this.authService.createOrUpdateUserData(newUser);
+        await this.authService.createOrUpdateUserData(newUser); // Chamar ou não depende da sua lógica final
 
         localStorage.removeItem('tempUserData');
         this.router.navigate(['/cadastro-sucesso']);

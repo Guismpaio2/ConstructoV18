@@ -53,16 +53,22 @@ export class ProdutoService {
   }
 
   getProduto(uid: string): Observable<Produto | undefined> {
+    // Retorna um Observable que emite sempre que o documento muda
     return this.produtosCollection.doc<Produto>(uid).valueChanges();
   }
 
   getProdutoOnce(uid: string): Observable<Produto | undefined> {
+    // Retorna um Observable que emite o valor uma única vez e depois completa
     return this.produtosCollection
       .doc<Produto>(uid)
       .valueChanges()
       .pipe(take(1));
   }
 
+  // Se precisar gerar UID explicitamente (usado no addProduto acima)
+  generateNewUid(): string {
+    return this.afs.createId();
+  }
   // Recebe Partial<Produto> para permitir atualização parcial
   async updateProduto(
     uid: string,

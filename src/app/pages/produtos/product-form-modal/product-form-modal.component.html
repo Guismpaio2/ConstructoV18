@@ -1,0 +1,106 @@
+<div class="modal-header">
+  <h5 class="modal-title">
+    {{ isEditing ? "Editar Produto" : "Adicionar Novo Produto" }}
+  </h5>
+  <button type="button" class="close" (click)="onCancel()">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+
+<div class="modal-body">
+  <form [formGroup]="productForm" (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <label for="nomeProduto">Nome do Produto</label>
+      <input
+        type="text"
+        id="nomeProduto"
+        formControlName="nomeProduto"
+        class="form-control"
+        [class.is-invalid]="
+          productForm.get('nomeProduto')?.invalid &&
+          productForm.get('nomeProduto')?.touched
+        "
+      />
+      <div
+        *ngIf="
+          productForm.get('nomeProduto')?.invalid &&
+          productForm.get('nomeProduto')?.touched
+        "
+        class="invalid-feedback"
+      >
+        Nome do produto é obrigatório.
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="tipo">Tipo</label>
+      <input
+        type="text"
+        id="tipo"
+        formControlName="tipo"
+        class="form-control"
+        [class.is-invalid]="
+          productForm.get('tipo')?.invalid && productForm.get('tipo')?.touched
+        "
+      />
+      <div
+        *ngIf="
+          productForm.get('tipo')?.invalid && productForm.get('tipo')?.touched
+        "
+        class="invalid-feedback"
+      >
+        Tipo é obrigatório.
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="marca">Marca</label>
+      <input
+        type="text"
+        id="marca"
+        formControlName="marca"
+        class="form-control"
+        [class.is-invalid]="
+          productForm.get('marca')?.invalid && productForm.get('marca')?.touched
+        "
+      />
+      <div
+        *ngIf="
+          productForm.get('marca')?.invalid && productForm.get('marca')?.touched
+        "
+        class="invalid-feedback"
+      >
+        Marca é obrigatória.
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="descricao">Descrição (Opcional)</label>
+      <textarea
+        id="descricao"
+        formControlName="descricao"
+        class="form-control"
+        rows="3"
+      ></textarea>
+    </div>
+
+    <div *ngIf="errorMessage" class="alert alert-danger mt-3">
+      {{ errorMessage }}
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="onCancel()">
+        Cancelar
+      </button>
+      <button type="submit" class="btn btn-primary" [disabled]="isLoading">
+        <span
+          *ngIf="isLoading"
+          class="spinner-border spinner-border-sm"
+          role="status"
+          aria-hidden="true"
+        ></span>
+        {{ isEditing ? "Salvar Alterações" : "Adicionar Produto" }}
+      </button>
+    </div>
+  </form>
+</div>

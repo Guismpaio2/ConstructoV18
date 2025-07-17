@@ -37,6 +37,8 @@ import { EdicaoEstoqueComponent } from './pages/estoque/edicao-estoque/edicao-es
 // SharedModule para layouts e outros componentes/módulos compartilhados
 import { SharedModule } from './shared/shared.module';
 import { BaixasComponent } from './pages/baixas/baixas.component';
+import { ProdutoFormComponent } from './pages/produtos/produto-form/produto-form.component';
+import { ProductFormModalComponent } from './pages/produtos/product-form-modal/product-form-modal.component';
 
 @NgModule({
   declarations: [
@@ -50,7 +52,7 @@ import { BaixasComponent } from './pages/baixas/baixas.component';
     HomeComponent,
     ProdutosComponent,
     EstoqueComponent,
-    RegistrosBaixasComponent, // Este será o componente de listagem
+    RegistrosBaixasComponent, 
     UsuariosComponent,
     PerfilComponent,
     CadastroProdutoComponent,
@@ -59,7 +61,9 @@ import { BaixasComponent } from './pages/baixas/baixas.component';
     EdicaoEstoqueComponent,
     RegistrosBaixasComponent,
     BaixasComponent,
-    RegistrosBaixasComponent,  // Componente para registrar a baixa
+    RegistrosBaixasComponent,
+    ProdutoFormComponent,
+    ProductFormModalComponent,  
   ],
   imports: [
     BrowserModule,

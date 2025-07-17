@@ -1,0 +1,139 @@
+<div class="produto-form-container">
+  <h2>{{ isEditing ? "Editar Produto" : "Cadastrar Novo Produto" }}</h2>
+
+  <form [formGroup]="produtoForm" (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <label for="nome">Nome do Produto <span class="required">*</span></label>
+      <input
+        id="nome"
+        type="text"
+        formControlName="nome"
+        class="form-control"
+      />
+      <div
+        *ngIf="
+          produtoForm.get('nome')?.invalid && produtoForm.get('nome')?.touched
+        "
+        class="text-danger"
+      >
+        Nome é obrigatório.
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="descricao">Descrição</label>
+      <textarea
+        id="descricao"
+        formControlName="descricao"
+        class="form-control"
+      ></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="tipo">Tipo <span class="required">*</span></label>
+      <select id="tipo" formControlName="tipo" class="form-control">
+        <option value="">Selecione um Tipo</option>
+        <option *ngFor="let tipo of tiposProduto" [value]="tipo">
+          {{ tipo }}
+        </option>
+      </select>
+      <div
+        *ngIf="
+          produtoForm.get('tipo')?.invalid && produtoForm.get('tipo')?.touched
+        "
+        class="text-danger"
+      >
+        Tipo é obrigatório.
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="marca">Marca</label>
+      <input
+        id="marca"
+        type="text"
+        formControlName="marca"
+        class="form-control"
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="unidadeMedida"
+        >Unidade de Medida <span class="required">*</span></label
+      >
+      <select
+        id="unidadeMedida"
+        formControlName="unidadeMedida"
+        class="form-control"
+      >
+        <option value="">Selecione a Unidade</option>
+        <option *ngFor="let unidade of unidadesMedida" [value]="unidade">
+          {{ unidade }}
+        </option>
+      </select>
+      <div
+        *ngIf="
+          produtoForm.get('unidadeMedida')?.invalid &&
+          produtoForm.get('unidadeMedida')?.touched
+        "
+        class="text-danger"
+      >
+        Unidade de Medida é obrigatória.
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="categoria">Categoria</label>
+      <input
+        id="categoria"
+        type="text"
+        formControlName="categoria"
+        class="form-control"
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="sku">SKU</label>
+      <input id="sku" type="text" formControlName="sku" class="form-control" />
+    </div>
+
+    <div class="form-group">
+      <label for="imageUrl">URL da Imagem</label>
+      <input
+        id="imageUrl"
+        type="text"
+        formControlName="imageUrl"
+        class="form-control"
+      />
+    </div>
+
+    <div
+      *ngIf="message"
+      [ngClass]="{
+        'alert alert-success': isSuccess,
+        'alert alert-danger': !isSuccess
+      }"
+      class="mt-3"
+    >
+      {{ message }}
+    </div>
+
+    <div class="form-actions mt-4">
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="onCancel()"
+        [disabled]="isLoading"
+      >
+        Cancelar
+      </button>
+      <button
+        type="submit"
+        class="btn btn-primary ml-2"
+        [disabled]="produtoForm.invalid || isLoading"
+      >
+        {{ isEditing ? "Salvar Alterações" : "Cadastrar Produto" }}
+      </button>
+    </div>
+  </form>
+</div>
