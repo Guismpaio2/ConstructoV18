@@ -1,57 +1,99 @@
 // src/styles/_variables.scss
-// Cores
-$color-brand-base: #ff6f00; // Laranja principal, do logo e botões CTA
-$color-brand-light: #f29c5a; // Variação mais clara
-$color-brand-dark: #b24e00; // Variação mais escura
 
-// Novas definições para resolver o erro "Undefined variable" e para mais gradientes
-$color-brand-lighter: lighten($color-brand-base, 15%);
-$color-brand-darker: darken($color-brand-base, 15%);
+// ------------------------------------------
+// Cores da Marca (Baseadas no Figma)
+// ------------------------------------------
+$color-brand-base: #ff8f00; // Laranja principal, do logo e botões CTA (Cor da Marca 0)
+$color-brand-light: #f29c5a; // Variação mais clara (Cor da Marca -1)
+$color-brand-dark: #e24e00; // Variação mais escura (Cor da Marca +1)
 
-// Cores Principais (Baseadas na "Cor Secundária" do Figma)
-$color-primary-base: #1e3a9f; // Azul escuro, da "Cor Secundária 0" do Figma
-$color-primary-dark: #0b172b; // Variação mais escura, da "Cor Secundária +1"
-$color-primary-light: #4061bc; // Variação mais clara, da "Cor Secundária -1"
+// Novas definições para gradientes ou variações diretas (se precisar de mais nuance)
+$color-brand-lighter: lighten(
+  $color-brand-base,
+  15%
+); // Exemplo de uso de função SCSS
+$color-brand-darker: darken(
+  $color-brand-base,
+  15%
+); // Exemplo de uso de função SCSS
 
-// REINTRODUZIDA PARA RESOLVER O ERRO NO _styles.scss
-// Atribuindo o valor do azul escuro da "Cor Secundária 0" do Figma para compatibilidade.
-$color-secondary-base: #1e3a9f; // Cor secundária base, utilizada para fundos de botões primários
+// ------------------------------------------
+// Cores Principais/Secundárias (Baseadas na "Cor Secundária" do Figma)
+// ------------------------------------------
+$color-primary-base: #1e3a9f; // Azul escuro principal (Cor Secundária 0)
+$color-primary-dark: #0b172b; // Variação mais escura (Cor Secundária +1)
+$color-primary-light: #4061bc; // Variação mais clara (Cor Secundária -1)
 
-$color-background-light: #f2f2f2; // Cor de fundo principal
-$color-background-card: #ffffff; // Fundo de cards
+// Se "color-secondary-base" é um sinônimo de $color-primary-base para algum uso específico, mantenha.
+// Caso contrário, pode ser redundante e removida para maior clareza.
+$color-secondary-base: #1e3a9f; // Mantido para compatibilidade, se necessário.
 
-// Cores de Texto
-$color-text-dark: #061d3d; // Cor principal para textos escuros
-$color-text-light: #dffbf5; // Cor para textos claros (em fundos escuros)
-$color-text-secondary: #6c757d; // Cor de texto para subtítulos e placeholders (inferido para cinza secundário)
-$color-text-placeholder: #adb5bd; // Cor mais clara para placeholders (inferido)
+// ------------------------------------------
+// Cores de Fundo (Baseadas no Figma)
+// ------------------------------------------
+$color-background-light: #f2f2f2; // Cor de fundo principal (Cor do Fundo)
+$color-background-card: #ffffff; // Fundo de cards (Branco puro)
 
-// Cores de Feedback
-$color-success: #00f01d; // Verde para sucesso/confirmação
-$color-alert: #f00000; // Vermelho para erro/alerta
-$color-alert-light: #ffcccc; // Variação mais clara para fundo de alerta (inferido)
-$color-alert-dark: #b00000; // Vermelho escuro para alertas mais críticos (inferido)
-$color-warning: #ffbf00; // Amarelo para avisos (inferido)
-$color-info: #17a2b8; // Azul padrão para informações (inferido)
+// ------------------------------------------
+// Cores de Texto (Baseadas no Figma)
+// ------------------------------------------
+$color-text-dark: #061d3d; // Cor principal para textos escuros (Cor das Letras)
+$color-text-light: #dffbf5; // Cor para textos claros (em fundos escuros, Cor das Letras)
+$color-text-secondary: #6c757d; // Cor de texto para subtítulos e placeholders (cinza neutro)
+$color-text-placeholder: #adb5bd; // Cor mais clara para placeholders
 
+// ------------------------------------------
+// Cores de Feedback (Baseadas no Figma e Alertas Comuns)
+// ------------------------------------------
+$color-success: #00fd1d; // Verde para sucesso/confirmação (Cores de Confirmação/Alerta)
+$color-error: #f00000; // Vermelho para erro/alerta (Cores de Confirmação/Alerta)
+
+// Variações para fundos e bordas de alertas (inferidas para complementariedade)
+$color-success-bg: lighten(
+  $color-success,
+  40%
+); // Fundo verde claro para sucesso
+$color-success-text: darken(
+  $color-success,
+  60%
+); // Texto verde escuro para sucesso
+$color-success-border: lighten($color-success, 20%); // Borda verde para sucesso
+
+$color-error-bg: lighten($color-error, 40%); // Fundo vermelho claro para erro
+$color-error-text: darken($color-error, 30%); // Texto vermelho escuro para erro
+$color-error-border: lighten($color-error, 10%); // Borda vermelha para erro
+
+$color-warning: #ffbf00; // Amarelo para avisos (pode ser usado o $color-brand-base para consistência se preferir)
+$color-info: #17a2b8; // Azul padrão para informações (pode ser um dos $color-primary-light)
+
+// ------------------------------------------
 // Cores de Borda e Input
-$color-border: #e0e0e0; // Cor para bordas e separadores
-$color-border-input: #dee2e6; // Uma borda de input mais suave, se necessário (inferido)
-$color-background-input: #ffffff; // Fundo dos inputs, se diferente de $color-background-card (inferido)
+// ------------------------------------------
+$color-border: #e9ecef; // Cor para bordas e separadores (do styles.scss anterior, bom para consistência)
+$color-border-input: #dee2e6; // Uma borda de input mais suave
+$color-background-input: #ffffff; // Fundo dos inputs
 
-// Variáveis que podem ser redundantes ou renomeadas para clareza
-$color-primary: #1e3a9f; // Redundante com $color-primary-base, mas mantido para compatibilidade se outras partes do código o usarem.
-$color-accent: #ffc107; // Exemplo (mantido)
-$color-secondary-lighter: #f9f9f9; // Variação mais clara (mantido)
-$color-secondary-darker: #e0e0e0; // Variação mais escura da cor secundária (mantido)
-$color-danger: #f00000; // Redundante com $color-alert, mas mantido para compatibilidade.
-$color-background: #f2f2f2; // Redundante com $color-background-light, mas mantido para compatibilidade.
-$color-secondary: #40618c; // Este parece ser o $color-primary-light, pode ser removido se não houver uso específico.
+// ------------------------------------------
+// Variáveis Redundantes / A serem Padronizadas (se possível)
+// ------------------------------------------
+// Estas variáveis são mantidas para evitar quebras se outras partes do seu código as usarem.
+// Idealmente, você deve migrar para as variáveis mais descritivas acima (ex: $color-primary-base, $color-brand-base).
+$color-primary: $color-primary-base; // Mapeado para a nova variável principal
+$color-accent: $color-brand-base; // Mapeado para a cor da marca se for o seu "accent"
+$color-secondary-lighter: #f9f9fa; // Ajustado para ser mais claro
+$color-secondary-darker: #dee2e6; // Ajustado para ser mais escuro
+$color-danger: $color-error; // Mapeado para $color-error
+$color-background: $color-background-light; // Mapeado para $color-background-light
+$color-secondary: $color-primary-light; // Mapeado para o azul secundário claro
 
+// ------------------------------------------
 // Transições
+// ------------------------------------------
 $transition-speed: 0.3s;
 
+// ------------------------------------------
 // Espaçamentos
+// ------------------------------------------
 $spacing-xxs: 4px;
 $spacing-xs: 8px;
 $spacing-s: 12px;
@@ -60,33 +102,41 @@ $spacing-l: 24px;
 $spacing-xl: 32px;
 $spacing-xxl: 48px;
 
-// Font Sizes
+// ------------------------------------------
+// Font Sizes (Tipografia Desktop do Figma)
+// ------------------------------------------
 $font-size-xsmall: 0.75rem; // 12px
 $font-size-small: 0.875rem; // 14px
 $font-size-base: 1rem; // 16px
 $font-size-large: 1.125rem; // 18px
 
-// Heading Sizes
-$font-size-h1: 2.5rem; // 40px
-$font-size-h2: 2rem; // 32px
-$font-size-h3: 1.75rem; // 28px
-$font-size-h4: 1.5rem; // 24px
-$font-size-h5: 1.25rem; // 20px
-$font-size-h6: 1rem; // 16px
+// Heading Sizes (Baseado na Tipografia Desktop do Figma)
+$font-size-h1: 2.5rem; // H1 - Header 1 Bold
+$font-size-h2: 2rem; // H2 - Header 2 Semi Bold
+$font-size-h3: 1.75rem; // H3 - Header 3 Semi Bold
+$font-size-h4: 1.5rem; // H4 - Header 4 Semi Bold
+$font-size-h5: 1.25rem; // H5 - Header 5 Medium
+$font-size-h6: 1rem; // H6 - Header 6 Medium
 
+// ------------------------------------------
 // Border Radius
+// ------------------------------------------
 $border-radius-small: 4px;
 $border-radius-medium: 8px;
 $border-radius-large: 12px;
 
+// ------------------------------------------
 // Box Shadow
+// ------------------------------------------
 $box-shadow-light: 0 2px 4px rgba(0, 0, 0, 0.08);
 $box-shadow-medium: 0 4px 8px rgba(0, 0, 0, 0.12);
 $box-shadow-heavy: 0 8px 16px rgba(0, 0, 0, 0.16);
-$box-shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-$box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+$box-shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); // Mantido do Bootstrap
+$box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15); // Mantido do Bootstrap
 
+// ------------------------------------------
 // Outras variáveis comuns
-$font-family-base: "Roboto", sans-serif;
+// ------------------------------------------
+$font-family-base: "Roboto", sans-serif; // Ajuste se usar outra fonte
 $padding-base: 1rem;
 $margin-base: 1rem;

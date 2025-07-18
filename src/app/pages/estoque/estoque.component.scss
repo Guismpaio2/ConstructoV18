@@ -159,10 +159,10 @@
 
       // Estilos para linhas expiradas e próximas do vencimento
       &.expired-row {
-        background-color: $color-alert-light; // Vermelho claro para itens vencidos
-        color: $color-alert-dark; // Texto vermelho escuro
+        background-color: $color-error-border; // Vermelho claro para itens vencidos
+        color: $color-error; // Texto vermelho escuro
         .expired-icon {
-          color: $color-alert-dark;
+          color: $color-error;
           margin-left: $spacing-xxs;
         }
       }

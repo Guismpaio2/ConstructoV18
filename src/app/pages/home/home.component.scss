@@ -163,7 +163,7 @@
   // Estilo específico para a seção "Materiais em Falta/Atenção"
   .attention-section {
     .no-data-message {
-      color: $color-alert; // Cor de alerta (vermelho) para a mensagem de falta
+      color: $color-error; // Cor de alerta (vermelho) para a mensagem de falta
       font-weight: 500;
     }
   }

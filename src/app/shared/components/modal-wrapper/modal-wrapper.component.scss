@@ -49,7 +49,7 @@
       transition: color $transition-speed;
     }
     &:hover svg {
-      color: $color-alert; // Muda para vermelho no hover
+      color: $color-error; // Muda para vermelho no hover
     }
   }
 }
