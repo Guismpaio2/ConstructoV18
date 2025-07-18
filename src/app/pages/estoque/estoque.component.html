@@ -3,7 +3,7 @@
     <h1>Controle de Estoque</h1>
     <div class="header-actions">
       <button
-        class="btn primary"
+        class="btn btn-primary"
         (click)="goToAddEstoqueItem()"
         *ngIf="canAddEditDeleteRegisterBaixa$ | async"
       >
@@ -12,43 +12,61 @@
     </div>
   </div>
 
-  <div class="search-filter-bar">
-    <div class="search-input">
+  <div class="filter-sort-section">
+    <div class="search-input-group">
+      <i class="fas fa-search search-icon"></i>
       <input
         type="text"
-        placeholder="Buscar por produto, lote, localização, SKU..."
+        placeholder="Pesquisar por nome, lote, localização ou SKU..."
         [(ngModel)]="searchTerm"
         (input)="triggerFilterAndSort()"
-        class="form-control"
+        class="form-control search-field"
       />
-      <i class="fas fa-search search-icon"></i>
+      <button
+        *ngIf="searchTerm"
+        class="btn btn-clear-search"
+        (click)="clearSearch()"
+        title="Limpar pesquisa"
+      >
+        <i class="fas fa-times-circle"></i>
+      </button>
     </div>
 
-    <select
-      [(ngModel)]="selectedTypeFilter"
-      (change)="triggerFilterAndSort()"
-      class="form-control"
-    >
-      <option value="">Todos os Tipos</option>
-      <option *ngFor="let type of productTypesForFilter" [value]="type">
-        {{ type }}
-      </option>
-    </select>
+    <div class="filter-group">
+      <i class="fas fa-filter filter-icon"></i>
+      <select
+        [(ngModel)]="selectedTypeFilter"
+        (change)="triggerFilterAndSort()"
+        class="form-control filter-field"
+      >
+        <option value="">Filtrar por Tipo</option>
+        <option *ngFor="let type of productTypesForFilter" [value]="type">
+          {{ type }}
+        </option>
+      </select>
+    </div>
 
-    <select
-      [(ngModel)]="selectedSort"
-      (change)="triggerFilterAndSort()"
-      class="form-control"
-    >
-      <option value="nomeProduto_asc">Produto (A-Z)</option>
-      <option value="nomeProduto_desc">Produto (Z-A)</option>
-      <option value="lote_asc">Lote (Crescente)</option>
-      <option value="lote_desc">Lote (Decrescente)</option>
-      <option value="quantidade_asc">Quantidade (Menor para Maior)</option>
-      <option value="quantidade_desc">Quantidade (Maior para Menor)</option>
-      <option value="validade_asc">Validade (Mais Próximo)</option>
-      <option value="validade_desc">Validade (Mais Distante)</option>
-    </select>
+    <div class="sort-group">
+      <i class="fas fa-sort sort-icon"></i>
+      <select
+        [(ngModel)]="selectedSort"
+        (change)="triggerFilterAndSort()"
+        class="form-control sort-field"
+      >
+        <option value="nomeProduto_asc">Ordenar por Produto (A-Z)</option>
+        <option value="nomeProduto_desc">Ordenar por Produto (Z-A)</option>
+        <option value="lote_asc">Ordenar por Lote (Crescente)</option>
+        <option value="lote_desc">Ordenar por Lote (Decrescente)</option>
+        <option value="quantidade_asc">Ordenar por Quantidade (Menor)</option>
+        <option value="quantidade_desc">Ordenar por Quantidade (Maior)</option>
+        <option value="validade_asc">
+          Ordenar por Validade (Mais Próximo)
+        </option>
+        <option value="validade_desc">
+          Ordenar por Validade (Mais Distante)
+        </option>
+      </select>
+    </div>
   </div>
 
   <div class="table-responsive">
@@ -86,10 +104,13 @@
               alt="Produto sem imagem"
               class="product-image"
             />
-            {{ item.nomeProduto }}
+            <div class="product-name-sku">
+              <span>{{ item.nomeProduto }}</span>
+              <span class="sku-text" *ngIf="item.sku">SKU: {{ item.sku }}</span>
+            </div>
           </td>
           <td>{{ item.lote }}</td>
-          <td>{{ item.quantidade }}</td>
+          <td>{{ item.quantidade }} {{ item.unidadeMedida }}</td>
           <td>
             {{ formatTimestamp(item.dataValidade) }}
             <i
@@ -108,24 +129,24 @@
           <td>{{ item.usuarioUltimaEdicaoNome || "N/A" }}</td>
           <td
             *ngIf="canAddEditDeleteRegisterBaixa$ | async"
-            class="text-center"
+            class="action-buttons-cell"
           >
             <button
-              class="btn info small"
+              class="btn btn-icon btn-edit"
               (click)="goToEditEstoqueItem(item.uid)"
               title="Editar"
             >
               <i class="fas fa-edit"></i>
             </button>
             <button
-              class="btn secondary small ms-2"
+              class="btn btn-icon btn-baixa"
               (click)="goToRegisterBaixa(item.uid)"
               title="Registrar Baixa"
             >
               <i class="fas fa-minus-circle"></i>
             </button>
             <button
-              class="btn danger small ms-2"
+              class="btn btn-icon btn-delete"
               (click)="onDeleteEstoqueItem(item.uid!, item.nomeProduto!)"
               title="Excluir"
             >

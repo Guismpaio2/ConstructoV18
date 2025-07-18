@@ -213,14 +213,16 @@ export class EstoqueComponent implements OnInit, OnDestroy {
     return item.dataValidade.toDate().getTime() <= oneMonthFromNow.getTime();
   }
 
+  clearSearch(): void {
+    this.searchTerm = '';
+    this.triggerFilterAndSort();
+  }
   goToAddEstoqueItem(): void {
-    // Redireciona para a rota do formulário sem UID (modo de cadastro)
     this.router.navigate(['/estoque/cadastro']);
   }
 
   goToEditEstoqueItem(uid: string | undefined): void {
     if (uid) {
-      // Redireciona para a rota do formulário com UID (modo de edição)
       this.router.navigate(['/estoque/edicao', uid]);
     } else {
       console.warn('UID do item de estoque não fornecido para edição.');

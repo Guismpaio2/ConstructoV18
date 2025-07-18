@@ -27,6 +27,7 @@ $color-primary-light: #4061bc; // Variação mais clara (Cor Secundária -1)
 // Se "color-secondary-base" é um sinônimo de $color-primary-base para algum uso específico, mantenha.
 // Caso contrário, pode ser redundante e removida para maior clareza.
 $color-secondary-base: #1e3a9f; // Mantido para compatibilidade, se necessário.
+$color-secondary-dark: #bdc3c7; // Cinza médio
 
 // ------------------------------------------
 // Cores de Fundo (Baseadas no Figma)
@@ -41,8 +42,9 @@ $color-text-dark: #061d3d; // Cor principal para textos escuros (Cor das Letras)
 $color-text-light: #dffbf5; // Cor para textos claros (em fundos escuros, Cor das Letras)
 $color-text-secondary: #6c757d; // Cor de texto para subtítulos e placeholders (cinza neutro)
 $color-text-placeholder: #adb5bd; // Cor mais clara para placeholders
-
+$color-text-medium: #7f8c8d; // Texto secundário/placeholder
 // ------------------------------------------
+$color-warning-text: #d35400; // Texto para alertas
 // Cores de Feedback (Baseadas no Figma e Alertas Comuns)
 // ------------------------------------------
 $color-success: #00fd1d; // Verde para sucesso/confirmação (Cores de Confirmação/Alerta)

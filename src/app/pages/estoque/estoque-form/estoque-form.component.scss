@@ -1,57 +1,246 @@
-// src/app/pages/estoque/estoque-form/estoque-form.component.scss
-@import "../../../../styles/variables"; // Seus variáveis globais
-@import "../../../../styles.scss"; // Seus estilos globais (incluindo .form-control, .btn, .main-page-content, .form-grid, etc.)
+/* src/app/pages/estoque/estoque-form/estoque-form.component.scss */
+@import "../../../../styles/variables"; // Your global variables
+@import "../../../../styles.scss"; // Your global styles (including .form-control, .btn, .main-page-content, etc.)
 
-// Estilos específicos para este formulário se necessário.
-// Ex: Se o `form-grid` precisar de ajustes específicos aqui.
+// Overall Page Container Enhancements
+.main-page-content {
+  background-color: $color-background; // Lighter background for the entire form area
+  padding: 2.5rem 2rem; // Increased padding for more breathing room
+  border-radius: $border-radius-medium; // Softer, more modern corners
+  box-shadow: $box-shadow-medium; // Subtle shadow for depth
+  margin: 2rem auto; // Center the content on larger screens
+  max-width: 1200px; // Max width for better readability
+  width: 95%; // Responsive width
+  box-sizing: border-box; // Ensure padding is included in the width
+}
+
+// Header Styling
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2.5rem; // More space below header
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid $color-border; // Subtle separator
+
+  .page-title {
+    color: $color-text-dark; // Darker title color
+    font-size: 2.2rem; // Larger, more prominent title
+    font-weight: 700; // Bold
+    margin: 0; // Remove default margin
+  }
+  .header-actions {
+    display: flex;
+    gap: 1rem; // Space between buttons
+  }
+}
+
+// Form Container Styling
+.form-container {
+  padding: 2rem; // Internal padding for the form
+  background-color: #fff; // White background for the form fields area
+  border-radius: $border-radius-medium; // Rounded corners for the form area
+  box-shadow: $box-shadow-medium; // Subtle shadow for the form container itself
+}
+
+// Form Grid for input fields
 .form-grid {
   display: grid;
   grid-template-columns: repeat(
     auto-fit,
-    minmax(280px, 1fr)
-  ); // Ajuste conforme necessário
-  gap: 1.5rem; // Espaçamento entre os campos
+    minmax(300px, 1fr)
+  ); // Slightly wider min-width for fields
+  gap: 2rem; // Increased spacing between grid items
 
-  .full-width {
-    grid-column: 1 / -1; // Ocupa todas as colunas
+  .form-group {
+    margin-bottom: 0; // No individual margin-bottom; rely on grid gap
+    display: flex;
+    flex-direction: column; // Stack label and input
+
+    label {
+      color: $color-text-medium; // Slightly lighter label color
+      font-weight: 600; // Make labels a bit bolder
+      margin-bottom: 0.6rem; // Space between label and input
+      display: block; // Ensure label takes its own line
+    }
+
+    .form-control {
+      padding: 0.85rem 1rem; // More padding for input fields
+      border: 1px solid $color-border; // Defined border color
+      border-radius: $border-radius-small; // Slightly rounded input fields
+      font-size: 1rem; // Standard font size
+      color: $color-text-dark; // Input text color
+      transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+
+      &:focus {
+        border-color: $color-primary; // Highlight on focus
+        box-shadow: 0 0 0 0.2rem rgba($color-primary, 0.25); // Subtle glow
+        outline: none; // Remove default outline
+      }
+
+      &.is-invalid {
+        border-color: $color-error-bg; // Red border for invalid fields
+      }
+    }
   }
 }
 
-.form-group {
-  margin-bottom: 0; // Remova a margem inferior padrão para usar o gap do grid
-}
-
-// Estilo para o campo readonly, se desejar diferenciá-lo
+// Readonly/Disabled Input Styling
 input[readonly].form-control,
 select[disabled].form-control {
-  background-color: $color-secondary; // Cor mais clara para campos desabilitados
+  background-color: $color-text-secondary; // A distinct, light gray for disabled fields
   cursor: not-allowed;
+  opacity: 0.8; // Slightly faded look
 }
 
+// Required Asterisk Styling
 .required {
-  color: $color-alert-dark; // Cor para indicar campos obrigatórios
+  color: $color-primary; // Use primary color for required asterisk, or keep red if it's a strong warning
   margin-left: 0.25rem;
+  font-weight: 700;
 }
 
+// Invalid Feedback Message Styling
 .invalid-feedback {
-  color: $color-alert-dark;
-  font-size: 0.875em;
-  margin-top: 0.25rem;
+  color: $color-error-border;
+  font-size: 0.85rem; // Slightly smaller font for feedback
+  margin-top: 0.5rem; // More space above the message
+  animation: fadeIn 0.3s ease-out; // Simple fade-in animation
 }
 
+// Form Action Buttons
+.form-actions {
+  display: flex;
+  justify-content: flex-end; // Align buttons to the right
+  gap: 1.2rem; // Space between buttons
+  margin-top: 3rem; // More space above action buttons
+  padding-top: 1.5rem;
+  border-top: 1px solid $color-border; // Separator for action buttons
+
+  .btn {
+    padding: 0.8rem 1.8rem; // More generous padding
+    font-size: 1.05rem; // Slightly larger font size
+    font-weight: 600; // Bolder text
+    border-radius: $border-radius-medium; // Pill-shaped buttons
+    cursor: pointer;
+    transition: all 0.2s ease-in-out; // Smooth transitions
+
+    i {
+      margin-right: 0.5rem; // Space between icon and text
+    }
+
+    &.btn-primary {
+      background-color: $color-primary;
+      color: #fff;
+      border: 1px solid $color-primary;
+
+      &:hover:not([disabled]) {
+        background-color: darken(
+          $color-primary,
+          8%
+        ); // Slightly darker on hover
+        border-color: darken($color-primary, 8%);
+        transform: translateY(-2px); // Subtle lift effect
+      }
+      &:active:not([disabled]) {
+        transform: translateY(0); // Press effect
+      }
+    }
+
+    &.btn-secondary-outline {
+      background-color: transparent;
+      color: $color-secondary; // Use secondary color for text
+      border: 1px solid $color-secondary;
+
+      &:hover:not([disabled]) {
+        background-color: rgba(
+          $color-secondary,
+          0.1
+        ); // Light background on hover
+        color: darken($color-secondary, 10%); // Darker text on hover
+        transform: translateY(-2px);
+      }
+      &:active:not([disabled]) {
+        transform: translateY(0);
+      }
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+}
+
+// Loading Overlay
 .loading-overlay {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.9); // Slightly more opaque
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  border-radius: $border-radius-large; // Match parent container's border-radius
+
   .spinner-border {
-    width: 3rem;
-    height: 3rem;
+    width: 4rem; // Larger spinner
+    height: 4rem; // Larger spinner
+    color: $color-primary !important; // Ensure spinner uses primary color
+    border-width: 0.35em; // Thicker spinner border
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .main-page-content {
+    padding: 1.5rem 1rem;
+    margin: 1rem auto;
+  }
+
+  .page-header {
+    flex-direction: column; // Stack title and buttons
+    align-items: flex-start;
+    margin-bottom: 2rem;
+
+    .page-title {
+      font-size: 1.8rem;
+      margin-bottom: 1rem; // Space below title
+    }
+
+    .header-actions {
+      width: 100%; // Buttons take full width
+      .btn {
+        width: 100%; // Each button takes full width
+      }
+    }
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr; // Single column on small screens
+    gap: 1.5rem;
+  }
+
+  .form-actions {
+    flex-direction: column; // Stack action buttons
+    gap: 1rem;
+    .btn {
+      width: 100%; // Each button takes full width
+    }
+  }
+}
+
+// Keyframe for fade-in animation
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

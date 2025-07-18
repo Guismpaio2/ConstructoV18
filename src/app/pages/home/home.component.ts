@@ -7,8 +7,9 @@ import { ProdutoService } from '../../services/produto.service';
 import { User } from '../../models/user.model';
 import { BaixaEstoque } from '../../models/baixa-estoque.model';
 import { EstoqueItem } from '../../models/item-estoque.model';
+import { Produto } from '../../models/produto.model'; // Importe o modelo Produto
 import { Observable, Subscription, combineLatest, of } from 'rxjs';
-import { map, take, startWith } from 'rxjs/operators';
+import { map, take, startWith, switchMap } from 'rxjs/operators';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { Timestamp } from '@angular/fire/firestore';
 
@@ -22,7 +23,6 @@ export class HomeComponent implements OnInit, OnDestroy {
   ultimasBaixas$: Observable<BaixaEstoque[]> = of([]);
   materiaisEmFalta$: Observable<EstoqueItem[]> = of([]);
 
-  // MUDANÇA AQUI: Inicialize as propriedades com um Observable de número 0
   totalEstoqueItems$: Observable<number> = of(0);
   totalBaixasMes$: Observable<number> = of(0);
   totalProdutosCadastrados$: Observable<number> = of(0);
@@ -44,10 +44,11 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.totalProdutosCadastrados$ = this.produtoService
       .getAllProdutosSimple()
       .pipe(
-        // <-- MUDANÇA AQUI
-        map((produtos) => produtos.length)
+        map((produtos) => produtos.length),
+        startWith(0)
       );
-    // Estas atribuições agora sobrescreverão os `of([])` iniciais.
+    this.subscriptions.push(this.totalProdutosCadastrados$.subscribe());
+
     this.ultimasBaixas$ = this.afs
       .collection<BaixaEstoque>('baixas', (ref) =>
         ref.orderBy('dataBaixa', 'desc').limit(5)
@@ -56,16 +57,6 @@ export class HomeComponent implements OnInit, OnDestroy {
       .pipe(startWith([]));
     this.subscriptions.push(this.ultimasBaixas$.subscribe());
 
-    this.materiaisEmFalta$ = this.afs
-      .collection<EstoqueItem>('estoque', (ref) =>
-        ref.where('quantidade', '<=', 5).orderBy('quantidade', 'asc')
-      )
-      .valueChanges({ idField: 'uid' })
-      .pipe(startWith([]));
-    this.subscriptions.push(this.materiaisEmFalta$.subscribe());
-
-    // --- Novos Observables para os cartões de resumo ---
-    // A inicialização aqui sobrescreverá o `of(0)` inicial.
     this.totalEstoqueItems$ = this.estoqueService.getEstoqueItems().pipe(
       map((items) => items.length),
       startWith(0)
@@ -99,11 +90,93 @@ export class HomeComponent implements OnInit, OnDestroy {
       );
     this.subscriptions.push(this.totalBaixasMes$.subscribe());
 
-    this.totalProdutosCadastrados$ = this.produtoService.getProdutos().pipe(
-      map((produtos) => produtos.length),
-      startWith(0)
+    // ----------------------------------------------------
+    // FUNÇÃO MELHORADA: Materiais em Falta/Atenção (CORRIGIDA)
+    // ----------------------------------------------------
+    this.materiaisEmFalta$ = combineLatest([
+      this.estoqueService.getEstoqueItems(), // Pega todos os itens do estoque
+      this.produtoService.getAllProdutosSimple(), // Pega todos os produtos (para possíveis informações de limite)
+    ]).pipe(
+      map(([estoqueItems, produtos]) => {
+        console.log('Todos os itens de estoque:', estoqueItems); // Veja todos os itens aqui
+        console.log('Todos os produtos:', produtos);
+
+        const materiaisEmAlerta: EstoqueItem[] = [];
+        const produtoMap = new Map<string, Produto>();
+        produtos.forEach((p) => produtoMap.set(p.uid!, p)); // Assumindo que Produto tem 'uid'
+
+        estoqueItems.forEach((item) => {
+          // CORREÇÃO AQUI: Usar 'produtoUid' em vez de 'idProduto'
+          const produtoAssociado = produtoMap.get(item.produtoUid);
+
+          // CORREÇÃO AQUI: Como 'quantidadeMinima' não existe em Produto, defina um limite padrão.
+          // Se "Chave de Fenda" com 2 unidades precisa aparecer, um limite de 2 ou mais é necessário.
+          // Por exemplo, se todo item com quantidade <= 5 é considerado em falta:
+          const limiteAlertaQuantidade = 5; // Limite fixo, já que 'quantidadeMinima' não existe em Produto
+
+          // Condição para "em falta" ou "atenção" por quantidade
+          if (item.quantidade <= limiteAlertaQuantidade) {
+            console.log(
+              'Item em falta por quantidade:',
+              item.nomeProduto,
+              item.quantidade
+            );
+            materiaisEmAlerta.push(item);
+          }
+
+          // Lógica para "Atenção" baseada na data de validade próxima
+          // Se o item tem data de validade e está perto de vencer (ex: 30 dias)
+          if (item.dataValidade && item.dataValidade instanceof Timestamp) {
+            const validadeDate = item.dataValidade.toDate();
+            const now = new Date();
+            const diffTime = Math.abs(validadeDate.getTime() - now.getTime());
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            // Se faltam menos de 30 dias para vencer E ele ainda não foi adicionado por baixa quantidade
+            // Evita duplicatas se já foi adicionado pela quantidade baixa
+            if (
+              diffDays <= 30 &&
+              !materiaisEmAlerta.some((m) => m.uid === item.uid)
+            ) {
+              console.log(
+                'Item em falta por validade próxima:',
+                item.nomeProduto,
+                diffDays,
+                'dias restantes'
+              );
+              materiaisEmAlerta.push(item);
+            }
+          }
+        });
+
+        // Opcional: Ordenar os materiais em alerta
+        materiaisEmAlerta.sort((a, b) => {
+          // Priorize por quantidade mais baixa
+          if (a.quantidade !== b.quantidade) {
+            return a.quantidade - b.quantidade;
+          }
+          // Se as quantidades forem iguais, ordene por data de validade mais próxima (se houver)
+          if (a.dataValidade && b.dataValidade) {
+            const dateA =
+              a.dataValidade instanceof Timestamp
+                ? a.dataValidade.toDate()
+                : new Date();
+            const dateB =
+              b.dataValidade instanceof Timestamp
+                ? b.dataValidade.toDate()
+                : new Date();
+            return dateA.getTime() - dateB.getTime();
+          }
+          return 0;
+        });
+
+        console.log('Materiais finais em alerta:', materiaisEmAlerta);
+        return materiaisEmAlerta;
+      }),
+      startWith([])
     );
-    this.subscriptions.push(this.totalProdutosCadastrados$.subscribe());
+    this.subscriptions.push(this.materiaisEmFalta$.subscribe());
+    // ----------------------------------------------------
 
     this.userSubscription = this.user$.subscribe((user) => {
       // Lógica se precisar do objeto user aqui

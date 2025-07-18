@@ -1,6 +1,6 @@
 <div class="main-page-content">
   <div class="page-header">
-    <h1>
+    <h1 class="page-title">
       {{
         estoqueItemId
           ? "Editar Item de Estoque"
@@ -8,7 +8,11 @@
       }}
     </h1>
     <div class="header-actions">
-      <button class="btn secondary" (click)="goBack()" [disabled]="isLoading">
+      <button
+        class="btn btn-secondary-outline"
+        (click)="goBack()"
+        [disabled]="isLoading"
+      >
         <i class="fas fa-arrow-left"></i> Voltar
       </button>
     </div>
@@ -20,7 +24,7 @@
     </div>
   </div>
 
-  <div class="form-container mt-4" *ngIf="!isLoading">
+  <div class="form-container" *ngIf="!isLoading">
     <form [formGroup]="estoqueForm" (ngSubmit)="onSubmit()">
       <div class="form-grid">
         <div class="form-group">
@@ -31,12 +35,11 @@
             id="produtoUid"
             formControlName="produtoUid"
             class="form-control"
-            [ngClass]="{
-              'is-invalid':
-                estoqueForm.get('produtoUid')?.invalid &&
-                (estoqueForm.get('produtoUid')?.dirty ||
-                  estoqueForm.get('produtoUid')?.touched)
-            }"
+            [class.is-invalid]="
+              estoqueForm.get('produtoUid')?.invalid &&
+              (estoqueForm.get('produtoUid')?.dirty ||
+                estoqueForm.get('produtoUid')?.touched)
+            "
           >
             <option value="">Selecione um produto</option>
             <option
@@ -113,12 +116,11 @@
             id="lote"
             formControlName="lote"
             class="form-control"
-            [ngClass]="{
-              'is-invalid':
-                estoqueForm.get('lote')?.invalid &&
-                (estoqueForm.get('lote')?.dirty ||
-                  estoqueForm.get('lote')?.touched)
-            }"
+            [class.is-invalid]="
+              estoqueForm.get('lote')?.invalid &&
+              (estoqueForm.get('lote')?.dirty ||
+                estoqueForm.get('lote')?.touched)
+            "
           />
           <div
             *ngIf="
@@ -141,12 +143,11 @@
             id="quantidade"
             formControlName="quantidade"
             class="form-control"
-            [ngClass]="{
-              'is-invalid':
-                estoqueForm.get('quantidade')?.invalid &&
-                (estoqueForm.get('quantidade')?.dirty ||
-                  estoqueForm.get('quantidade')?.touched)
-            }"
+            [class.is-invalid]="
+              estoqueForm.get('quantidade')?.invalid &&
+              (estoqueForm.get('quantidade')?.dirty ||
+                estoqueForm.get('quantidade')?.touched)
+            "
           />
           <div
             *ngIf="
@@ -183,12 +184,11 @@
             formControlName="localizacao"
             class="form-control"
             placeholder="Ex: Corredor A, Prateleira 3"
-            [ngClass]="{
-              'is-invalid':
-                estoqueForm.get('localizacao')?.invalid &&
-                (estoqueForm.get('localizacao')?.dirty ||
-                  estoqueForm.get('localizacao')?.touched)
-            }"
+            [class.is-invalid]="
+              estoqueForm.get('localizacao')?.invalid &&
+              (estoqueForm.get('localizacao')?.dirty ||
+                estoqueForm.get('localizacao')?.touched)
+            "
           />
           <div
             *ngIf="
@@ -233,10 +233,10 @@
         </ng-container>
       </div>
 
-      <div class="form-actions mt-4">
+      <div class="form-actions">
         <button
           type="submit"
-          class="btn primary"
+          class="btn btn-primary"
           [disabled]="estoqueForm.invalid || isLoading"
         >
           <i class="fas fa-save" *ngIf="!isLoading"></i>
@@ -244,7 +244,7 @@
         </button>
         <button
           type="button"
-          class="btn secondary ms-3"
+          class="btn btn-secondary-outline"
           (click)="goBack()"
           [disabled]="isLoading"
         >
