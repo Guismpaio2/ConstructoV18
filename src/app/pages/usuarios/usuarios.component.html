@@ -35,47 +35,53 @@
 
   <div *ngIf="filteredUsers.length > 0" class="users-grid">
     <div class="user-card" *ngFor="let user of filteredUsers">
-      <div class="profile-circle">
-        <i class="fas fa-user"></i>
+      <div class="profile-section">
+        <div class="profile-circle">
+          <i class="fas fa-user"></i>
+        </div>
+        <h4>{{ user.nome }} {{ user.sobrenome }}</h4>
       </div>
-      <h4>{{ user.nome }} {{ user.sobrenome }}</h4>
-      <div class="user-info-detail">
-        <div>
-          <label>Email:</label>
-          <span>{{ user.email }}</span>
+
+      <div class="details-section">
+        <div class="user-info-detail">
+          <div>
+            <label>Email:</label>
+            <span>{{ user.email }}</span>
+          </div>
+        </div>
+        <div class="user-info-detail">
+          <div>
+            <label>Código:</label>
+            <span>{{ user.employeeCode }}</span>
+          </div>
+        </div>
+        <div class="user-info-detail role-select-group">
+          <label for="role-{{ user.uid }}">Tipo de Permissão:</label>
+          <select
+            id="role-{{ user.uid }}"
+            [(ngModel)]="user.role"
+            (change)="onRoleChange(user)"
+            [disabled]="user.uid === currentUserId"
+          >
+            <option value="Administrador">Administrador</option>
+            <option value="Estoquista">Estoquista</option>
+            <option value="Leitor">Leitor</option>
+          </select>
+        </div>
+        <div class="user-info-detail">
+          <div>
+            <label>Data de Cadastro:</label>
+            <span>{{ formatTimestamp(user.dataCadastro) }}</span>
+          </div>
+        </div>
+        <div class="user-info-detail">
+          <div>
+            <label>Último Login:</label>
+            <span>{{ formatTimestamp(user.lastLogin) }}</span>
+          </div>
         </div>
       </div>
-      <div class="user-info-detail">
-        <div>
-          <label>Código:</label>
-          <span>{{ user.employeeCode }}</span>
-        </div>
-      </div>
-      <div class="user-info-detail role-select-group">
-        <label for="role-{{ user.uid }}">Tipo de Permissão:</label>
-        <select
-          id="role-{{ user.uid }}"
-          [(ngModel)]="user.role"
-          (change)="onRoleChange(user)"
-          [disabled]="user.uid === currentUserId"
-        >
-          <option value="Administrador">Administrador</option>
-          <option value="Estoquista">Estoquista</option>
-          <option value="Leitor">Leitor</option>
-        </select>
-      </div>
-      <div class="user-info-detail">
-        <div>
-          <label>Data de Cadastro:</label>
-          <span>{{ formatTimestamp(user.dataCadastro) }}</span>
-        </div>
-      </div>
-      <div class="user-info-detail">
-        <div>
-          <label>Último Login:</label>
-          <span>{{ formatTimestamp(user.lastLogin) }}</span>
-        </div>
-      </div>
+
       <button
         *ngIf="user.uid !== currentUserId"
         class="btn-delete-user"

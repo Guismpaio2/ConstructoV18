@@ -1,301 +1,350 @@
-// src/app/pages/usuarios/usuarios.component.scss
-@import "../../../styles.scss"; // Importe estilos globais para acessar as variáveis.
+@import "../../../styles/variables"; // Importa as variáveis de cor e espaçamento
 
 .main-content-container {
-  padding: $spacing-l; // Adiciona um padding geral ao container principal
-  background-color: $color-background; // Fundo geral da página
+  padding: $spacing-l; // Padding geral para o conteúdo principal
+  background-color: $color-background-light; // Fundo geral da página
+  min-height: calc(
+    100vh - 60px
+  ); // Ajusta para a altura da tela, considerando a navbar
+  display: flex;
+  flex-direction: column;
 }
 
 .page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   margin-bottom: $spacing-l;
-
   h1 {
-    color: $color-text-dark;
-    font-size: $font-size-h2; // Usando a variável para h2
-    font-weight: 600;
-  }
-
-  .pagination-controls {
-    display: flex;
-    gap: $spacing-xs;
-    align-items: center;
-
-    button {
-      background-color: transparent;
-      border: 1px solid $color-border; // Cor de borda
-      color: $color-text-dark;
-      padding: $spacing-xxs $spacing-xs;
-      border-radius: $border-radius-small;
-      cursor: pointer;
-      font-size: $font-size-base;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 32px; // Largura fixa para os botões de navegação
-      height: 32px; // Altura fixa para os botões de navegação
-
-      &:hover:not(:disabled) {
-        background-color: $color-secondary-lighter; // Cor de hover mais clara
-      }
-
-      &:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
-    }
-
-    span {
-      color: $color-text-dark;
-      font-size: $font-size-base;
-    }
+    color: $color-primary-dark; // Cor do título da página
+    font-size: $font-size-h2; // Reajustado para ser um pouco menor que H1
+    font-weight: 700; // Bold para o título
   }
 }
 
 .search-filter-bar {
   display: flex;
-  flex-wrap: wrap; // Permite que os itens quebrem a linha em telas menores
-  gap: $spacing-m; // Aumenta o espaçamento entre os itens
-  margin-bottom: $spacing-xl; // Aumenta a margem inferior
-  align-items: center;
-  background-color: $color-background-card; // Fundo branco para a barra de busca
-  padding: $spacing-m;
-  border-radius: $border-radius-medium; // Bordas arredondadas
-  box-shadow: $box-shadow-light; // Sombra suave
+  gap: $spacing-m; // Espaçamento entre os elementos da barra
+  margin-bottom: $spacing-xl; // Espaçamento abaixo da barra de pesquisa
+  flex-wrap: wrap; // Permite que os itens quebrem para a próxima linha em telas menores
+  align-items: center; // Alinha os itens da barra verticalmente
 
   .search-input {
-    position: relative;
     flex-grow: 1;
-    min-width: 280px; // Aumenta a largura mínima para o campo de busca
+    min-width: 250px; // Garante que o input de pesquisa não fique muito pequeno
+    position: relative; // Necessário para posicionar o ícone de busca
 
     input {
-      width: 100%;
-      padding: $spacing-xs $spacing-s $spacing-xs $spacing-l; // Ajusta padding para ícone
-      border: 1px solid $color-border; // Usa variável de borda
-      border-radius: $border-radius-small;
-      font-size: $font-size-base;
-      color: $color-text-dark;
-      background-color: $color-background-card; // Fundo do input branco
+      width: 100%; // Ocupa 100% da largura do seu container
+      background-color: $color-background-card;
+      border: 1px solid $color-border-input;
+      border-radius: $border-radius-medium; // Bordas mais arredondadas
+      padding: $spacing-xs $spacing-s $spacing-xs $spacing-xl; // Aumenta o padding para o ícone
+
       &:focus {
-        border-color: $color-brand-base; // Cor de foco com a cor da marca
-        outline: none;
-        box-shadow: 0 0 0 2px rgba($color-brand-base, 0.2); // Sombra de foco
+        outline: none; // Remove o outline padrão
+        border-color: $color-brand-base;
+        box-shadow: 0 0 0 2px rgba($color-brand-base, 0.2);
       }
     }
 
     .search-icon {
       position: absolute;
-      left: $spacing-xs;
+      left: $spacing-s; // Ajusta a posição do ícone da lupa
       top: 50%;
       transform: translateY(-50%);
-      color: $color-text-dark; // Cor do ícone de busca
-      font-size: $font-size-base;
+      color: $color-text-secondary; // Cor mais suave para o ícone
+      pointer-events: none; // Permite clicar no input mesmo com o ícone
     }
   }
 
   select {
-    padding: $spacing-xs;
-    border: 1px solid $color-border; // Usa variável de borda
-    border-radius: $border-radius-small;
-    background-color: $color-background-card; // Fundo branco para select
+    padding: $spacing-xs $spacing-s;
+    border-radius: $border-radius-medium; // Bordas mais arredondadas
+    border: 1px solid $color-border-input;
+    background-color: $color-background-card;
     color: $color-text-dark;
-    cursor: pointer;
     font-size: $font-size-base;
+    cursor: pointer;
+    appearance: none; // Remove o estilo padrão do select para permitir customização total
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%236c757d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-down"><polyline points="6 9 12 15 18 9"></polyline></svg>'); // Ícone de seta para baixo
+    background-repeat: no-repeat;
+    background-position: right $spacing-s center; // Ajuste a posição do ícone da seta
+    background-size: 16px; // Tamanho do ícone
+    min-width: 150px; // Garante que os selects tenham uma largura mínima decente
 
     &:focus {
-      border-color: $color-brand-base;
       outline: none;
+      border-color: $color-brand-base;
       box-shadow: 0 0 0 2px rgba($color-brand-base, 0.2);
     }
   }
 }
 
+.alert {
+  padding: $spacing-m;
+  margin-bottom: $spacing-xl;
+  border-radius: $border-radius-medium;
+  font-size: $font-size-large;
+  text-align: center;
+  color: $color-text-dark; // Cor de texto genérica para alertas
+}
+
+.alert-info {
+  background-color: lighten(
+    $color-primary-light,
+    30%
+  ); // Um azul mais claro para info
+  border: 1px solid lighten($color-primary-light, 20%);
+  color: darken($color-primary-light, 20%);
+}
+
 .users-grid {
   display: grid;
   grid-template-columns: repeat(
-    auto-fit,
+    auto-fill,
     minmax(280px, 1fr)
-  ); // Ajusta minmax para os cards
-  gap: $spacing-l; // Espaçamento maior entre os cards
+  ); // Cards responsivos
+  gap: $spacing-l; // Espaçamento entre os cards
+  justify-content: center; // Centraliza os cards quando não preenchem a linha toda
+  flex-grow: 1; // Permite que a grade ocupe o espaço restante
 }
 
 .user-card {
   background-color: $color-background-card;
-  border-radius: $border-radius-medium;
-  box-shadow: $box-shadow-light;
-  padding: $spacing-l $spacing-m; // Ajusta padding
+  border-radius: $border-radius-large; // Bordas mais arredondadas para o card
+  box-shadow: $box-shadow-medium; // Sombra mais proeminente
+  padding: $spacing-l; // Aumenta o padding interno do card
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; // Transição para hover
 
   &:hover {
-    transform: translateY(-$spacing-xxs); // Pequeno movimento para cima
-    box-shadow: $box-shadow-medium; // Sombra mais proeminente no hover
+    transform: translateY(-5px); // Efeito de levantar no hover
+    box-shadow: $box-shadow-heavy; // Sombra mais forte no hover
+  }
+
+  .profile-section {
+    margin-bottom: $spacing-m;
   }
 
   .profile-circle {
-    width: 90px; // Aumenta um pouco o círculo
-    height: 90px;
-    background-color: $color-brand-base; // Usa a cor da marca
+    width: 100px; // Aumenta o tamanho do círculo do perfil
+    height: 100px;
+    background-color: $color-brand-base;
     border-radius: 50%;
     display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: $spacing-m; // Ajusta margem
-    border: 3px solid $color-brand-light; // Adiciona uma borda sutil
+    justify-content: center; // Centraliza horizontalmente
+    align-items: center; // Centraliza verticalmente
+    margin-bottom: $spacing-s;
+    box-shadow: $box-shadow-light; // Sombra para o círculo do perfil
 
     .fas.fa-user {
-      font-size: 3.5rem; // Aumenta o ícone
-      color: $color-text-light; // Ícone branco
+      font-size: 50px; // Tamanho do ícone
+      color: $color-text-light;
+      line-height: 1; // Garante que o ícone não tenha espaçamento extra de linha
     }
   }
 
   h4 {
-    color: $color-text-dark;
-    font-size: $font-size-h4; // Usando a variável para h4
-    font-weight: 600;
-    margin-bottom: $spacing-s;
+    color: $color-primary-dark; // Cor do nome do usuário
+    font-size: $font-size-h5; // Tamanho da fonte para o nome
+    margin-bottom: $spacing-xs;
+    font-weight: 600; // Semi Bold para o nome
+    word-break: break-word; // Permite quebra de palavra para nomes longos
+    max-width: 100%; // Garante que o nome não vaze do card
+  }
+
+  .details-section {
+    width: 100%;
+    margin-top: $spacing-m;
   }
 
   .user-info-detail {
-    width: 100%;
-    margin-bottom: $spacing-xs;
-    text-align: left;
+    margin-bottom: $spacing-s;
 
-    div {
-      // Este div é para as informações "Nome Completo", "Código", "Data de Cadastro", "Último Login"
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background-color: $color-secondary-lighter; // Cor de fundo mais clara para as caixas de informação
-      padding: $spacing-xxs $spacing-xs;
+    // Altera o estilo do div interno para o layout do card
+    > div {
+      // Aplica ao div diretamente dentro de .user-info-detail
+      background-color: $color-background-light; // Fundo cinza claro para cada detalhe
+      padding: $spacing-xs $spacing-m;
       border-radius: $border-radius-small;
-      border: 1px solid $color-secondary-darker; // Borda sutil
+      display: flex;
+      justify-content: space-between; // Espaça label e valor
+      align-items: center; // Alinha verticalmente
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05); // Sombra interna sutil
+      min-height: 40px; // Garante uma altura mínima para todos os detalhes
     }
 
     label {
-      font-weight: 500;
-      color: $color-primary-base; // Usa uma cor de texto mais proeminente para o label
+      font-weight: 500; // Medium weight para as labels
+      color: $color-text-secondary; // Cor mais suave para as labels
       font-size: $font-size-small;
-      margin-bottom: 0; // Remove margem se estiver dentro do div flex
+      white-space: nowrap; // Evita quebra de linha para a label
+      margin-right: $spacing-xs; // Espaçamento entre label e valor
+      flex-shrink: 0; // Evita que a label encolha
     }
 
     span {
       color: $color-text-dark;
       font-size: $font-size-base;
-      // Removendo padding, border e background que estavam no span para melhor alinhamento
-      padding: 0;
-      border: none;
-      background-color: transparent;
+      font-weight: normal;
+      text-align: right; // Alinha o valor à direita
+      flex-grow: 1; // Permite que o span ocupe o espaço restante
+      word-break: break-all; // Permite quebra de palavra longa dentro do span (ex: email longo)
+      overflow: hidden; // Esconde o conteúdo que transborda
+      text-overflow: ellipsis; // Adiciona reticências se o texto for muito longo
+      white-space: normal; // Permite quebra de linha para valores longos se necessário
     }
 
-    // Estilo específico para o select de Role
     &.role-select-group {
-      display: flex; // Mantém o flex para label e select
-      flex-direction: column;
-      align-items: flex-start; // Alinha itens à esquerda
-      margin-top: $spacing-xs; // Margem superior para separar
+      display: flex;
+      flex-direction: column; // Empilha label e select
+      align-items: flex-start; // Alinha a label à esquerda
 
       label {
-        font-weight: 500;
-        color: $color-primary-base;
-        font-size: $font-size-small;
-        margin-bottom: $spacing-xxs; // Pequena margem abaixo do label
+        margin-bottom: $spacing-xxs; // Espaçamento entre label e select
+        align-self: flex-start; // Alinha a label à esquerda
       }
 
       select {
         width: 100%;
         padding: $spacing-xs;
-        border: 1px solid $color-border;
         border-radius: $border-radius-small;
+        border: 1px solid $color-border;
         background-color: $color-background-card;
         color: $color-text-dark;
         font-size: $font-size-base;
         cursor: pointer;
+        appearance: none; // Remove o estilo padrão do select
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%236c757d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-down"><polyline points="6 9 12 15 18 9"></polyline></svg>');
+        background-repeat: no-repeat;
+        background-position: right $spacing-xs center;
+        background-size: 16px;
 
         &:focus {
-          border-color: $color-brand-base;
           outline: none;
+          border-color: $color-brand-base;
           box-shadow: 0 0 0 2px rgba($color-brand-base, 0.2);
         }
 
         &:disabled {
-          background-color: $color-secondary-lighter; // Cor de fundo para disabled
+          background-color: lighten(
+            $color-background-light,
+            3%
+          ); // Fundo ligeiramente diferente para desabilitado
           cursor: not-allowed;
           opacity: 0.7;
+          color: $color-text-medium; // Cor do texto mais suave para disabled
         }
       }
     }
   }
 
   .btn-delete-user {
-    @extend .btn; // Estende as propriedades base de .btn
-    @extend .secondary; // Usa o estilo de botão secundário
-    margin-top: $spacing-l; // Mais espaçamento
+    background-color: $color-error;
+    color: $color-text-light;
+    padding: $spacing-s $spacing-l;
+    border-radius: $border-radius-medium;
+    border: none;
+    cursor: pointer;
+    font-size: $font-size-base;
+    margin-top: $spacing-m; // Espaçamento acima do botão
     width: 100%; // Ocupa a largura total do card
-    font-size: $font-size-small;
-    padding: $spacing-s $spacing-m; // Aumenta o padding para o botão
-    border: 1px solid $color-danger; // Borda vermelha
-    color: $color-danger; // Texto vermelho
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: $spacing-xxs; // Espaçamento entre ícone e texto
+    box-shadow: $box-shadow-sm; // Sombra sutil para o botão
 
     &:hover {
-      background-color: lighten($color-danger, 40%); // Hover mais suave
-      color: $color-danger;
+      background-color: darken($color-error, 10%);
+      box-shadow: $box-shadow-medium; // Aumenta a sombra no hover
     }
 
     &:active {
-      background-color: lighten($color-danger, 30%);
-      color: $color-danger;
-    }
-
-    &:disabled {
-      color: lighten($color-danger, 30%);
-      border-color: lighten($color-danger, 30%);
-      cursor: not-allowed;
+      background-color: darken($color-error, 20%);
+      box-shadow: none; // Remove a sombra no active
     }
 
     .fas.fa-trash-alt {
-      margin-right: $spacing-xxs; // Espaçamento entre o ícone e o texto
+      font-size: $font-size-base;
     }
   }
-}
-
-.alert-info {
-  margin-top: $spacing-xl;
-  padding: $spacing-m;
-  background-color: lighten($color-info, 35%); // Fundo claro para o alerta
-  color: $color-info; // Texto da cor de informação
-  border: 1px solid $color-info;
-  border-radius: $border-radius-medium;
-  text-align: center;
-  font-size: $font-size-large;
-  font-weight: 500;
 }
 
 // Media Queries para responsividade
 @media (max-width: 768px) {
-  .search-filter-bar {
-    flex-direction: column;
-    align-items: stretch;
+  .main-content-container {
+    padding: $spacing-m;
+  }
 
-    .search-input {
-      min-width: unset; // Remove largura mínima em telas pequenas
+  .page-header {
+    h1 {
+      font-size: $font-size-h3;
     }
+  }
 
+  .search-filter-bar {
+    flex-direction: column; // Empilha os itens em telas menores
+    gap: $spacing-s; // Reduz o espaçamento
+
+    .search-input,
     select {
-      width: 100%; // Ocupa largura total
+      width: 100%; // Ocupa toda a largura disponível
+      min-width: unset; // Remove o min-width
     }
   }
 
   .users-grid {
-    grid-template-columns: 1fr; // Uma coluna em telas menores
+    grid-template-columns: 1fr; // Um card por linha em telas muito pequenas
+    gap: $spacing-m; // Reduz o espaçamento
   }
 
   .user-card {
-    width: 100%; // Ocupa largura total do container
+    width: 100%; // Cards ocupam toda a largura em telas menores
+    max-width: 380px; // Aumenta um pouco o max-width para melhor visualização em celulares maiores
+    margin: 0 auto; // Centraliza os cards
+  }
+}
+
+// Media Query para telas menores que 480px (celulares)
+@media (max-width: 480px) {
+  .main-content-container {
+    padding: $spacing-s; // Diminui ainda mais o padding em telas muito pequenas
+  }
+
+  .page-header {
+    h1 {
+      font-size: $font-size-h4; // Título menor para telas muito pequenas
+    }
+  }
+
+  .search-filter-bar {
+    gap: $spacing-xs; // Reduz o espaçamento entre elementos da barra
+  }
+
+  .user-card {
+    padding: $spacing-m; // Reduz o padding do card em telas muito pequenas
+    .profile-circle {
+      width: 80px; // Reduz o círculo do perfil
+      height: 80px;
+      .fas.fa-user {
+        font-size: 40px; // Reduz o ícone do perfil
+      }
+    }
+    h4 {
+      font-size: $font-size-base; // Reduz o nome do usuário
+    }
+    .user-info-detail {
+      label,
+      span {
+        font-size: $font-size-small; // Reduz o texto dos detalhes
+      }
+    }
+    .btn-delete-user {
+      padding: $spacing-xs $spacing-m; // Reduz o padding do botão
+      font-size: $font-size-small; // Reduz o texto do botão
+    }
   }
 }

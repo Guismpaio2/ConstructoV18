@@ -4,11 +4,11 @@
 .dashboard-container {
   display: flex;
   min-height: 100vh;
-  background-color: $color-primary-dark; 
+  background-color: $color-primary-dark;
 }
 
 .sidebar {
-  width: 250px;
+  width: 80px; // Largura inicial menor para mostrar apenas ícones
   background-color: $color-primary-dark;
   color: $color-text-light;
   display: flex;
@@ -21,13 +21,29 @@
   top: 0;
   z-index: 100;
   overflow-y: auto;
+  transition: width 0.3s ease; // Transição para a largura
+
+  &:hover {
+    width: 250px; // Largura expandida ao passar o mouse
+  }
 
   .logo {
     text-align: center;
     margin-bottom: $spacing-xl;
+    transition: all 0.3s ease; // Transição para a logo também
+
     img {
-      width: 80px;
+      width: 50px; // Largura inicial da logo
       height: auto;
+      margin-left: auto;
+      margin-right: auto;
+      margin-top: auto;
+      transition: width 0.3s ease; // Transição para a largura da imagem
+
+      // Ajusta a largura da imagem da logo quando a sidebar expande
+      .sidebar:hover & {
+        width: 150px; // Exemplo: Aumenta a logo um pouco, ajuste conforme desejar
+      }
     }
   }
 
@@ -47,10 +63,21 @@
         color: $color-text-light;
         font-size: $font-size-base;
         transition: background-color $transition-speed, color $transition-speed;
+        white-space: nowrap; // Evita que o texto quebre linha
+        overflow: hidden; // Esconde o que exceder a largura
 
         i {
           margin-right: $spacing-s;
           font-size: $font-size-large;
+        }
+
+        .nav-text {
+          opacity: 0; // Inicialmente oculto
+          transition: opacity 0.3s ease; // Transição para opacidade
+          // Para garantir que o texto não ocupe espaço antes de aparecer
+          width: 0;
+          visibility: hidden;
+          transition: opacity 0.3s ease, width 0.3s ease, visibility 0.3s ease;
         }
 
         &:hover {
@@ -68,12 +95,19 @@
     }
   }
 
+  // Mostra o texto do menu quando a sidebar é expandida
+  &:hover .nav-menu li a .nav-text {
+    opacity: 1;
+    width: auto; // Permite que o texto ocupe o espaço necessário
+    visibility: visible;
+  }
+
   .sidebar-footer {
     padding: $spacing-s $spacing-l;
     .btn {
       width: 100%;
       background-color: $color-secondary-base;
-      color: $color-secondary-lighter;
+      color: $color-secondary-lighter; // Usando lighter para um contraste melhor com o azul
       border-radius: $border-radius-small;
       padding: $spacing-xs $spacing-s;
       font-size: $font-size-base;
@@ -81,50 +115,61 @@
       border: none;
       cursor: pointer;
       transition: background-color $transition-speed;
+      opacity: 0; // Inicialmente oculto
+      transition: opacity 0.3s ease; // Transição para opacidade
+      white-space: nowrap; // Evita quebra de linha do texto do botão
+      overflow: hidden; // Esconde o que exceder
+      pointer-events: none; // Desativa cliques enquanto oculto para evitar seleção acidental
 
       &:hover {
         background-color: darken($color-secondary-base, 10%);
       }
     }
   }
+
+  // Mostra o botão "Sair" quando a sidebar é expandida
+  &:hover .sidebar-footer .btn {
+    opacity: 1;
+    pointer-events: auto; // Reativa cliques
+  }
 }
 
 .main-content {
   flex-grow: 1;
-  margin-left: 250px; // Offset by sidebar width
+  margin-left: 80px; // Offset inicial pela largura da sidebar
   background-color: $color-background;
   display: flex;
   flex-direction: column;
-
-  // Adicione um padding-top ao main-content para deixar espaço para a top-bar fixa
   padding-top: calc(
     $spacing-l + 60px + $spacing-m * 2
-  ); // Altura da top-bar + suas margens/padding.
-  // Ajuste "60px" para a altura real da sua top-bar.
-  padding-left: $spacing-xl; // Adicione padding horizontal para o conteúdo principal
+  ); /* Ajuste o padding-top se necessário */
+  padding-left: $spacing-xl;
   padding-right: $spacing-xl;
-  padding-bottom: $spacing-xl; // Um pouco de padding na parte inferior
+  padding-bottom: $spacing-xl;
+  transition: margin-left 0.3s ease; // Transição para o margin-left
+}
+
+// Ajusta o offset quando a sidebar expande
+.sidebar:hover + .main-content {
+  margin-left: 250px;
 }
 
 .top-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  // REMOVA margin-bottom AQUI
   padding: $spacing-m $spacing-xl;
   background-color: $color-background-card;
   border-radius: $border-radius-medium;
   box-shadow: $box-shadow-light;
   width: calc(
-    100% - 250px - (#{$spacing-xl} * 2)
-      // Ajuste para considerar o padding do main-content
-  );
+    100% - 80px - (#{$spacing-xl} * 2)
+  ); // Ajuste inicial para largura da sidebar
   position: fixed;
-  top: $spacing-l; // Distância do topo da tela
-  left: calc(
-    250px + #{$spacing-xl}
-  ); // Posição após a sidebar + padding esquerdo do main-content
+  top: $spacing-l;
+  left: calc(80px + #{$spacing-xl}); // Posição inicial
   z-index: 50;
+  transition: width 0.3s ease, left 0.3s ease; // Transição para largura e posição
 
   .page-title {
     font-size: $font-size-h2;
@@ -158,35 +203,46 @@
   }
 }
 
-// REMOVA ESTE SELETOR, POIS O PADDING SERÁ APLICADO AO .main-content
-// router-outlet + * {
-//   // Selects the element directly after router-outlet (your loaded component)
-//   margin-top: calc(
-//     $spacing-l + 60px + $spacing-m * 2
-//   );
-// }
+// Ajusta largura e posição da top-bar quando a sidebar expande
+.sidebar:hover ~ .main-content .top-bar {
+  /* Changed selector to target top-bar correctly */
+  width: calc(100% - 250px - (#{$spacing-xl} * 2));
+  left: calc(250px + #{$spacing-xl});
+}
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .sidebar {
-    width: 60px;
+    width: 60px; // Largura para mobile
+    // Em mobile, geralmente não queremos o efeito de hover de expansão
+    // Remova o :hover para mobile se não quiser expandir
+    &:hover {
+      width: 60px; // Mantém a largura para mobile, sem expansão
+    }
     .logo {
       img {
-        width: 40px;
+        width: 20px; // Logo menor em mobile
+      }
+      &:hover img {
+        width: 25px; // Mantém a logo menor em mobile, sem expansão
       }
     }
     .nav-menu {
       li {
         a {
           justify-content: center;
-          span {
-            display: none;
+          padding-left: $spacing-s; // Ajusta padding para centralizar
+          i {
+            margin-right: 0; // Remove margem do ícone em mobile
+          }
+          .nav-text {
+            display: none; // Oculta o texto completamente em mobile
           }
         }
         &.active-link {
           border-left: none;
           border-bottom: 5px solid $color-brand-base;
-          padding-left: $spacing-s;
+          padding-left: $spacing-s; // Ajusta padding
         }
       }
     }
@@ -194,37 +250,38 @@
       padding: $spacing-s $spacing-xs;
       .btn {
         width: auto;
-        font-size: 0;
+        font-size: 0; // Esconde o texto do botão
         padding: $spacing-xs;
         overflow: hidden;
         position: relative;
+        opacity: 1; // Sempre visível para o ícone de saída
+        pointer-events: auto; // Permite cliques
         &::before {
-          content: "\f011";
+          content: "\f011"; // Ícone de "sign-out-alt" do Font Awesome
           font-family: "Font Awesome 5 Free";
           font-weight: 900;
           font-size: $font-size-large;
-          color: $color-text-dark;
+          color: $color-text-light; // Usando light para combinar com o tema escuro
         }
       }
     }
   }
 
   .main-content {
+    margin-left: 60px; // Offset para mobile
+    padding-top: calc($spacing-s + 50px + $spacing-m * 2);
+    padding-left: $spacing-m; // Reduz padding em mobile
+    padding-right: $spacing-m; // Reduz padding em mobile
+  }
+
+  // Mantém o offset para mobile, sem expansão
+  .sidebar:hover + .main-content {
     margin-left: 60px;
-    // Ajuste o padding-top também para mobile, se a top-bar for menor
-    padding-top: calc(
-      $spacing-s + 50px + $spacing-m * 2
-    ); // Ajuste 50px para a altura da top-bar mobile
   }
 
   .top-bar {
-    left: calc(
-      60px + #{$spacing-m}
-    ); // Ajuste left para mobile (sidebar width + padding)
-    width: calc(
-      100% - 60px - (#{$spacing-m} * 2)
-        // Ajuste width para mobile (total width - sidebar width - padding do main-content)
-    );
+    left: calc(60px + #{$spacing-m});
+    width: calc(100% - 60px - (#{$spacing-m} * 2));
     padding: $spacing-s $spacing-m;
     top: $spacing-s;
 
@@ -241,10 +298,9 @@
     }
   }
 
-  // REMOVA ESTE SELETOR TAMBÉM NO MEDIA QUERY
-  // router-outlet + * {
-  //   margin-top: calc(
-  //     $spacing-s + 50px + $spacing-m * 2
-  //   );
-  // }
+  // Mantém a largura e posição da top-bar para mobile
+  .sidebar:hover ~ .main-content .top-bar {
+    width: calc(100% - 60px - (#{$spacing-m} * 2));
+    left: calc(60px + #{$spacing-m});
+  }
 }
