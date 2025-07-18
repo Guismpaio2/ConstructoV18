@@ -4,12 +4,12 @@
 .dashboard-container {
   display: flex;
   min-height: 100vh;
-  background-color: $color-background;
+  background-color: $color-primary-dark; 
 }
 
 .sidebar {
   width: 250px;
-  background-color: $color-primary-base;
+  background-color: $color-primary-dark;
   color: $color-text-light;
   display: flex;
   flex-direction: column;
@@ -73,7 +73,7 @@
     .btn {
       width: 100%;
       background-color: $color-secondary-base;
-      color: $color-text-dark;
+      color: $color-secondary-lighter;
       border-radius: $border-radius-small;
       padding: $spacing-xs $spacing-s;
       font-size: $font-size-base;

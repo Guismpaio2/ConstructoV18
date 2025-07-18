@@ -3,128 +3,243 @@
 @import "../../../styles/_variables.scss"; // Ajuste o caminho conforme a localização real
 @import "../../../styles/_styles.scss"; // Ajuste o caminho conforme a localização real
 
-// O .page-container deve ser definido no seu layout principal (app.component.scss ou similar)
-// para gerenciar a largura total, sidebar e topbar.
-// Aqui, vamos focar no conteúdo interno da página e no "main-content-area".
-
 .main-content-area {
-  flex-grow: 1; // Permite que esta área ocupe o espaço restante no flex container
-  padding: $spacing-l $spacing-xl; // Padding ao redor do conteúdo da página, como nos seus outros prints
-  background-color: $color-background; // Fundo cinza claro da sua app
-  width: 100%; // Ocupa a largura disponível do container pai
-  max-width: 900px; // Largura máxima para o conteúdo principal, ajustando conforme seus outros prints
-  margin: 0 auto; // Centraliza o conteúdo dentro do page-container se houver espaço
-  box-sizing: border-box; // Garante que padding e border sejam incluídos na largura/altura
+  flex-grow: 1;
+  padding: $spacing-l $spacing-xl;
+  background-color: $color-background; // Seu fundo cinza claro
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  box-sizing: border-box;
 }
 
 .page-header {
-  margin-bottom: $spacing-l; // Espaço abaixo do título da página
+  margin-bottom: $spacing-l;
   h1 {
     font-size: $font-size-h2; // Um pouco menor que H1 global, para ser título de página interna
     font-weight: 600;
-    color: $color-text-dark;
-    margin-bottom: $spacing-xs; // Espaço entre título e subtítulo
+    color: $color-text-dark; // Cor de texto escuro
+    margin-bottom: $spacing-xs;
+    position: relative;
+    padding-bottom: $spacing-xxs;
+    &::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 60px;
+      height: 4px;
+      background-color: $color-brand-base; // Linha laranja do seu tema
+      border-radius: $border-radius-small;
+    }
   }
 
   .subtitle {
     font-size: $font-size-base;
-    color: $color-secondary-base; // Use uma cor de texto mais suave para o subtítulo
+    color: $color-text-secondary; // Usando a nova variável para texto secundário
     margin-bottom: 0;
   }
 }
 
 .form-card-container {
   background-color: $color-background-card; // Fundo branco para o "card" do formulário
-  padding: $spacing-xl; // Padding interno do card
-  border-radius: $border-radius-medium; // Cantos arredondados
-  box-shadow: $box-shadow-light; // Sombra sutil para o card
-  width: 100%; // Ocupa a largura disponível dentro do main-content-area
+  padding: $spacing-xl;
+  border-radius: $border-radius-large; // Cantos mais arredondados
+  box-shadow: $box-shadow-medium; // Sombra um pouco mais pronunciada
+  width: 100%;
   display: flex;
   flex-direction: column;
-  gap: $spacing-l; // Espaçamento entre os grupos de formulário
+  gap: $spacing-l;
+  transition: transform $transition-speed ease-out,
+    box-shadow $transition-speed ease-out;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: $box-shadow-heavy; // Sombra mais intensa no hover
+  }
 }
 
-// O .form-group e .form-control já estão definidos no _styles.scss
-// Apenas sobrescreva ou adicione especificidades se necessário aqui
 .form-group {
-  // Sobrescrever margin-bottom se precisar de mais espaço que o default do _styles.scss
-  margin-bottom: $spacing-m; // Exemplo: um pouco mais de espaço
+  margin-bottom: $spacing-s;
+
   label {
-    font-size: $font-size-base; // Labels um pouco maiores
-    font-weight: 500;
-    margin-bottom: $spacing-xs; // Espaço entre label e input
+    font-size: $font-size-base;
+    font-weight: 600;
+    color: $color-text-dark; // Cor de texto escuro
+    margin-bottom: $spacing-xs;
+    display: block;
   }
+
   .form-control {
-    padding: $spacing-s; // Aumentar padding para inputs para melhor toque
-    border-radius: $border-radius-medium; // Inputs com cantos mais arredondados
+    width: 100%;
+    padding: $spacing-s $spacing-m;
+    border: 1px solid $color-border; // Cor de borda geral
+    border-radius: $border-radius-medium; // Cantos arredondados
+    font-size: $font-size-base;
+    color: $color-text-dark; // Cor de texto escuro
+    background-color: $color-background-card; // Fundo branco para inputs
+    transition: border-color $transition-speed ease,
+      box-shadow $transition-speed ease;
+
     &:focus {
-      box-shadow: 0 0 0 3px rgba(adjust-hue($color-primary, 0), 0.2); // Sombra de foco com cor primária
+      outline: none;
+      border-color: $color-primary-base; // Borda na cor primária (azul escuro)
+      box-shadow: 0 0 0 3px rgba($color-primary-base, 0.2); // Sombra de foco sutil (usando a cor primária)
+    }
+
+    &::placeholder {
+      color: $color-text-placeholder; // Usando a nova variável para placeholder
+      opacity: 0.8;
     }
   }
+
+  select.form-control {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    // Usando a cor $color-text-secondary para a seta do select
+    background-image: url('data:image/svg+xml;utf8,<svg fill="#{$color-text-secondary}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path d="M7 10l5 5 5-5z"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right $spacing-m center;
+    background-size: 18px;
+    padding-right: $spacing-xl;
+  }
+
   textarea.form-control {
-    min-height: 120px; // Altura mínima maior para textareas
+    min-height: 120px;
     resize: vertical;
   }
 }
 
+.error-message {
+  color: $color-alert; // Vermelho para erros
+  font-size: $font-size-small;
+  margin-top: $spacing-xxs;
+  opacity: 1;
+  max-height: 100px;
+  overflow: hidden;
+  transition: opacity $transition-speed ease, max-height $transition-speed ease;
+  &.ng-hide {
+    opacity: 0;
+    max-height: 0;
+  }
+}
+
 .form-actions {
   display: flex;
-  justify-content: flex-end; // Alinha os botões à direita
-  gap: $spacing-m; // Espaçamento entre os botões
-  margin-top: $spacing-m; // Espaço acima dos botões, dentro do form-card-container
-  padding-top: $spacing-s; // Pequeno padding acima da linha
-  border-top: 1px solid $color-border; // Linha fina de separação
+  justify-content: flex-end;
+  gap: $spacing-m;
+  margin-top: $spacing-m;
+  padding-top: $spacing-s;
+  border-top: 1px solid $color-border; // Cor de borda geral
 }
 
-// As classes .btn.primary e .btn.secondary já estão definidas no _styles.scss
-// Se precisar de ajustes específicos para os botões desta página:
-.form-actions {
-  .btn {
-    padding: $spacing-s $spacing-l; // Padding ajustado para os botões aqui
-    border-radius: $border-radius-medium; // Bordas mais arredondadas para botões
+.btn {
+  padding: $spacing-s $spacing-l;
+  border-radius: $border-radius-medium; // Cantos arredondados
+  font-size: $font-size-base;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all $transition-speed ease;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
   }
-  .btn.primary {
-    background-color: $color-brand-base; // Usando seu laranja CTA como botão principal
-    color: $color-text-light;
-    &:hover {
-      background-color: $color-brand-light;
-    }
-  }
-  .btn.secondary {
-    background-color: transparent;
-    color: $color-brand-base; // Usando o laranja CTA para o texto e borda do secundário
+
+  &.primary {
+    // Botão "Registrar Baixa" (CTA)
+    background-color: $color-brand-base; // Laranja principal da marca
+    color: $color-text-light; // Texto claro
     border: 1px solid $color-brand-base;
-    &:hover {
-      background-color: lighten($color-brand-base, 40%);
-      color: $color-brand-dark;
+
+    &:hover:not(:disabled) {
+      background-color: $color-brand-light; // Variação mais clara no hover
+      transform: translateY(-2px);
+      box-shadow: $box-shadow-sm;
+    }
+    &:active:not(:disabled) {
+      background-color: $color-brand-dark; // Variação mais escura no active
+      transform: translateY(0);
+      box-shadow: none;
+    }
+  }
+
+  &.secondary {
+    // Botão "Ver Registros de Baixas"
+    background-color: transparent;
+    color: $color-primary-base; // Azul escuro da "Cor Secundária 0" do Figma
+    border: 1px solid $color-primary-base;
+
+    &:hover:not(:disabled) {
+      background-color: lighten(
+        $color-primary-base,
+        40%
+      ); // Fundo mais claro de azul no hover
+      color: $color-primary-dark; // Azul mais escuro para o texto no hover
+      transform: translateY(-2px);
+      box-shadow: $box-shadow-sm;
+    }
+    &:active:not(:disabled) {
+      background-color: lighten($color-primary-base, 30%);
+      transform: translateY(0);
+      box-shadow: none;
     }
   }
 }
 
-/* Estilos responsivos básicos */
 @media (max-width: 768px) {
   .main-content-area {
-    padding: $spacing-l $spacing-m; // Ajusta padding em telas menores
-  }
-
-  .form-card-container {
-    padding: $spacing-l; // Reduz padding do card em telas menores
+    padding: $spacing-m $spacing-s;
   }
 
   .page-header {
     h1 {
-      font-size: $font-size-h3; // Ajusta tamanho do título em telas menores
+      font-size: $font-size-h3; // Reduz o tamanho do título
+      &::after {
+        width: 40px;
+      }
     }
     .subtitle {
-      font-size: $font-size-small;
+      font-size: $font-size-small; // Reduz o tamanho do subtítulo
+    }
+  }
+
+  .form-card-container {
+    padding: $spacing-m;
+    border-radius: $border-radius-medium; // Menos arredondado em telas pequenas
+    &:hover {
+      transform: none;
+      box-shadow: $box-shadow-light; // Sombra mais leve em telas pequenas
+    }
+  }
+
+  .form-group {
+    label {
+      font-size: $font-size-small; // Labels menores
+    }
+    .form-control {
+      padding: $spacing-xs $spacing-s; // Inputs menores
     }
   }
 
   .form-actions {
-    flex-direction: column; // Botões empilhados em telas menores
+    flex-direction: column;
     gap: $spacing-s;
     .btn {
-      width: 100%; // Botões com largura total
+      width: 100%;
+      padding: $spacing-s $spacing-l;
     }
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content-area {
+    padding: $spacing-s;
+  }
+  .form-card-container {
+    padding: $spacing-s;
   }
 }

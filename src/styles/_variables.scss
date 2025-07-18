@@ -4,49 +4,52 @@ $color-brand-base: #ff6f00; // Laranja principal, do logo e botões CTA
 $color-brand-light: #f29c5a; // Variação mais clara
 $color-brand-dark: #b24e00; // Variação mais escura
 
-// Novas definições para resolver o erro "Undefined variable"
-$color-brand-lighter: lighten(
-  $color-brand-base,
-  15%
-); // Variação um pouco mais clara que 'light'
-$color-brand-darker: darken(
-  $color-brand-base,
-  15%
-); // Variação um pouco mais escura que 'dark'
+// Novas definições para resolver o erro "Undefined variable" e para mais gradientes
+$color-brand-lighter: lighten($color-brand-base, 15%);
+$color-brand-darker: darken($color-brand-base, 15%);
 
-$color-primary: #1e3a9f; // Exemplo
-$color-secondary-base: #f2f2f2; // Certifique-se que está definida!
-$color-accent: #ffc107; // Exemplo
-$color-border: #e0e0e0; // Cor para bordas e separadores
-$color-secondary-lighter: #f9f9f9;
-$color-secondary-darker: #e0e0e0; // Variação mais escura da cor secundária
-
-// Cores de feedback
-$color-danger: #f00000;
-
+// Cores Principais (Baseadas na "Cor Secundária" do Figma)
 $color-primary-base: #1e3a9f; // Azul escuro, da "Cor Secundária 0" do Figma
 $color-primary-dark: #0b172b; // Variação mais escura, da "Cor Secundária +1"
 $color-primary-light: #4061bc; // Variação mais clara, da "Cor Secundária -1"
-$color-secondary-base: #1E3A5F; // Cor de fundo clara, da "Cor Secundária 0"
+
+// REINTRODUZIDA PARA RESOLVER O ERRO NO _styles.scss
+// Atribuindo o valor do azul escuro da "Cor Secundária 0" do Figma para compatibilidade.
+$color-secondary-base: #1e3a9f; // Cor secundária base, utilizada para fundos de botões primários
 
 $color-background-light: #f2f2f2; // Cor de fundo principal
 $color-background-card: #ffffff; // Fundo de cards
 
+// Cores de Texto
 $color-text-dark: #061d3d; // Cor principal para textos escuros
 $color-text-light: #dffbf5; // Cor para textos claros (em fundos escuros)
+$color-text-secondary: #6c757d; // Cor de texto para subtítulos e placeholders (inferido para cinza secundário)
+$color-text-placeholder: #adb5bd; // Cor mais clara para placeholders (inferido)
 
+// Cores de Feedback
 $color-success: #00f01d; // Verde para sucesso/confirmação
 $color-alert: #f00000; // Vermelho para erro/alerta
-$color-alert-light: #ffcccc;
-$color-alert-dark: #b00000; // Vermelho escuro para alertas mais críticos
-$color-warning: #ffbf00; // Amarelo para avisos (inferido, não explícito no Figma mas comum para near-expiry)
-$color-info: #17a2b8; // Azul padrão para informações (inferido, Bootstrap default) - pode ser ajustado
+$color-alert-light: #ffcccc; // Variação mais clara para fundo de alerta (inferido)
+$color-alert-dark: #b00000; // Vermelho escuro para alertas mais críticos (inferido)
+$color-warning: #ffbf00; // Amarelo para avisos (inferido)
+$color-info: #17a2b8; // Azul padrão para informações (inferido)
 
-$color-background: #f2f2f2; // Exemplo, use a cor que desejar
-$color-secondary: #40618c;
+// Cores de Borda e Input
+$color-border: #e0e0e0; // Cor para bordas e separadores
+$color-border-input: #dee2e6; // Uma borda de input mais suave, se necessário (inferido)
+$color-background-input: #ffffff; // Fundo dos inputs, se diferente de $color-background-card (inferido)
+
+// Variáveis que podem ser redundantes ou renomeadas para clareza
+$color-primary: #1e3a9f; // Redundante com $color-primary-base, mas mantido para compatibilidade se outras partes do código o usarem.
+$color-accent: #ffc107; // Exemplo (mantido)
+$color-secondary-lighter: #f9f9f9; // Variação mais clara (mantido)
+$color-secondary-darker: #e0e0e0; // Variação mais escura da cor secundária (mantido)
+$color-danger: #f00000; // Redundante com $color-alert, mas mantido para compatibilidade.
+$color-background: #f2f2f2; // Redundante com $color-background-light, mas mantido para compatibilidade.
+$color-secondary: #40618c; // Este parece ser o $color-primary-light, pode ser removido se não houver uso específico.
 
 // Transições
-$transition-speed: 0.3s; // Adicione esta linha para definir a velocidade de transição
+$transition-speed: 0.3s;
 
 // Espaçamentos
 $spacing-xxs: 4px;
@@ -80,13 +83,10 @@ $border-radius-large: 12px;
 $box-shadow-light: 0 2px 4px rgba(0, 0, 0, 0.08);
 $box-shadow-medium: 0 4px 8px rgba(0, 0, 0, 0.12);
 $box-shadow-heavy: 0 8px 16px rgba(0, 0, 0, 0.16);
-
-// Outras variáveis comuns (fontes, tamanhos, espaçamentos, etc.)
-$font-family-base: "Roboto", sans-serif;
-// $font-size-base: 1rem; // Duplicado, já definido acima
-$padding-base: 1rem;
-$margin-base: 1rem;
-
-// Sombras
 $box-shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
 $box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+
+// Outras variáveis comuns
+$font-family-base: "Roboto", sans-serif;
+$padding-base: 1rem;
+$margin-base: 1rem;

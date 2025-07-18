@@ -1,27 +1,56 @@
-<div class="page-container">
-  <div class="header-container">
-    <h2>Registro de Baixas</h2>
-    <div class="search-bar">
-      <input
-        type="text"
-        placeholder="Pesquisar"
-        [(ngModel)]="searchTerm"
-        (input)="onSearchTermChange(searchTerm)"
-      />
-      <i class="fas fa-search search-icon"></i>
+<div class="main-content-area">
+  <div class="page-header">
+    <h1>Registro de Baixas</h1>
+    <div class="header-actions">
+      <div class="search-input-group">
+        <input
+          type="text"
+          placeholder="Pesquisar..."
+          [(ngModel)]="searchTerm"
+          (input)="onSearchTermChange(searchTerm)"
+          class="form-control"
+        />
+        <i class="fas fa-search search-icon"></i>
+      </div>
+      <button class="btn primary" (click)="goToRegistrarBaixa()">
+        <i class="fas fa-plus"></i> Registrar Nova Baixa
+      </button>
     </div>
   </div>
 
   <div class="controls-bar">
-    <button class="filter-button"><i class="fas fa-filter"></i> Filtros</button>
-    <div class="sort-dropdown">
-      <select>
-        <option>Ordenar Por</option>
-      </select>
+    <div class="filter-sort-group">
+      <button class="btn secondary filter-button">
+        <i class="fas fa-filter"></i> Filtros
+      </button>
+
+      <div class="sort-dropdown">
+        <select
+          class="form-control"
+          [(ngModel)]="selectedMotivoFilter"
+          (change)="onMotivoFilterChange()"
+        >
+          <option value="">Todos os Motivos</option>
+          <option *ngFor="let motivo of uniqueMotivos" [value]="motivo">
+            {{ motivo }}
+          </option>
+        </select>
+      </div>
+
+      <div class="sort-dropdown">
+        <select
+          class="form-control"
+          [(ngModel)]="selectedOrder"
+          (change)="onOrderChange()"
+        >
+          <option value="">Ordenar Por</option>
+          <option value="dataBaixaDesc">Data (Mais Recente)</option>
+          <option value="dataBaixaAsc">Data (Mais Antiga)</option>
+          <option value="nomeProdutoAsc">Produto (A-Z)</option>
+          <option value="nomeProdutoDesc">Produto (Z-A)</option>
+        </select>
+      </div>
     </div>
-    <button class="primary-button" (click)="goToRegistrarBaixa()">
-      Registrar Nova Baixa
-    </button>
   </div>
 
   <div class="table-responsive">
@@ -38,10 +67,13 @@
       </thead>
       <tbody>
         <ng-container *ngIf="filteredBaixas.length > 0; else noBaixas">
-          <tr *ngFor="let baixa of filteredBaixas">
+          <tr
+            *ngFor="let baixa of filteredBaixas"
+            class="table-row-hover-effect"
+          >
             <td>{{ baixa.nomeProduto }}</td>
             <td>{{ baixa.loteItemEstoque }}</td>
-            <td>{{ baixa.dataBaixa.toDate() | date : "dd/MM/yyyy HH:mm" }}</td>
+            <td>{{ baixa.dataBaixa | date : "dd/MM/yyyy HH:mm" }}</td>
             <td>{{ baixa.quantidadeBaixada }} un.</td>
             <td>{{ baixa.motivo }}</td>
             <td>{{ baixa.usuarioResponsavelNome }}</td>
